@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,7 +56,12 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Page<Product> findByFilters(String search, UUID categoryId, ProductStatus status, Pageable pageable) {
-        return springDataProductRepository.findByFilters(search, categoryId, status, pageable)
+        return findByFilters(search, categoryId, status, null, null, pageable);
+    }
+
+    @Override
+    public Page<Product> findByFilters(String search, UUID categoryId, ProductStatus status, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        return springDataProductRepository.findByFilters(search, categoryId, status, minPrice, maxPrice, pageable)
                 .map(ProductEntity::toDomain);
     }
 
