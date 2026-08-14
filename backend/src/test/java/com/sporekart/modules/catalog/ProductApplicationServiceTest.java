@@ -73,4 +73,32 @@ class ProductApplicationServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productApplicationService.getProducts(0, 101, "name,asc", null, null, null));
         assertThrows(IllegalArgumentException.class, () -> productApplicationService.getProducts(0, 10, "invalidField,asc", null, null, null));
     }
+
+    @Test
+    void shouldFilterProductsByPriceRange() {
+        CreateProductCommand p1 = new CreateProductCommand("SKU-PR-001", "Cheap Spores", "Desc", new BigDecimal("15.00"), "USD", null);
+        CreateProductCommand p2 = new CreateProductCommand("SKU-PR-002", "Mid Spores", "Desc", new BigDecimal("45.00"), "USD", null);
+        CreateProductCommand p3 = new CreateProductCommand("SKU-PR-003", "Expensive Spores", "Desc", new BigDecimal("95.00"), "USD", null);
+        productApplicationService.createProduct(p1);
+        productApplicationService.createProduct(p2);
+        productApplicationService.createProduct(p3);
+
+        // Filter minPrice=20, maxPrice=60 -> should find p2 (45.00)
+        var filtered = productApplicationService.getProducts(0, 10, "price,asc", null, null, null, new BigDecimal("20.00"), new BigDecimal("60.00"));
+        assertNotNull(filtered);
+        assertEquals(1, filtered.content().size());
+        assertEquals("SKU-PR-002", filtered.content().get(0).sku());
+    }
+
+    @Test
+    void shouldValidatePriceRangeInputs() {
+        assertThrows(IllegalArgumentException.class, () ->
+                productApplicationService.getProducts(0, 10, null, null, null, null, new BigDecimal("-5.00"), null));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                productApplicationService.getProducts(0, 10, null, null, null, null, null, new BigDecimal("-10.00")));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                productApplicationService.getProducts(0, 10, null, null, null, null, new BigDecimal("100.00"), new BigDecimal("50.00")));
+    }
 }

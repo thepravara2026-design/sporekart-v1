@@ -75,6 +75,29 @@ class CatalogProductControllerTest {
     }
 
     @Test
+    void shouldFilterProductsByMinAndMaxPrice() throws Exception {
+        mockMvc.perform(get("/api/v1/catalog/products")
+                        .param("minPrice", "40.00")
+                        .param("maxPrice", "60.00")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.content[?(@.sku == 'SKU-CTRL-001')].price").value(49.99));
+    }
+
+    @Test
+    void shouldReturn400ForInvalidPriceRange() throws Exception {
+        mockMvc.perform(get("/api/v1/catalog/products")
+                        .param("minPrice", "100.00")
+                        .param("maxPrice", "10.00")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("CATALOG_INVALID_PRICE_RANGE"))
+                .andExpect(jsonPath("$.error.message").value(containsString("Minimum price cannot be greater than maximum price")));
+    }
+
+    @Test
     void shouldReturnProductById() throws Exception {
         mockMvc.perform(get("/api/v1/catalog/products/{productId}", seededProduct.id())
                         .contentType(MediaType.APPLICATION_JSON))
