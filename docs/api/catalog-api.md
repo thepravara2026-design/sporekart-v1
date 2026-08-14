@@ -1,6 +1,6 @@
-# SPOREKART v3.0 — CATALOG REST API CONTRACT SPECIFICATION (SPRINT 1C)
+# SPOREKART v3.0 — CATALOG REST API CONTRACT SPECIFICATION (SPRINT 2A)
 
-This document establishes the official REST API contract between the Spring Boot backend catalog module and the Vite/React frontend application for **Sprint 1D — Frontend Catalog Integration**.
+This document establishes the official REST API contract between the Spring Boot backend catalog module and the Vite/React frontend application for **Sprint 2A — Catalog Query Backend**.
 
 ---
 
@@ -68,6 +68,8 @@ This document establishes the official REST API contract between the Spring Boot
   - `categoryId` (UUID, optional)
   - `status` (string, optional: `DRAFT`, `ACTIVE`, `OUT_OF_STOCK`, `DISCONTINUED`, `ARCHIVED`)
   - `search` (string, optional substring search across name, SKU, and description)
+  - `minPrice` (decimal, optional minimum price filter, min: `0.00`)
+  - `maxPrice` (decimal, optional maximum price filter, min: `0.00`)
 
 - **Example Response**: `200 OK`
 ```json
@@ -168,6 +170,7 @@ This document establishes the official REST API contract between the Spring Boot
 | `200 OK` | N/A | Successful operation |
 | `400 Bad Request` | `CATALOG_INVALID_PAGE_SIZE` | Page size < 1 or exceeds max limit of 100 |
 | `400 Bad Request` | `CATALOG_INVALID_SORT` | Sort field not in whitelist or invalid direction |
+| `400 Bad Request` | `CATALOG_INVALID_PRICE_RANGE` | Negative min/max price or minPrice > maxPrice |
 | `404 Not Found` | `CATALOG_PRODUCT_NOT_FOUND` | Product with given ID/SKU does not exist |
 | `404 Not Found` | `CATALOG_CATEGORY_NOT_FOUND` | Category with given ID/slug does not exist |
 | `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` | Unhandled server error |
