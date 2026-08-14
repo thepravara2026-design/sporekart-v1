@@ -7,6 +7,10 @@ import { HomePage } from '../pages/HomePage';
 import { HealthPage } from '../pages/HealthPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 
+import { ProductListPage } from '../features/catalog/pages/ProductListPage';
+import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage';
+import { CategoryListPage } from '../features/catalog/pages/CategoryListPage';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -24,6 +28,9 @@ export const App: FC = () => {
           <Routes>
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
+              <Route path="products" element={<ProductListPage />} />
+              <Route path="products/:productId" element={<ProductDetailPage />} />
+              <Route path="categories" element={<CategoryListPage />} />
               <Route path="health" element={<HealthPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>

@@ -12,6 +12,12 @@ export const MainLayout: FC = () => {
           <NavLink to="/" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} end>
             Home
           </NavLink>
+          <NavLink to="/products" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+            Products
+          </NavLink>
+          <NavLink to="/categories" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+            Categories
+          </NavLink>
           <NavLink to="/health" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
             System Health
           </NavLink>
