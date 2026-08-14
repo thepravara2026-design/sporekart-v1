@@ -1,11 +1,11 @@
 # Sporekart v3.0
 
-Sporekart v3.0 is an enterprise e-commerce platform built as a **Modular Monolith** using Java 21, Spring Boot, React (Vite + TypeScript), and PostgreSQL (Supabase).
+Sporekart v3.0 is an enterprise e-commerce platform built as a **Modular Monolith** using Java 21, Spring Boot 3.4+, React (Vite + TypeScript), and PostgreSQL (Supabase / H2).
 
 ## Architecture Overview
 
 ```
-                    SPOREKART
+                    SPOREKART v3.0
 
                          |
                          v
@@ -43,14 +43,14 @@ Sporekart v3.0 is an enterprise e-commerce platform built as a **Modular Monolit
                    NOTIFICATION
                          |
                          v
-                  POSTGRESQL
+                  POSTGRESQL / H2
 ```
 
 ## Technology Stack
 
-- **Backend**: Java 21, Spring Boot 3.4+, Maven, Spring Data JPA, Spring Security, Flyway, PostgreSQL, Actuator
+- **Backend**: Java 21, Spring Boot 3.4+, Maven, Spring Data JPA, Spring Security, Flyway, PostgreSQL / H2, Springdoc OpenAPI
 - **Frontend**: Vite, React 18+, TypeScript, TanStack Query, Axios, Vitest, React Testing Library
-- **Database**: Supabase PostgreSQL
+- **Database**: PostgreSQL (Supabase) / H2 in-memory DB for DEV/QAT
 - **Infrastructure**: Docker, Docker Compose, GitHub Actions
 
 ## Repository Layout
@@ -63,9 +63,16 @@ sporekart/
 ├── infrastructure/       # Docker & Deployment Infrastructure
 ├── scripts/              # Helper & Validation Scripts
 ├── docs/                 # Architecture, API & Development Documentation
+│   ├── catalog/          # Catalog Module Documentation
+│   │   ├── architecture.md
+│   │   ├── api.md
+│   │   ├── database.md
+│   │   ├── testing.md
+│   │   └── technical-debt.md
+│   ├── adr/              # Architectural Decision Records
+│   ├── releases/         # Release Baselines & Evidence Reports
+│   └── troubleshooting.md
 ├── .github/workflows/    # CI/CD GitHub Actions
-├── .editorconfig
-├── .gitignore
 ├── .env.example
 ├── docker-compose.yml
 └── README.md
@@ -78,11 +85,10 @@ sporekart/
 - Java 21 LTS
 - Apache Maven 3.9+
 - Node.js 20+ / npm 10+
-- Docker & Docker Compose
 
-### Running locally
+### Running Locally
 
-1. **Clone & Setup Environment**
+1. **Setup Environment**
    ```bash
    cp .env.example .env
    ```
@@ -100,16 +106,23 @@ sporekart/
    npm run dev
    ```
 
-4. **Verify Health APIs**
+4. **Run Test Suites**
+   - Backend Tests: `cd backend && mvn clean test` (50 tests passing)
+   - Frontend Tests: `cd frontend && npm run test` (20 tests passing)
+
+5. **Verify API Endpoints & Docs**
    - Backend Health: `http://localhost:8080/api/v1/health`
-   - Backend Version: `http://localhost:8080/api/v1/version`
-   - Frontend Health Page: `http://localhost:5173/health`
+   - OpenAPI Spec: `http://localhost:8080/v3/api-docs`
+   - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+   - Catalog Products: `http://localhost:8080/api/v1/catalog/products`
 
-## Documentation
+## Catalog Module Documentation
 
-- [Architecture Overview](docs/architecture/architecture-overview.md)
-- [Module Boundaries](docs/architecture/module-boundaries.md)
-- [Local Setup Guide](docs/development/local-setup.md)
-- [Contributing & Git Workflow](docs/development/contributing.md)
-- [API Standards](docs/api/api-guidelines.md)
-- [Security Baseline](docs/security/security-baseline.md)
+- [Catalog Architecture](docs/catalog/architecture.md)
+- [Catalog REST API Specification](docs/catalog/api.md)
+- [Catalog Database Model & Schema](docs/catalog/database.md)
+- [Catalog Testing Strategy & Suite](docs/testing/catalog-testing.md)
+- [Troubleshooting & Diagnostics Guide](docs/troubleshooting.md)
+- [Technical Debt Register](docs/catalog/technical-debt.md)
+- [Catalog Release Baseline Evidence](docs/releases/catalog-release-baseline.md)
+- [ADR 0001: Catalog Architecture](docs/adr/0001-catalog-modular-monolith-architecture.md)
