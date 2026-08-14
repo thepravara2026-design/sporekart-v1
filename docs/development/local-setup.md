@@ -23,14 +23,22 @@ Copy the example environment template:
 cp .env.example .env
 ```
 
-### 3. Backend Execution
-From the root directory:
+### 3. Backend Execution (Java 21 / Spring Boot)
+
+#### Development Profile (H2 In-Memory DB + Web Console)
 ```bash
 cd backend
 mvn clean test
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
-The backend starts on `http://localhost:8080`.
+- Backend REST API: `http://localhost:8080`
+- H2 Web Console: `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:sporekart_dev`, User: `sa`, Password: empty)
+
+#### QAT / Testing Profile
+```bash
+cd backend
+mvn spring-boot:run -Dspring-boot.run.profiles=qat
+```
 
 ### 4. Frontend Execution
 From the root directory:

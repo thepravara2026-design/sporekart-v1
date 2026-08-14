@@ -1,4 +1,4 @@
-package com.sporekart.common.response;
+package com.sporekart.application.exception;
 
 public class ApiErrorResponse {
     private boolean success = false;
@@ -13,6 +13,10 @@ public class ApiErrorResponse {
 
     public static ApiErrorResponse of(String code, String message, String path) {
         return new ApiErrorResponse(new ApiErrorDetails(code, message, path));
+    }
+
+    public static ApiErrorResponse of(String code, String message, String path, String requestId) {
+        return new ApiErrorResponse(new ApiErrorDetails(code, message, path, requestId));
     }
 
     public boolean isSuccess() {

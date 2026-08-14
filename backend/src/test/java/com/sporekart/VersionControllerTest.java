@@ -20,13 +20,14 @@ class VersionControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void versionEndpointShouldReturn200AndVersionData() throws Exception {
+    void shouldExposeVersionEndpoint() throws Exception {
         mockMvc.perform(get("/api/v1/version")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.appName").exists())
-                .andExpect(jsonPath("$.data.version").exists());
+                .andExpect(jsonPath("$.data.version").exists())
+                .andExpect(header().exists("X-Request-ID"));
     }
 }

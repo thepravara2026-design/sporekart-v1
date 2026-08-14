@@ -7,30 +7,23 @@ server:
 spring:
   application:
     name: sporekart-backend
-  datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/sporekart_db}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
-    show-sql: false
     properties:
       hibernate:
         format_sql: true
         jdbc:
           time_zone: UTC
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,version
+        include: health,info
   endpoint:
     health:
       show-details: never
@@ -46,3 +39,5 @@ logging:
     com.sporekart: INFO
     org.springframework.web: INFO
     org.hibernate: WARN
+  pattern:
+    level: "%5p [${spring.application.name:},%X{requestId:-}]"

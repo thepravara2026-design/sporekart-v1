@@ -1,4 +1,4 @@
-package com.sporekart.common.response;
+package com.sporekart.application.exception;
 
 public class ApiResponse<T> {
     private boolean success;

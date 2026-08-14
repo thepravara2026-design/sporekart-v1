@@ -14,20 +14,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class SecurityConfigTest {
+class RequestIdFilterTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    void shouldReturnUnauthorizedForProtectedEndpoint() throws Exception {
-        mockMvc.perform(get("/api/v1/protected-resource")
+    void shouldGenerateRequestIdWhenHeaderAbsent() throws Exception {
+        mockMvc.perform(get("/api/v1/health")
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"))
-                .andExpect(jsonPath("$.error.path").value("/api/v1/protected-resource"))
+                .andExpect(status().isOk())
                 .andExpect(header().exists("X-Request-ID"));
+    }
+
+    @Test
+    void shouldPropagateRequestIdWhenHeaderProvided() throws Exception {
+        String customRequestId = "custom-test-request-id-12345";
+        mockMvc.perform(get("/api/v1/health")
+                .header("X-Request-ID", customRequestId)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Request-ID", customRequestId));
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 class SporekartApplicationTests {
 
     @Test
-    void contextLoads() {
+    void shouldLoadApplicationContext() {
         // Verifies Spring Boot Application Context loads successfully
     }
 }
