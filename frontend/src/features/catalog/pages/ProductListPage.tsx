@@ -15,6 +15,11 @@ export const ProductListPage: FC = () => {
   const categoryId = searchParams.get('categoryId') || '';
   const status = (searchParams.get('status') as ProductStatus) || undefined;
   const search = searchParams.get('search') || '';
+  const minPriceStr = searchParams.get('minPrice') || '';
+  const maxPriceStr = searchParams.get('maxPrice') || '';
+
+  const minPrice = minPriceStr ? parseFloat(minPriceStr) : undefined;
+  const maxPrice = maxPriceStr ? parseFloat(maxPriceStr) : undefined;
 
   const { data: categoriesResponse } = useCategories({ size: 50 });
   const categories = categoriesResponse?.data.content || [];
@@ -32,6 +37,8 @@ export const ProductListPage: FC = () => {
     categoryId: categoryId || undefined,
     status,
     search: search || undefined,
+    minPrice,
+    maxPrice,
   });
 
   const updateParam = (key: string, value: string) => {
@@ -77,10 +84,14 @@ export const ProductListPage: FC = () => {
         selectedCategory={categoryId}
         selectedStatus={status || ''}
         selectedSort={sort}
+        minPrice={minPriceStr}
+        maxPrice={maxPriceStr}
         onSearchChange={(val) => updateParam('search', val)}
         onCategoryChange={(val) => updateParam('categoryId', val)}
         onStatusChange={(val) => updateParam('status', val)}
         onSortChange={(val) => updateParam('sort', val)}
+        onMinPriceChange={(val) => updateParam('minPrice', val)}
+        onMaxPriceChange={(val) => updateParam('maxPrice', val)}
         onClearFilters={handleClearFilters}
       />
 
@@ -108,7 +119,7 @@ export const ProductListPage: FC = () => {
         <div className="empty-state" data-testid="products-empty">
           <h3>No products found</h3>
           <p>Try adjusting your search query or clearing filter criteria.</p>
-          {(search || categoryId || status) && (
+          {(search || categoryId || status || minPriceStr || maxPriceStr) && (
             <button type="button" className="btn btn-secondary btn-sm" onClick={handleClearFilters}>
               Clear All Filters
             </button>

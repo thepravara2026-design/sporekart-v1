@@ -7,10 +7,14 @@ interface CatalogFilterBarProps {
   selectedCategory: string;
   selectedStatus: string;
   selectedSort: string;
+  minPrice?: string;
+  maxPrice?: string;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onStatusChange: (value: string) => void;
   onSortChange: (value: string) => void;
+  onMinPriceChange?: (value: string) => void;
+  onMaxPriceChange?: (value: string) => void;
   onClearFilters: () => void;
 }
 
@@ -20,13 +24,19 @@ export const CatalogFilterBar: FC<CatalogFilterBarProps> = ({
   selectedCategory,
   selectedStatus,
   selectedSort,
+  minPrice = '',
+  maxPrice = '',
   onSearchChange,
   onCategoryChange,
   onStatusChange,
   onSortChange,
+  onMinPriceChange,
+  onMaxPriceChange,
   onClearFilters,
 }) => {
-  const hasActiveFilters = Boolean(search || selectedCategory || selectedStatus || selectedSort !== 'createdAt,desc');
+  const hasActiveFilters = Boolean(
+    search || selectedCategory || selectedStatus || minPrice || maxPrice || selectedSort !== 'createdAt,desc'
+  );
 
   return (
     <div className="catalog-filter-bar" data-testid="catalog-filter-bar">
@@ -73,6 +83,38 @@ export const CatalogFilterBar: FC<CatalogFilterBarProps> = ({
           <option value="DRAFT">Draft</option>
         </select>
       </div>
+
+      {onMinPriceChange && (
+        <div className="filter-group">
+          <label htmlFor="min-price-input" className="filter-label">Min Price</label>
+          <input
+            id="min-price-input"
+            type="number"
+            min="0"
+            step="0.01"
+            className="form-control"
+            placeholder="Min $"
+            value={minPrice}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onMinPriceChange(e.target.value)}
+          />
+        </div>
+      )}
+
+      {onMaxPriceChange && (
+        <div className="filter-group">
+          <label htmlFor="max-price-input" className="filter-label">Max Price</label>
+          <input
+            id="max-price-input"
+            type="number"
+            min="0"
+            step="0.01"
+            className="form-control"
+            placeholder="Max $"
+            value={maxPrice}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onMaxPriceChange(e.target.value)}
+          />
+        </div>
+      )}
 
       <div className="filter-group">
         <label htmlFor="sort-select" className="filter-label">Sort By</label>
