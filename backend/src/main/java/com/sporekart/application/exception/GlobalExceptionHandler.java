@@ -81,6 +81,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.checkout.domain.exception.CartEmptyException.class)
+    public ResponseEntity<ApiErrorResponse> handleCartEmpty(com.sporekart.modules.checkout.domain.exception.CartEmptyException ex, HttpServletRequest request) {
+        log.warn("Cart empty for checkout preview on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CHECKOUT_CART_EMPTY", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.checkout.domain.exception.CheckoutNotEligibleException.class)
+    public ResponseEntity<ApiErrorResponse> handleCheckoutNotEligible(com.sporekart.modules.checkout.domain.exception.CheckoutNotEligibleException ex, HttpServletRequest request) {
+        log.warn("Checkout not eligible on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CHECKOUT_NOT_ELIGIBLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.checkout.domain.exception.CurrencyMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleCurrencyMismatch(com.sporekart.modules.checkout.domain.exception.CurrencyMismatchException ex, HttpServletRequest request) {
+        log.warn("Currency mismatch on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CHECKOUT_CURRENCY_MISMATCH", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.checkout.domain.exception.TaxCalculationException.class)
+    public ResponseEntity<ApiErrorResponse> handleTaxCalculationFailed(com.sporekart.modules.checkout.domain.exception.TaxCalculationException ex, HttpServletRequest request) {
+        log.error("Tax calculation error on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        ApiErrorResponse response = ApiErrorResponse.of("CHECKOUT_TAX_CALCULATION_FAILED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.checkout.domain.exception.ShippingRateUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleShippingRateUnavailable(com.sporekart.modules.checkout.domain.exception.ShippingRateUnavailableException ex, HttpServletRequest request) {
+        log.warn("Shipping rate unavailable on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CHECKOUT_SHIPPING_RATE_UNAVAILABLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex, HttpServletRequest request) {
         log.warn("Category not found on {}: {}", request.getRequestURI(), ex.getMessage());
