@@ -116,6 +116,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.order.domain.exception.OrderNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleOrderNotFound(com.sporekart.modules.order.domain.exception.OrderNotFoundException ex, HttpServletRequest request) {
+        log.warn("Order not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("ORDER_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.order.domain.exception.OrderAccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleOrderAccessDenied(com.sporekart.modules.order.domain.exception.OrderAccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Order access denied on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("ORDER_ACCESS_DENIED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.order.domain.exception.OrderNotCancellableException.class)
+    public ResponseEntity<ApiErrorResponse> handleOrderNotCancellable(com.sporekart.modules.order.domain.exception.OrderNotCancellableException ex, HttpServletRequest request) {
+        log.warn("Order not cancellable on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("ORDER_NOT_CANCELLABLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex, HttpServletRequest request) {
         log.warn("Category not found on {}: {}", request.getRequestURI(), ex.getMessage());

@@ -123,6 +123,7 @@ sporekart/
 - [Catalog Database Model & Schema](docs/catalog/database.md)
 - [Cart Module Specification & Handoff](docs/cart.md)
 - [Checkout Module Specification & Handoff](docs/checkout.md)
+- [Order Module Specification & Handoff](docs/order.md)
 - [Catalog Testing Strategy & Suite](docs/testing/catalog-testing.md)
 - [Troubleshooting & Diagnostics Guide](docs/troubleshooting.md)
 - [Technical Debt Register](docs/catalog/technical-debt.md)
@@ -130,3 +131,4 @@ sporekart/
 - [ADR 0001: Catalog Architecture](docs/adr/0001-catalog-modular-monolith-architecture.md)
 - [ADR 0002: Cart Architecture & Handoff](docs/adr/0002-cart-domain-architecture-and-checkout-handoff.md)
 - [ADR 0003: Pricing & Checkout Engine](docs/adr/0003-pricing-and-checkout-engine.md)
+- [ADR 0004: Order Domain & Creation](docs/adr/0004-order-domain-and-creation.md)
