@@ -20,12 +20,13 @@ class HealthControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void healthEndpointShouldReturn200AndUpStatus() throws Exception {
+    void shouldExposeHealthEndpoint() throws Exception {
         mockMvc.perform(get("/api/v1/health")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.status").value("UP"));
+                .andExpect(jsonPath("$.data.status").value("UP"))
+                .andExpect(header().exists("X-Request-ID"));
     }
 }
