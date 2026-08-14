@@ -51,4 +51,19 @@ class CategoryApplicationServiceTest {
 
         assertThrows(CategoryDeletionException.class, () -> categoryApplicationService.deleteCategory(category.id()));
     }
+
+    @Test
+    void shouldGetPaginatedCategoriesWithValidation() {
+        categoryApplicationService.createCategory(new CreateCategoryCommand("Cat Alpha", "Desc A"));
+        categoryApplicationService.createCategory(new CreateCategoryCommand("Cat Beta", "Desc B"));
+
+        var pagedResponse = categoryApplicationService.getCategories(0, 10, "name,asc", null, null);
+        assertNotNull(pagedResponse);
+        assertTrue(pagedResponse.content().size() >= 2);
+
+        assertThrows(IllegalArgumentException.class, () -> categoryApplicationService.getCategories(-1, 10, "name,asc", null, null));
+        assertThrows(IllegalArgumentException.class, () -> categoryApplicationService.getCategories(0, 0, "name,asc", null, null));
+        assertThrows(IllegalArgumentException.class, () -> categoryApplicationService.getCategories(0, 101, "name,asc", null, null));
+        assertThrows(IllegalArgumentException.class, () -> categoryApplicationService.getCategories(0, 10, "badSortField,asc", null, null));
+    }
 }

@@ -56,4 +56,21 @@ class ProductApplicationServiceTest {
         CreateProductCommand command2 = new CreateProductCommand("sp-rei-001", "Reishi Liquid Culture", "Desc 2", new BigDecimal("35.00"), "USD", null);
         assertThrows(DuplicateSkuException.class, () -> productApplicationService.createProduct(command2));
     }
+
+    @Test
+    void shouldGetPaginatedProductsWithValidation() {
+        CreateProductCommand command1 = new CreateProductCommand("SKU-PAG-001", "Alpha Product", "Desc", new BigDecimal("10.00"), "USD", null);
+        CreateProductCommand command2 = new CreateProductCommand("SKU-PAG-002", "Beta Product", "Desc", new BigDecimal("20.00"), "USD", null);
+        productApplicationService.createProduct(command1);
+        productApplicationService.createProduct(command2);
+
+        var pagedResponse = productApplicationService.getProducts(0, 10, "name,asc", null, null, null);
+        assertNotNull(pagedResponse);
+        assertTrue(pagedResponse.content().size() >= 2);
+
+        assertThrows(IllegalArgumentException.class, () -> productApplicationService.getProducts(-1, 10, "name,asc", null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> productApplicationService.getProducts(0, 0, "name,asc", null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> productApplicationService.getProducts(0, 101, "name,asc", null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> productApplicationService.getProducts(0, 10, "invalidField,asc", null, null, null));
+    }
 }
