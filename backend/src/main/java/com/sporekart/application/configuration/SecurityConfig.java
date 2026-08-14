@@ -50,7 +50,16 @@ public class SecurityConfig {
             )
             .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/health", "/api/v1/version", "/actuator/health", "/actuator/info", "/h2-console/**").permitAll()
+                .requestMatchers(
+                        "/api/v1/health",
+                        "/api/v1/version",
+                        "/actuator/health",
+                        "/actuator/info",
+                        "/h2-console/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**").permitAll()
                 .anyRequest().authenticated()
             );
