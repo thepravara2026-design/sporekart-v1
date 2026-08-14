@@ -41,6 +41,8 @@ export interface ProductQueryParams {
   categoryId?: string;
   status?: ProductStatus;
   search?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export interface CategoryQueryParams {
