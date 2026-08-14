@@ -1,5 +1,6 @@
 package com.sporekart.application.exception;
 
+import com.sporekart.modules.catalog.domain.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,27 @@ public class GlobalExceptionHandler {
         log.warn("Resource not found: {} {}", request.getMethod(), request.getRequestURI());
         ApiErrorResponse response = ApiErrorResponse.of("NOT_FOUND", "Requested resource was not found", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler({ProductNotFoundException.class, CategoryNotFoundException.class})
+    public ResponseEntity<ApiErrorResponse> handleDomainNotFound(RuntimeException ex, HttpServletRequest request) {
+        log.warn("Domain resource not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler({DuplicateSkuException.class, DuplicateCategoryException.class})
+    public ResponseEntity<ApiErrorResponse> handleDuplicateResource(RuntimeException ex, HttpServletRequest request) {
+        log.warn("Duplicate resource conflict on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CONFLICT", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler({InvalidProductStateException.class, CategoryDeletionException.class})
+    public ResponseEntity<ApiErrorResponse> handleDomainStateConflict(RuntimeException ex, HttpServletRequest request) {
+        log.warn("Domain state conflict on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("BAD_REQUEST", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
