@@ -116,13 +116,15 @@ sporekart/
    - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
    - Catalog Products: `http://localhost:8080/api/v1/catalog/products`
 
-## Catalog Module Documentation
+## Module Documentation
 
 - [Catalog Architecture](docs/catalog/architecture.md)
 - [Catalog REST API Specification](docs/catalog/api.md)
 - [Catalog Database Model & Schema](docs/catalog/database.md)
+- [Cart Module Specification & Handoff](docs/cart.md)
 - [Catalog Testing Strategy & Suite](docs/testing/catalog-testing.md)
 - [Troubleshooting & Diagnostics Guide](docs/troubleshooting.md)
 - [Technical Debt Register](docs/catalog/technical-debt.md)
 - [Catalog Release Baseline Evidence](docs/releases/catalog-release-baseline.md)
 - [ADR 0001: Catalog Architecture](docs/adr/0001-catalog-modular-monolith-architecture.md)
+- [ADR 0002: Cart Architecture & Handoff](docs/adr/0002-cart-domain-architecture-and-checkout-handoff.md)

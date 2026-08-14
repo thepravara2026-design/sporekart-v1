@@ -32,6 +32,55 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.cart.domain.exception.CartNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCartNotFound(com.sporekart.modules.cart.domain.exception.CartNotFoundException ex, HttpServletRequest request) {
+        log.warn("Cart not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CART_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.cart.domain.exception.CartItemNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCartItemNotFound(com.sporekart.modules.cart.domain.exception.CartItemNotFoundException ex, HttpServletRequest request) {
+        log.warn("Cart item not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CART_ITEM_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.cart.domain.exception.CartNotModifiableException.class)
+    public ResponseEntity<ApiErrorResponse> handleCartNotModifiable(com.sporekart.modules.cart.domain.exception.CartNotModifiableException ex, HttpServletRequest request) {
+        log.warn("Cart not modifiable on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CART_NOT_MODIFIABLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.cart.domain.exception.InvalidQuantityException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidQuantity(com.sporekart.modules.cart.domain.exception.InvalidQuantityException ex, HttpServletRequest request) {
+        log.warn("Invalid quantity on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CART_INVALID_QUANTITY", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.cart.domain.exception.ProductNotPurchasableException.class)
+    public ResponseEntity<ApiErrorResponse> handleProductNotPurchasable(com.sporekart.modules.cart.domain.exception.ProductNotPurchasableException ex, HttpServletRequest request) {
+        log.warn("Product not purchasable on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CATALOG_PRODUCT_NOT_PURCHASABLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.cart.domain.exception.CartAccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleCartAccessDenied(com.sporekart.modules.cart.domain.exception.CartAccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Cart access denied on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("UNAUTHORIZED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiErrorResponse> handleOptimisticLockingFailure(org.springframework.orm.ObjectOptimisticLockingFailureException ex, HttpServletRequest request) {
+        log.warn("Cart optimistic locking conflict on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CART_CONCURRENCY_CONFLICT", "Cart was modified concurrently by another request. Please try again.", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex, HttpServletRequest request) {
         log.warn("Category not found on {}: {}", request.getRequestURI(), ex.getMessage());
