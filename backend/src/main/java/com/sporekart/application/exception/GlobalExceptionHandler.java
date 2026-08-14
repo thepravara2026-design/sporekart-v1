@@ -25,10 +25,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler({ProductNotFoundException.class, CategoryNotFoundException.class})
-    public ResponseEntity<ApiErrorResponse> handleDomainNotFound(RuntimeException ex, HttpServletRequest request) {
-        log.warn("Domain resource not found on {}: {}", request.getRequestURI(), ex.getMessage());
-        ApiErrorResponse response = ApiErrorResponse.of("NOT_FOUND", ex.getMessage(), request.getRequestURI());
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleProductNotFound(ProductNotFoundException ex, HttpServletRequest request) {
+        log.warn("Product not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CATALOG_PRODUCT_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex, HttpServletRequest request) {
+        log.warn("Category not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CATALOG_CATEGORY_NOT_FOUND", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -74,7 +81,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         log.warn("Invalid argument on {}: {}", request.getRequestURI(), ex.getMessage());
-        ApiErrorResponse response = ApiErrorResponse.of("BAD_REQUEST", ex.getMessage(), request.getRequestURI());
+        String code = "BAD_REQUEST";
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("sort field") || ex.getMessage().contains("sort direction")) {
+                code = "CATALOG_INVALID_SORT";
+            } else if (ex.getMessage().contains("Page size") || ex.getMessage().contains("Page index")) {
+                code = "CATALOG_INVALID_PAGE_SIZE";
+            }
+        }
+        ApiErrorResponse response = ApiErrorResponse.of(code, ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
