@@ -1,7 +1,8 @@
-package com.sporekart.common.config;
+package com.sporekart.application.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sporekart.common.response.ApiErrorResponse;
+import com.sporekart.application.exception.ApiErrorResponse;
+import com.sporekart.application.web.RequestIdFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,7 +30,12 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
     private String allowedOrigins;
 
+    private final RequestIdFilter requestIdFilter;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public SecurityConfig(RequestIdFilter requestIdFilter) {
+        this.requestIdFilter = requestIdFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,10 +47,14 @@ public class SecurityConfig {
                 .authenticationEntryPoint(unauthorizedEntryPoint())
                 .accessDeniedHandler(accessDeniedHandler())
             )
+            .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/health", "/api/v1/version", "/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers("/api/v1/health", "/api/v1/version", "/actuator/health", "/actuator/info", "/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             );
+
+        // Allow H2 console frame loading in dev profile if needed
+        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
     }
@@ -57,7 +68,7 @@ public class SecurityConfig {
                 .toList();
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "X-Request-ID", "X-Request-Id"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

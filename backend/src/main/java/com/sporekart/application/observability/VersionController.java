@@ -1,6 +1,6 @@
-package com.sporekart.common.controller;
+package com.sporekart.application.observability;
 
-import com.sporekart.common.response.ApiResponse;
+import com.sporekart.application.exception.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
