@@ -87,6 +87,8 @@ public class GlobalExceptionHandler {
                 code = "CATALOG_INVALID_SORT";
             } else if (ex.getMessage().contains("Page size") || ex.getMessage().contains("Page index")) {
                 code = "CATALOG_INVALID_PAGE_SIZE";
+            } else if (ex.getMessage().contains("price") || ex.getMessage().contains("Price")) {
+                code = "CATALOG_INVALID_PRICE_RANGE";
             }
         }
         ApiErrorResponse response = ApiErrorResponse.of(code, ex.getMessage(), request.getRequestURI());

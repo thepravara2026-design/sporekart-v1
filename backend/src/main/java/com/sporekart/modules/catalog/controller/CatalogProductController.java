@@ -8,6 +8,7 @@ import com.sporekart.modules.catalog.domain.product.ProductStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
@@ -27,9 +28,11 @@ public class CatalogProductController {
             @RequestParam(name = "sort", required = false) String sort,
             @RequestParam(name = "categoryId", required = false) UUID categoryId,
             @RequestParam(name = "status", required = false) ProductStatus status,
-            @RequestParam(name = "search", required = false) String search
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice
     ) {
-        PageResponse<ProductDto> products = productApplicationService.getProducts(page, size, sort, categoryId, status, search);
+        PageResponse<ProductDto> products = productApplicationService.getProducts(page, size, sort, categoryId, status, search, minPrice, maxPrice);
         return ResponseEntity.ok(ApiResponse.success(products));
     }
 

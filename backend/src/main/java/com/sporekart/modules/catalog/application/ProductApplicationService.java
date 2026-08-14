@@ -1,5 +1,6 @@
 package com.sporekart.modules.catalog.application;
 
+import com.sporekart.modules.catalog.application.dto.request.ProductSearchCriteria;
 import com.sporekart.modules.catalog.application.dto.response.PageResponse;
 import com.sporekart.modules.catalog.domain.category.Category;
 import com.sporekart.modules.catalog.domain.exception.CategoryNotFoundException;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -114,6 +116,21 @@ public class ProductApplicationService {
     }
 
     public PageResponse<ProductDto> getProducts(int page, int size, String sortParam, UUID categoryId, ProductStatus status, String search) {
+        return getProducts(page, size, sortParam, categoryId, status, search, null, null);
+    }
+
+    public PageResponse<ProductDto> getProducts(int page, int size, String sortParam, UUID categoryId, ProductStatus status, String search, BigDecimal minPrice, BigDecimal maxPrice) {
+        ProductSearchCriteria criteria = ProductSearchCriteria.of(page, size, sortParam, categoryId, status, search, minPrice, maxPrice);
+        return getProducts(criteria);
+    }
+
+    public PageResponse<ProductDto> getProducts(ProductSearchCriteria criteria) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("ProductSearchCriteria cannot be null");
+        }
+
+        int page = criteria.page();
+        int size = criteria.size();
         if (page < 0) {
             throw new IllegalArgumentException("Page index cannot be negative");
         }
@@ -124,10 +141,35 @@ public class ProductApplicationService {
             throw new IllegalArgumentException("Page size cannot exceed maximum limit of " + MAX_PAGE_SIZE);
         }
 
-        Sort sort = parseAndValidateSort(sortParam, ALLOWED_PRODUCT_SORT_FIELDS, Sort.by(Sort.Direction.DESC, "createdAt"));
+        BigDecimal minPrice = criteria.minPrice();
+        BigDecimal maxPrice = criteria.maxPrice();
+
+        if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Minimum price cannot be negative");
+        }
+        if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Maximum price cannot be negative");
+        }
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+        }
+
+        Sort sort = parseAndValidateSort(criteria.sort(), ALLOWED_PRODUCT_SORT_FIELDS, Sort.by(Sort.Direction.DESC, "createdAt"));
+        // Deterministic secondary sorting by ID
+        if (sort.stream().noneMatch(order -> order.getProperty().equals("id"))) {
+            sort = sort.and(Sort.by(Sort.Direction.ASC, "id"));
+        }
+
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Product> productPage = productRepository.findByFilters(search, categoryId, status, pageable);
+        Page<Product> productPage = productRepository.findByFilters(
+                criteria.search(),
+                criteria.categoryId(),
+                criteria.status(),
+                minPrice,
+                maxPrice,
+                pageable
+        );
         Page<ProductDto> dtoPage = productPage.map(ProductDto::fromDomain);
 
         return PageResponse.fromPage(dtoPage);
@@ -144,7 +186,6 @@ public class ProductApplicationService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
 
-        // Hard deletion or transition to ARCHIVED
         productRepository.deleteById(product.getId());
     }
 
