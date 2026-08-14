@@ -1,6 +1,9 @@
 package com.sporekart.modules.catalog.infrastructure.persistence;
 
 import com.sporekart.modules.catalog.domain.product.Product;
+import com.sporekart.modules.catalog.domain.product.ProductStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,5 +16,6 @@ public interface ProductRepository {
     boolean existsBySku(String sku);
     long countByCategoryId(UUID categoryId);
     List<Product> findAll();
+    Page<Product> findByFilters(String search, UUID categoryId, ProductStatus status, Pageable pageable);
     void deleteById(UUID id);
 }

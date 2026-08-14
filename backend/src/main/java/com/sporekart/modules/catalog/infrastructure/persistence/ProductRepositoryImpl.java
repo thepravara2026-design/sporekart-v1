@@ -1,6 +1,9 @@
 package com.sporekart.modules.catalog.infrastructure.persistence;
 
 import com.sporekart.modules.catalog.domain.product.Product;
+import com.sporekart.modules.catalog.domain.product.ProductStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -48,6 +51,12 @@ public class ProductRepositoryImpl implements ProductRepository {
         return springDataProductRepository.findAll().stream()
                 .map(ProductEntity::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Page<Product> findByFilters(String search, UUID categoryId, ProductStatus status, Pageable pageable) {
+        return springDataProductRepository.findByFilters(search, categoryId, status, pageable)
+                .map(ProductEntity::toDomain);
     }
 
     @Override

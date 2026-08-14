@@ -1,6 +1,9 @@
 package com.sporekart.modules.catalog.infrastructure.persistence;
 
 import com.sporekart.modules.catalog.domain.category.Category;
+import com.sporekart.modules.catalog.domain.category.CategoryStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -53,6 +56,12 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         return springDataCategoryRepository.findAll().stream()
                 .map(CategoryEntity::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Page<Category> findByFilters(String search, CategoryStatus status, Pageable pageable) {
+        return springDataCategoryRepository.findByFilters(search, status, pageable)
+                .map(CategoryEntity::toDomain);
     }
 
     @Override
