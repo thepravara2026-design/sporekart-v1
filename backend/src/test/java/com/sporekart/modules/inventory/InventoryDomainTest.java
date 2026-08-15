@@ -89,4 +89,31 @@ class InventoryDomainTest {
         assertEquals(ReservationStatus.EXPIRED, reservation.getStatus());
         assertThrows(ReservationAlreadyReleasedException.class, () -> reservation.release("TEST"));
     }
+
+    @Test
+    @DisplayName("InventoryItem commit should reduce both on-hand and reserved quantity")
+    void testInventoryItemCommit() {
+        InventoryItem item = InventoryItem.createNew(UUID.randomUUID(), null, "SKU-COMMIT-001", 20);
+        item.reserve(5);
+
+        assertEquals(20, item.getOnHandQuantity());
+        assertEquals(5, item.getReservedQuantity());
+        assertEquals(15, item.getAvailableQuantity());
+
+        item.commit(5);
+        assertEquals(15, item.getOnHandQuantity());
+        assertEquals(0, item.getReservedQuantity());
+        assertEquals(15, item.getAvailableQuantity());
+    }
+
+    @Test
+    @DisplayName("InventoryItem recordDamaged should reduce available quantity and calculate low stock")
+    void testInventoryItemDamagedAndLowStock() {
+        InventoryItem item = InventoryItem.createNew(UUID.randomUUID(), null, "SKU-DAMAGED-001", 10);
+        assertFalse(item.isLowStock());
+
+        item.recordDamaged(6);
+        assertEquals(4, item.getAvailableQuantity());
+        assertTrue(item.isLowStock()); // 4 <= lowStockThreshold (5)
+    }
 }

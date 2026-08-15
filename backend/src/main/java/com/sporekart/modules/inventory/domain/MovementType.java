@@ -5,5 +5,8 @@ public enum MovementType {
     STOCK_ADJUSTMENT,
     RESERVATION,
     RELEASE,
+    COMMIT,
+    RESTOCK,
+    DAMAGE,
     EXPIRY
 }

@@ -17,4 +17,6 @@ public interface InventoryRepository {
     Optional<InventoryItem> findBySkuForUpdate(String sku);
 
     List<InventoryItem> findAllBySkuInOrderBySkuAscForUpdate(List<String> skus);
+
+    List<InventoryItem> findAll();
 }

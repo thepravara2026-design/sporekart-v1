@@ -50,7 +50,7 @@ class InventoryControllerTest {
     void testGetInventoryBySku() throws Exception {
         String sku = "SKU-MUSH-01";
         InventoryItemDto dto = new InventoryItemDto(
-                UUID.randomUUID(), UUID.randomUUID(), null, sku, 20, 5, 15, "ACTIVE",
+                UUID.randomUUID(), UUID.randomUUID(), null, sku, 20, 5, 0, 15, 5, false, "ACTIVE",
                 OffsetDateTime.now(), OffsetDateTime.now()
         );
 
@@ -102,7 +102,7 @@ class InventoryControllerTest {
     void testAdminAdjustStock() throws Exception {
         StockAdjustmentCommand command = new StockAdjustmentCommand("SKU-MUSH-01", 100, "NEW_RESTOCK");
         InventoryItemDto dto = new InventoryItemDto(
-                UUID.randomUUID(), UUID.randomUUID(), null, "SKU-MUSH-01", 100, 0, 100, "ACTIVE",
+                UUID.randomUUID(), UUID.randomUUID(), null, "SKU-MUSH-01", 100, 0, 0, 100, 5, false, "ACTIVE",
                 OffsetDateTime.now(), OffsetDateTime.now()
         );
 

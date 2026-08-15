@@ -3,6 +3,8 @@ package com.sporekart.modules.inventory.application;
 import com.sporekart.modules.inventory.application.dto.InventoryItemDto;
 import com.sporekart.modules.inventory.application.dto.ReservationDto;
 import com.sporekart.modules.inventory.application.dto.StockAdjustmentCommand;
+import com.sporekart.modules.inventory.application.dto.StockAvailabilityDto;
+import com.sporekart.modules.inventory.application.dto.StockMovementDto;
 import com.sporekart.modules.inventory.domain.InventoryItem;
 import com.sporekart.modules.inventory.domain.MovementType;
 import com.sporekart.modules.inventory.domain.ReservationStatus;
@@ -345,5 +347,115 @@ public class InventoryApplicationService {
         return inventoryRepository.findBySku(normalizedSku)
                 .map(InventoryItemDto::fromDomain)
                 .orElseThrow(() -> new InventoryItemNotFoundException(normalizedSku));
+    }
+
+    @Transactional
+    public ReservationDto commitReservation(UUID reservationId) {
+        log.info("Committing stock reservation: {}", reservationId);
+
+        StockReservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+
+        if (!reservation.isActive()) {
+            log.info("Reservation {} is already in status {}, skipping commit", reservationId, reservation.getStatus());
+            return ReservationDto.fromDomain(reservation);
+        }
+
+        List<String> sortedSkus = reservation.getItems().stream()
+                .map(StockReservationItem::getSku)
+                .filter(Objects::nonNull)
+                .map(s -> s.trim().toUpperCase())
+                .distinct()
+                .sorted(Comparator.naturalOrder())
+                .toList();
+
+        List<InventoryItem> lockedItems = inventoryRepository.findAllBySkuInOrderBySkuAscForUpdate(sortedSkus);
+        Map<String, InventoryItem> inventoryMap = lockedItems.stream()
+                .collect(Collectors.toMap(i -> i.getSku().trim().toUpperCase(), Function.identity()));
+
+        for (StockReservationItem resItem : reservation.getItems()) {
+            String itemSku = resItem.getSku().trim().toUpperCase();
+            InventoryItem invItem = inventoryMap.get(itemSku);
+            if (invItem != null) {
+                int prevOnHand = invItem.getOnHandQuantity();
+                int prevReserved = invItem.getReservedQuantity();
+
+                invItem.commit(resItem.getQuantity());
+                inventoryRepository.save(invItem);
+
+                stockMovementRepository.save(StockMovement.recordMovement(
+                        invItem.getId(),
+                        MovementType.COMMIT,
+                        resItem.getQuantity(),
+                        "FULFILLMENT_COMMIT",
+                        reservationId.toString(),
+                        prevOnHand,
+                        invItem.getOnHandQuantity(),
+                        prevReserved,
+                        invItem.getReservedQuantity()
+                ));
+            }
+        }
+
+        reservation.commit();
+        StockReservation saved = reservationRepository.save(reservation);
+        log.info("Successfully committed stock reservation {}", reservationId);
+        return ReservationDto.fromDomain(saved);
+    }
+
+    @Transactional
+    public InventoryItemDto recordDamagedStock(String sku, int quantity, String reason) {
+        String normalizedSku = sku != null ? sku.trim().toUpperCase() : null;
+        log.info("Recording damaged stock for SKU {}: quantity {}", normalizedSku, quantity);
+
+        InventoryItem invItem = inventoryRepository.findBySkuForUpdate(normalizedSku)
+                .orElseThrow(() -> new InventoryItemNotFoundException(normalizedSku));
+
+        int prevOnHand = invItem.getOnHandQuantity();
+        int prevReserved = invItem.getReservedQuantity();
+
+        invItem.recordDamaged(quantity);
+        InventoryItem saved = inventoryRepository.save(invItem);
+
+        stockMovementRepository.save(StockMovement.recordMovement(
+                saved.getId(),
+                MovementType.DAMAGE,
+                quantity,
+                "WAREHOUSE_QA",
+                reason != null ? reason : "DAMAGED_STOCK",
+                prevOnHand,
+                saved.getOnHandQuantity(),
+                prevReserved,
+                saved.getReservedQuantity()
+        ));
+
+        return InventoryItemDto.fromDomain(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StockMovementDto> listMovementsForSku(String sku) {
+        String normalizedSku = sku != null ? sku.trim().toUpperCase() : null;
+        InventoryItem item = inventoryRepository.findBySku(normalizedSku)
+                .orElseThrow(() -> new InventoryItemNotFoundException(normalizedSku));
+
+        return stockMovementRepository.findByInventoryItemId(item.getId()).stream()
+                .map(StockMovementDto::fromDomain)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public StockAvailabilityDto getInventoryAvailability(String sku) {
+        String normalizedSku = sku != null ? sku.trim().toUpperCase() : null;
+        InventoryItem item = inventoryRepository.findBySku(normalizedSku)
+                .orElseThrow(() -> new InventoryItemNotFoundException(normalizedSku));
+
+        return StockAvailabilityDto.fromDomain(item);
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryItemDto> listAllInventory() {
+        return inventoryRepository.findAll().stream()
+                .map(InventoryItemDto::fromDomain)
+                .toList();
     }
 }

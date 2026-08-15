@@ -33,6 +33,12 @@ public class InventoryItemEntity {
     @Column(name = "reserved_quantity", nullable = false)
     private int reservedQuantity;
 
+    @Column(name = "damaged_quantity", nullable = false)
+    private int damagedQuantity;
+
+    @Column(name = "low_stock_threshold", nullable = false)
+    private int lowStockThreshold;
+
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
@@ -55,6 +61,8 @@ public class InventoryItemEntity {
             String sku,
             int onHandQuantity,
             int reservedQuantity,
+            int damagedQuantity,
+            int lowStockThreshold,
             String status,
             Long version,
             OffsetDateTime createdAt,
@@ -66,6 +74,8 @@ public class InventoryItemEntity {
         this.sku = sku;
         this.onHandQuantity = onHandQuantity;
         this.reservedQuantity = reservedQuantity;
+        this.damagedQuantity = damagedQuantity;
+        this.lowStockThreshold = lowStockThreshold;
         this.status = status;
         this.version = version;
         this.createdAt = createdAt;
@@ -80,6 +90,8 @@ public class InventoryItemEntity {
                 item.getSku(),
                 item.getOnHandQuantity(),
                 item.getReservedQuantity(),
+                item.getDamagedQuantity(),
+                item.getLowStockThreshold(),
                 item.getStatus(),
                 item.getVersion(),
                 item.getCreatedAt(),
@@ -95,6 +107,8 @@ public class InventoryItemEntity {
                 this.sku,
                 this.onHandQuantity,
                 this.reservedQuantity,
+                this.damagedQuantity,
+                this.lowStockThreshold,
                 this.status,
                 this.version,
                 this.createdAt,
@@ -120,6 +134,12 @@ public class InventoryItemEntity {
 
     public int getReservedQuantity() { return reservedQuantity; }
     public void setReservedQuantity(int reservedQuantity) { this.reservedQuantity = reservedQuantity; }
+
+    public int getDamagedQuantity() { return damagedQuantity; }
+    public void setDamagedQuantity(int damagedQuantity) { this.damagedQuantity = damagedQuantity; }
+
+    public int getLowStockThreshold() { return lowStockThreshold; }
+    public void setLowStockThreshold(int lowStockThreshold) { this.lowStockThreshold = lowStockThreshold; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

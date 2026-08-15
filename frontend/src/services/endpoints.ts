@@ -13,4 +13,10 @@ export const ENDPOINTS = {
   ADMIN_RETURN_APPROVE: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/approve`,
   ADMIN_RETURN_REJECT: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/reject`,
   ADMIN_RETURN_INSPECT: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/inspect`,
+  INVENTORY_AVAILABILITY: (sku: string) => `/api/v1/inventory/skus/${sku}/availability`,
+  ADMIN_INVENTORY_LIST: '/api/v1/admin/inventory',
+  ADMIN_INVENTORY_BY_SKU: (sku: string) => `/api/v1/admin/inventory/${sku}`,
+  ADMIN_INVENTORY_MOVEMENTS: (sku: string) => `/api/v1/admin/inventory/${sku}/movements`,
+  ADMIN_INVENTORY_ADJUST: (sku: string) => `/api/v1/admin/inventory/${sku}/adjustments`,
+  ADMIN_INVENTORY_DAMAGED: (sku: string) => `/api/v1/admin/inventory/${sku}/damaged`,
 } as const;

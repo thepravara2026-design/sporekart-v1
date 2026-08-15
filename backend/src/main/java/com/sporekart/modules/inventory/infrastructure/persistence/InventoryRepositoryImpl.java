@@ -48,4 +48,11 @@ public class InventoryRepositoryImpl implements InventoryRepository {
                 .map(InventoryItemEntity::toDomain)
                 .toList();
     }
+
+    @Override
+    public List<InventoryItem> findAll() {
+        return jpaRepository.findAll().stream()
+                .map(InventoryItemEntity::toDomain)
+                .toList();
+    }
 }

@@ -12,7 +12,10 @@ public record InventoryItemDto(
         String sku,
         int onHandQuantity,
         int reservedQuantity,
+        int damagedQuantity,
         int availableQuantity,
+        int lowStockThreshold,
+        boolean isLowStock,
         String status,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
@@ -25,7 +28,10 @@ public record InventoryItemDto(
                 item.getSku(),
                 item.getOnHandQuantity(),
                 item.getReservedQuantity(),
+                item.getDamagedQuantity(),
                 item.getAvailableQuantity(),
+                item.getLowStockThreshold(),
+                item.isLowStock(),
                 item.getStatus(),
                 item.getCreatedAt(),
                 item.getUpdatedAt()

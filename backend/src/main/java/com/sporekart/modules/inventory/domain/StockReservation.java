@@ -84,6 +84,17 @@ public class StockReservation {
         }
     }
 
+    public void commit() {
+        if (this.status == ReservationStatus.COMMITTED) {
+            // Idempotent commit
+            return;
+        }
+        if (this.status == ReservationStatus.ACTIVE || this.status == ReservationStatus.CONFIRMED) {
+            this.status = ReservationStatus.COMMITTED;
+            this.updatedAt = OffsetDateTime.now();
+        }
+    }
+
     public boolean isActive() {
         return this.status == ReservationStatus.ACTIVE;
     }
