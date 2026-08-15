@@ -44,7 +44,7 @@ public class PaymentEntity {
     private String currency;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false, length = 50)
     private PaymentStatus status;
 
     @Enumerated(EnumType.STRING)

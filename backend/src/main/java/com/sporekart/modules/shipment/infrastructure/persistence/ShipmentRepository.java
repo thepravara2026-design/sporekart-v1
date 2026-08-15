@@ -21,6 +21,7 @@ public interface ShipmentRepository {
     Page<Shipment> findByCustomerId(String customerId, Pageable pageable);
     Page<Shipment> findAll(ShipmentStatus statusFilter, Pageable pageable);
     List<Shipment> findActiveShipmentsForReconciliation();
+    List<Shipment> findAllByStatus(ShipmentStatus status);
 
     boolean existsWebhookEvent(ShipmentProviderType provider, String providerEventId);
     void saveWebhookEvent(ShippingWebhookEventEntity entity);

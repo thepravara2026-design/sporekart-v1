@@ -88,11 +88,14 @@ public class ShipmentRepositoryImpl implements ShipmentRepository {
                 ShipmentStatus.PICKED_UP,
                 ShipmentStatus.IN_TRANSIT,
                 ShipmentStatus.OUT_FOR_DELIVERY,
-                ShipmentStatus.DELIVERY_FAILED
+                ShipmentStatus.BOOKING_PENDING
         );
-        return springDataRepository.findByStatusIn(activeStatuses).stream()
-                .map(ShipmentEntity::toDomain)
-                .collect(Collectors.toList());
+        return springDataRepository.findByStatusIn(activeStatuses).stream().map(ShipmentEntity::toDomain).toList();
+    }
+
+    @Override
+    public List<Shipment> findAllByStatus(ShipmentStatus status) {
+        return springDataRepository.findByStatusIn(List.of(status)).stream().map(ShipmentEntity::toDomain).toList();
     }
 
     @Override

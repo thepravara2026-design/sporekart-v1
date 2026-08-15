@@ -54,6 +54,24 @@ app:
     general-read-limit: 500
   observability:
     slow-request-threshold-ms: 100
+  resilience:
+    payment:
+      connect-timeout-ms: 1000
+      read-timeout-ms: 1000
+      max-attempts: 3
+      initial-backoff-ms: 10
+      backoff-multiplier: 1.5
+      jitter-factor: 0.1
+    shipping:
+      connect-timeout-ms: 1000
+      read-timeout-ms: 1000
+      max-attempts: 3
+      initial-backoff-ms: 10
+      backoff-multiplier: 1.5
+      jitter-factor: 0.1
+    database:
+      lock-timeout-ms: 2000
+      max-retry-attempts: 3
 
 logging:
   level:

@@ -17,4 +17,7 @@ public interface SpringDataJpaPaymentRepository extends JpaRepository<PaymentEnt
 
     @Query("SELECT p FROM PaymentEntity p LEFT JOIN FETCH p.attempts WHERE p.orderId = :orderId")
     Optional<PaymentEntity> findByOrderIdWithAttempts(@Param("orderId") UUID orderId);
+
+    @Query("SELECT DISTINCT p FROM PaymentEntity p LEFT JOIN FETCH p.attempts WHERE p.status = :status")
+    java.util.List<PaymentEntity> findAllByStatus(@Param("status") com.sporekart.modules.payment.domain.PaymentStatus status);
 }

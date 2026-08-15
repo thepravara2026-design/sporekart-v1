@@ -14,4 +14,6 @@ public interface PaymentRepository {
     Optional<Payment> findByPaymentReference(String paymentReference);
 
     Optional<Payment> findByOrderId(UUID orderId);
+
+    java.util.List<Payment> findAllByStatus(com.sporekart.modules.payment.domain.PaymentStatus status);
 }

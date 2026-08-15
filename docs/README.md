@@ -102,3 +102,6 @@
 
 ## 11. Sprint 5C Observability & Production Diagnostics
 - [Sprint 5C Observability & Production Diagnostics Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5c-observability-production-diagnostics.md)
+
+## 12. Sprint 5D Reliability, Resilience & Failure Recovery
+- [Sprint 5D Reliability, Resilience & Failure Recovery Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5d-reliability-resilience-recovery.md)

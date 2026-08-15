@@ -63,6 +63,24 @@ app:
     tracing:
       enabled: true
       sample-rate: 1.0
+  resilience:
+    payment:
+      connect-timeout-ms: ${PAYMENT_CONNECT_TIMEOUT_MS:3000}
+      read-timeout-ms: ${PAYMENT_READ_TIMEOUT_MS:5000}
+      max-attempts: ${PAYMENT_MAX_ATTEMPTS:3}
+      initial-backoff-ms: ${PAYMENT_BACKOFF_MS:200}
+      backoff-multiplier: 2.0
+      jitter-factor: 0.25
+    shipping:
+      connect-timeout-ms: ${SHIPPING_CONNECT_TIMEOUT_MS:3000}
+      read-timeout-ms: ${SHIPPING_READ_TIMEOUT_MS:5000}
+      max-attempts: ${SHIPPING_MAX_ATTEMPTS:3}
+      initial-backoff-ms: ${SHIPPING_BACKOFF_MS:200}
+      backoff-multiplier: 2.0
+      jitter-factor: 0.25
+    database:
+      lock-timeout-ms: ${DB_LOCK_TIMEOUT_MS:5000}
+      max-retry-attempts: 3
 
 logging:
   level:

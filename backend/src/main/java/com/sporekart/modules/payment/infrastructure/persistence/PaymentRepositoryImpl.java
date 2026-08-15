@@ -54,4 +54,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public Optional<Payment> findByOrderId(UUID orderId) {
         return jpaRepository.findByOrderIdWithAttempts(orderId).map(PaymentEntity::toDomain);
     }
+
+    @Override
+    public List<Payment> findAllByStatus(com.sporekart.modules.payment.domain.PaymentStatus status) {
+        return jpaRepository.findAllByStatus(status).stream().map(PaymentEntity::toDomain).toList();
+    }
 }
