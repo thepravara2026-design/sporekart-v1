@@ -41,5 +41,14 @@ export const ENDPOINTS = {
   ADMIN_TICKET_RESOLVE: (ticketRef: string) => `/api/v1/admin/support/tickets/${ticketRef}/resolve`,
   ADMIN_TICKET_CLOSE: (ticketRef: string) => `/api/v1/admin/support/tickets/${ticketRef}/close`,
   ADMIN_REPLACEMENT_APPROVE: (replacementRef: string) => `/api/v1/admin/support/replacements/${replacementRef}/approve`,
+  CUSTOMER_REVIEWS: '/api/v1/reviews',
+  PRODUCT_REVIEWS: (productId: string) => `/api/v1/products/${productId}/reviews`,
+  PRODUCT_RATING_SUMMARY: (productId: string) => `/api/v1/products/${productId}/rating-summary`,
+  REVIEW_VOTE: (reviewRef: string) => `/api/v1/reviews/${reviewRef}/vote`,
+  ADMIN_REVIEWS: '/api/v1/admin/reviews',
+  ADMIN_REVIEW_APPROVE: (reviewRef: string) => `/api/v1/admin/reviews/${reviewRef}/approve`,
+  ADMIN_REVIEW_REJECT: (reviewRef: string) => `/api/v1/admin/reviews/${reviewRef}/reject`,
+  ADMIN_REVIEW_FLAG: (reviewRef: string) => `/api/v1/admin/reviews/${reviewRef}/flag`,
+  ADMIN_REVIEW_REPLY: (reviewRef: string) => `/api/v1/admin/reviews/${reviewRef}/replies`,
 } as const;
 
