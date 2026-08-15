@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,7 +53,7 @@ class ReturnControllerTest {
         given(returnApplicationService.checkEligibility(eq("ORD-101"), eq("cust-101"))).willReturn(dto);
 
         mockMvc.perform(get("/api/v1/orders/ORD-101/return-eligibility")
-                        .header("X-Customer-Id", "cust-101"))
+                        .principal(new UsernamePasswordAuthenticationToken("cust-101", "n/a")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderReference").value("ORD-101"))
                 .andExpect(jsonPath("$.eligible").value(true));
@@ -75,7 +76,7 @@ class ReturnControllerTest {
         given(returnApplicationService.createReturn(eq("ORD-101"), any(), eq("cust-101"))).willReturn(dto);
 
         mockMvc.perform(post("/api/v1/orders/ORD-101/returns")
-                        .header("X-Customer-Id", "cust-101")
+                        .principal(new UsernamePasswordAuthenticationToken("cust-101", "n/a"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())

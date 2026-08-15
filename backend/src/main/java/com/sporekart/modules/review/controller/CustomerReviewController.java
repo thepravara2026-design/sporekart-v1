@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +27,9 @@ public class CustomerReviewController {
     @PostMapping("/reviews")
     public ResponseEntity<ProductReviewDto> submitReview(
             @Valid @RequestBody CreateReviewRequestDto requestDto,
-            @RequestHeader(value = "X-Customer-Id", defaultValue = "cust-101") String customerId
+            Authentication authentication
     ) {
+        String customerId = resolveCustomerId(authentication);
         log.info("REST: Submit product review for customer: {}", customerId);
         ProductReviewDto result = reviewApplicationService.submitCustomerReview(requestDto, customerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -51,10 +53,19 @@ public class CustomerReviewController {
     public ResponseEntity<ProductReviewDto> voteHelpfulness(
             @PathVariable String reviewReference,
             @Valid @RequestBody ReviewHelpfulnessDto voteDto,
-            @RequestHeader(value = "X-Customer-Id", defaultValue = "cust-101") String customerId
+            Authentication authentication
     ) {
+        String customerId = resolveCustomerId(authentication);
         log.info("REST: Helpfulness vote for review: {}, isHelpful: {}", reviewReference, voteDto.isHelpful());
         ProductReviewDto result = reviewApplicationService.voteHelpfulness(reviewReference, voteDto.isHelpful(), customerId);
         return ResponseEntity.ok(result);
+    }
+
+    private String resolveCustomerId(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            throw new org.springframework.security.authentication.AuthenticationCredentialsNotFoundException(
+                    "Authenticated user identity required");
+        }
+        return authentication.getName();
     }
 }

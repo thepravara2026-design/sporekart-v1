@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +29,9 @@ public class ReturnController {
     @GetMapping("/orders/{orderReference}/return-eligibility")
     public ResponseEntity<ReturnEligibilityDto> checkEligibility(
             @PathVariable String orderReference,
-            @RequestHeader(value = "X-Customer-Id", defaultValue = "cust-101") String customerId
+            Authentication authentication
     ) {
+        String customerId = resolveCustomerId(authentication);
         log.info("REST: Request to check return eligibility for orderRef: {}", orderReference);
         ReturnEligibilityDto result = returnApplicationService.checkEligibility(orderReference, customerId);
         return ResponseEntity.ok(result);
@@ -39,8 +41,9 @@ public class ReturnController {
     public ResponseEntity<ReturnDto> createReturn(
             @PathVariable String orderReference,
             @Valid @RequestBody CreateReturnRequestDto requestDto,
-            @RequestHeader(value = "X-Customer-Id", defaultValue = "cust-101") String customerId
+            Authentication authentication
     ) {
+        String customerId = resolveCustomerId(authentication);
         log.info("REST: Request to create return for orderRef: {}", orderReference);
         ReturnDto result = returnApplicationService.createReturn(orderReference, requestDto, customerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -49,8 +52,9 @@ public class ReturnController {
     @GetMapping("/returns/{returnReference}")
     public ResponseEntity<ReturnDto> getReturnByReference(
             @PathVariable String returnReference,
-            @RequestHeader(value = "X-Customer-Id", defaultValue = "cust-101") String customerId
+            Authentication authentication
     ) {
+        String customerId = resolveCustomerId(authentication);
         log.info("REST: Request to fetch return by reference: {}", returnReference);
         ReturnDto result = returnApplicationService.getReturnByReference(returnReference, customerId);
         return ResponseEntity.ok(result);
@@ -58,8 +62,9 @@ public class ReturnController {
 
     @GetMapping("/customer/returns")
     public ResponseEntity<List<ReturnDto>> listCustomerReturns(
-            @RequestHeader(value = "X-Customer-Id", defaultValue = "cust-101") String customerId
+            Authentication authentication
     ) {
+        String customerId = resolveCustomerId(authentication);
         log.info("REST: Request to list returns for customer: {}", customerId);
         List<ReturnDto> results = returnApplicationService.listReturnsForCustomer(customerId);
         return ResponseEntity.ok(results);
@@ -68,10 +73,20 @@ public class ReturnController {
     @PostMapping("/returns/{returnReference}/cancel")
     public ResponseEntity<ReturnDto> cancelReturn(
             @PathVariable String returnReference,
-            @RequestHeader(value = "X-Customer-Id", defaultValue = "cust-101") String customerId
+            Authentication authentication
     ) {
+        String customerId = resolveCustomerId(authentication);
         log.info("REST: Request to cancel return: {}", returnReference);
         ReturnDto result = returnApplicationService.cancelReturn(returnReference, customerId);
         return ResponseEntity.ok(result);
     }
+
+    private String resolveCustomerId(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            throw new org.springframework.security.authentication.AuthenticationCredentialsNotFoundException(
+                    "Authenticated user identity required");
+        }
+        return authentication.getName();
+    }
 }
+

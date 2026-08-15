@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -58,6 +59,7 @@ class AdminShipmentControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/admin/shipments should return paginated list")
+    @WithMockUser(roles = "ADMIN")
     void testGetAdminShipments() throws Exception {
         Order order = createTestOrder();
         shipmentService.createShipmentForOrder(order.getId());
@@ -71,12 +73,12 @@ class AdminShipmentControllerTest {
 
     @Test
     @DisplayName("POST /api/v1/admin/shipments/{ref}/cancel should cancel shipment")
+    @WithMockUser(roles = "ADMIN")
     void testCancelShipment() throws Exception {
         Order order = createTestOrder();
         ShipmentDto shipment = shipmentService.createShipmentForOrder(order.getId());
 
-        mockMvc.perform(post("/api/v1/admin/shipments/{ref}/cancel", shipment.shipmentReference())
-                        .header("X-Admin-Id", "admin-root"))
+        mockMvc.perform(post("/api/v1/admin/shipments/{ref}/cancel", shipment.shipmentReference()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
     }

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -57,13 +58,13 @@ class ShipmentControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/orders/{orderRef}/shipment should return customer shipment details")
+    @WithMockUser(username = "cust-ctrl-100")
     void testGetShipmentDetails() throws Exception {
         String custId = "cust-ctrl-100";
         Order order = createTestOrder(custId);
         ShipmentDto shipment = shipmentService.createShipmentForOrder(order.getId());
 
-        mockMvc.perform(get("/api/v1/orders/{orderRef}/shipment", order.getOrderNumber())
-                        .header("X-Customer-Id", custId))
+        mockMvc.perform(get("/api/v1/orders/{orderRef}/shipment", order.getOrderNumber()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderReference").value(order.getOrderNumber()))
                 .andExpect(jsonPath("$.shipmentReference").value(shipment.shipmentReference()))
@@ -72,13 +73,13 @@ class ShipmentControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/orders/{orderRef}/tracking should return tracking timeline")
+    @WithMockUser(username = "cust-ctrl-200")
     void testGetTrackingTimeline() throws Exception {
         String custId = "cust-ctrl-200";
         Order order = createTestOrder(custId);
         ShipmentDto shipment = shipmentService.createShipmentForOrder(order.getId());
 
-        mockMvc.perform(get("/api/v1/orders/{orderRef}/tracking", order.getOrderNumber())
-                        .header("X-Customer-Id", custId))
+        mockMvc.perform(get("/api/v1/orders/{orderRef}/tracking", order.getOrderNumber()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderReference").value(order.getOrderNumber()))
                 .andExpect(jsonPath("$.awb").value(shipment.awb()))
@@ -86,13 +87,13 @@ class ShipmentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/orders/{orderRef}/shipment with wrong customer ID should reject with IDOR error")
+    @DisplayName("GET /api/v1/orders/{orderRef}/shipment with wrong authenticated user should reject with IDOR error")
+    @WithMockUser(username = "cust-attacker")
     void testCustomerMismatchIdor() throws Exception {
         Order order = createTestOrder("cust-owner");
         shipmentService.createShipmentForOrder(order.getId());
 
-        mockMvc.perform(get("/api/v1/orders/{orderRef}/shipment", order.getOrderNumber())
-                        .header("X-Customer-Id", "cust-attacker"))
+        mockMvc.perform(get("/api/v1/orders/{orderRef}/shipment", order.getOrderNumber()))
                 .andExpect(status().isBadRequest());
     }
 }
