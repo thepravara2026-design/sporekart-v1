@@ -122,3 +122,7 @@
 - [Immutable Release Manifest Specification](file:///f:/sporekart-v3.0/docs/release-manifest.md)
 - [CI/CD Pipeline & Quality Gate Policy](file:///f:/sporekart-v3.0/docs/ci-cd-runbook.md)
 - [Automated Rollback Verification](file:///f:/sporekart-v3.0/docs/rollback-verification.md)
+
+## 15. Sprint 5D Notification & Communication Platform
+- [Sprint 5D Notification Platform Architecture](file:///f:/sporekart-v3.0/docs/sprint-5d-notification-platform.md)
+- [Sprint 5D Notification Platform Completion Summary](file:///f:/sporekart-v3.0/docs/sprint-5d-notification-platform-completion.md)

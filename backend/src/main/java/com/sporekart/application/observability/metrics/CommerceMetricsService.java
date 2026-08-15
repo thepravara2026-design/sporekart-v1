@@ -166,4 +166,32 @@ public class CommerceMetricsService {
                 .register(meterRegistry)
                 .increment();
     }
+
+    public void recordNotificationSent(String channel, String provider) {
+        Counter.builder("sporekart.notifications.sent")
+                .description("Total notifications sent")
+                .tag("channel", channel != null ? channel : "unknown")
+                .tag("provider", provider != null ? provider : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordNotificationDelivered(String channel, String provider) {
+        Counter.builder("sporekart.notifications.delivered")
+                .description("Total notifications delivered")
+                .tag("channel", channel != null ? channel : "unknown")
+                .tag("provider", provider != null ? provider : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordNotificationFailed(String channel, String provider, String reason) {
+        Counter.builder("sporekart.notifications.failed")
+                .description("Total notifications failed")
+                .tag("channel", channel != null ? channel : "unknown")
+                .tag("provider", provider != null ? provider : "unknown")
+                .tag("reason", reason != null ? reason : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
 }
