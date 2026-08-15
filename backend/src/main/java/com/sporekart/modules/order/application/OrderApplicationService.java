@@ -176,7 +176,7 @@ public class OrderApplicationService {
         }
 
         OrderStatus prev = order.getStatus();
-        order.markPaid();
+        order.markConfirmed();
         Order saved = orderRepository.save(order);
 
         recordHistory(orderId, prev, OrderStatus.CONFIRMED, "Payment confirmed: " + paymentReference, OrderActorType.PAYMENT, paymentReference, null);

@@ -46,9 +46,12 @@ class PaymentWebhookSecurityTest {
         MockPaymentProvider mockProvider = new MockPaymentProvider();
         PaymentProviderRegistry registry = new PaymentProviderRegistry(List.of(mockProvider), properties);
 
+        com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository statusHistoryRepository = mock(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository.class);
+        com.sporekart.modules.order.application.OrderApplicationService orderApplicationService = mock(com.sporekart.modules.order.application.OrderApplicationService.class);
+
         PaymentApplicationService service = new PaymentApplicationService(
-                paymentRepository, paymentAttemptRepository, webhookEventRepository,
-                orderRepository, reservationRepository, inventoryService, registry, properties, new ObjectMapper()
+                paymentRepository, paymentAttemptRepository, webhookEventRepository, statusHistoryRepository,
+                orderRepository, orderApplicationService, reservationRepository, inventoryService, registry, properties, new ObjectMapper()
         );
 
         String jsonPayload = "{\"event_id\":\"evt_test_001\",\"event\":\"payment.captured\",\"payload\":{}}";
@@ -77,9 +80,12 @@ class PaymentWebhookSecurityTest {
         MockPaymentProvider mockProvider = new MockPaymentProvider();
         PaymentProviderRegistry registry = new PaymentProviderRegistry(List.of(mockProvider), properties);
 
+        com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository statusHistoryRepository = mock(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository.class);
+        com.sporekart.modules.order.application.OrderApplicationService orderApplicationService = mock(com.sporekart.modules.order.application.OrderApplicationService.class);
+
         PaymentApplicationService service = new PaymentApplicationService(
-                paymentRepository, paymentAttemptRepository, webhookEventRepository,
-                orderRepository, reservationRepository, inventoryService, registry, properties, new ObjectMapper()
+                paymentRepository, paymentAttemptRepository, webhookEventRepository, statusHistoryRepository,
+                orderRepository, orderApplicationService, reservationRepository, inventoryService, registry, properties, new ObjectMapper()
         );
 
         String jsonPayload = "{\"event_id\":\"evt_test_002\",\"event\":\"payment.captured\",\"payload\":{}}";
@@ -105,9 +111,12 @@ class PaymentWebhookSecurityTest {
         MockPaymentProvider mockProvider = new MockPaymentProvider();
         PaymentProviderRegistry registry = new PaymentProviderRegistry(List.of(mockProvider), properties);
 
+        com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository statusHistoryRepository = mock(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository.class);
+        com.sporekart.modules.order.application.OrderApplicationService orderApplicationService = mock(com.sporekart.modules.order.application.OrderApplicationService.class);
+
         PaymentApplicationService service = new PaymentApplicationService(
-                paymentRepository, paymentAttemptRepository, webhookEventRepository,
-                orderRepository, reservationRepository, inventoryService, registry, properties, new ObjectMapper()
+                paymentRepository, paymentAttemptRepository, webhookEventRepository, statusHistoryRepository,
+                orderRepository, orderApplicationService, reservationRepository, inventoryService, registry, properties, new ObjectMapper()
         );
 
         PaymentWebhookEvent existingProcessedEvent = PaymentWebhookEvent.recordEvent(PaymentProviderType.MOCK, "evt_test_003", "payment.captured", true);

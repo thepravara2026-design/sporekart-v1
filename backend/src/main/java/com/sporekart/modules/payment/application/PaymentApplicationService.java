@@ -50,7 +50,9 @@ public class PaymentApplicationService {
     private final PaymentRepository paymentRepository;
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final WebhookEventRepository webhookEventRepository;
+    private final com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository statusHistoryRepository;
     private final OrderRepository orderRepository;
+    private final com.sporekart.modules.order.application.OrderApplicationService orderApplicationService;
     private final ReservationRepository reservationRepository;
     private final InventoryApplicationService inventoryApplicationService;
     private final PaymentProviderRegistry providerRegistry;
@@ -61,7 +63,9 @@ public class PaymentApplicationService {
             PaymentRepository paymentRepository,
             PaymentAttemptRepository paymentAttemptRepository,
             WebhookEventRepository webhookEventRepository,
+            com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository statusHistoryRepository,
             OrderRepository orderRepository,
+            com.sporekart.modules.order.application.OrderApplicationService orderApplicationService,
             ReservationRepository reservationRepository,
             InventoryApplicationService inventoryApplicationService,
             PaymentProviderRegistry providerRegistry,
@@ -71,7 +75,9 @@ public class PaymentApplicationService {
         this.paymentRepository = paymentRepository;
         this.paymentAttemptRepository = paymentAttemptRepository;
         this.webhookEventRepository = webhookEventRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
         this.orderRepository = orderRepository;
+        this.orderApplicationService = orderApplicationService;
         this.reservationRepository = reservationRepository;
         this.inventoryApplicationService = inventoryApplicationService;
         this.providerRegistry = providerRegistry;
@@ -198,11 +204,18 @@ public class PaymentApplicationService {
         }
 
         // Mark SUCCESS
+        PaymentStatus prevStatus = payment.getStatus();
         payment.markSuccess(activeAttempt != null ? activeAttempt.getId() : null, command.providerPaymentId(), command.providerSignature());
         Payment saved = paymentRepository.save(payment);
 
+        statusHistoryRepository.save(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryEntity.fromDomain(
+                com.sporekart.modules.payment.domain.PaymentStatusHistory.recordTransition(
+                        saved.getId(), prevStatus, PaymentStatus.SUCCESS, "CLIENT_VERIFY", "CUSTOMER", customerId, command.providerPaymentId(), "Payment signature verified successfully", null
+                )
+        ));
+
         // Confirm Order and Reservation
-        confirmOrderAndReservation(payment.getOrderId());
+        confirmOrderAndReservation(payment.getOrderId(), payment.getPaymentReference());
         log.info("Successfully verified payment {} for order {}", saved.getPaymentReference(), saved.getOrderId());
         return PaymentDto.fromDomain(saved);
     }
@@ -280,15 +293,27 @@ public class PaymentApplicationService {
                 if (payment != null) {
                     if (eventType.contains("captured") || eventType.contains("authorized") || eventType.contains("success")) {
                         if (!payment.isSuccessful()) {
+                            PaymentStatus prevStatus = payment.getStatus();
                             payment.markSuccess(attempt.getId(), providerPaymentId, signatureHeader);
-                            paymentRepository.save(payment);
-                            confirmOrderAndReservation(payment.getOrderId());
+                            Payment saved = paymentRepository.save(payment);
+                            statusHistoryRepository.save(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryEntity.fromDomain(
+                                    com.sporekart.modules.payment.domain.PaymentStatusHistory.recordTransition(
+                                            saved.getId(), prevStatus, PaymentStatus.SUCCESS, "WEBHOOK", "RAZORPAY", providerType.name(), eventId, "Webhook event " + eventType + " processed", null
+                                    )
+                            ));
+                            confirmOrderAndReservation(saved.getOrderId(), saved.getPaymentReference());
                         }
                     } else if (eventType.contains("failed")) {
                         if (!payment.isSuccessful()) {
+                            PaymentStatus prevStatus = payment.getStatus();
                             payment.markFailed(attempt.getId(), "WEBHOOK_FAILED", "Payment failed event received from provider");
-                            paymentRepository.save(payment);
-                            releaseReservationForOrder(payment.getOrderId(), "PAYMENT_FAILED_WEBHOOK");
+                            Payment saved = paymentRepository.save(payment);
+                            statusHistoryRepository.save(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryEntity.fromDomain(
+                                    com.sporekart.modules.payment.domain.PaymentStatusHistory.recordTransition(
+                                            saved.getId(), prevStatus, PaymentStatus.FAILED, "WEBHOOK", "RAZORPAY", providerType.name(), eventId, "Webhook event " + eventType + " processed", null
+                                    )
+                            ));
+                            releaseReservationForOrder(saved.getOrderId(), "PAYMENT_FAILED_WEBHOOK");
                         }
                     }
                 }
@@ -312,13 +337,8 @@ public class PaymentApplicationService {
         return PaymentDto.fromDomain(payment);
     }
 
-    private void confirmOrderAndReservation(UUID orderId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
-        if (order != null && order.getStatus() == OrderStatus.CREATED) {
-            order.markPaid();
-            orderRepository.save(order);
-            log.info("Order {} transitioned to PAID", orderId);
-        }
+    private void confirmOrderAndReservation(UUID orderId, String paymentReference) {
+        orderApplicationService.confirmOrderPayment(orderId, paymentReference);
 
         StockReservation reservation = reservationRepository.findByOrderId(orderId).orElse(null);
         if (reservation != null && reservation.isActive()) {

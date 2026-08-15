@@ -82,7 +82,7 @@ class OrderLifecycleServiceTest {
         OrderDto dto = orderApplicationService.confirmOrderPayment(orderId, "PAY-REF-123");
 
         assertNotNull(dto);
-        assertEquals(OrderStatus.PAID, dto.status());
+        assertEquals(OrderStatus.CONFIRMED, dto.status());
         verify(historyRepository).save(any(OrderStatusHistory.class));
         verify(eventPublisher).publishEvent(any(OrderLifecycleEvent.class));
     }

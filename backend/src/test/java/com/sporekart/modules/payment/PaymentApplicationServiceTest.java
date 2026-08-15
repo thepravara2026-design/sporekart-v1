@@ -48,6 +48,8 @@ class PaymentApplicationServiceTest {
     private PaymentAttemptRepository paymentAttemptRepository;
     private WebhookEventRepository webhookEventRepository;
     private OrderRepository orderRepository;
+    private com.sporekart.modules.order.application.OrderApplicationService orderApplicationService;
+    private com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository statusHistoryRepository;
     private ReservationRepository reservationRepository;
     private InventoryApplicationService inventoryApplicationService;
     private PaymentProviderRegistry providerRegistry;
@@ -59,7 +61,9 @@ class PaymentApplicationServiceTest {
         paymentRepository = mock(PaymentRepository.class);
         paymentAttemptRepository = mock(PaymentAttemptRepository.class);
         webhookEventRepository = mock(WebhookEventRepository.class);
+        statusHistoryRepository = mock(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryRepository.class);
         orderRepository = mock(OrderRepository.class);
+        orderApplicationService = mock(com.sporekart.modules.order.application.OrderApplicationService.class);
         reservationRepository = mock(ReservationRepository.class);
         inventoryApplicationService = mock(InventoryApplicationService.class);
         paymentProperties = new PaymentProperties();
@@ -68,8 +72,8 @@ class PaymentApplicationServiceTest {
         providerRegistry = new PaymentProviderRegistry(List.of(mockProvider), paymentProperties);
 
         paymentService = new PaymentApplicationService(
-                paymentRepository, paymentAttemptRepository, webhookEventRepository,
-                orderRepository, reservationRepository, inventoryApplicationService,
+                paymentRepository, paymentAttemptRepository, webhookEventRepository, statusHistoryRepository,
+                orderRepository, orderApplicationService, reservationRepository, inventoryApplicationService,
                 providerRegistry, paymentProperties, new ObjectMapper()
         );
     }
@@ -156,9 +160,8 @@ class PaymentApplicationServiceTest {
 
         assertNotNull(result);
         assertEquals(PaymentStatus.SUCCESS, result.status());
-        assertEquals(OrderStatus.PAID, order.getStatus());
 
-        verify(orderRepository).save(order);
+        verify(orderApplicationService).confirmOrderPayment(orderId, payRef);
         verify(reservationRepository).save(reservation);
     }
 
