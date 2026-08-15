@@ -105,3 +105,13 @@
 
 ## 12. Sprint 5D Reliability, Resilience & Failure Recovery
 - [Sprint 5D Reliability, Resilience & Failure Recovery Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5d-reliability-resilience-recovery.md)
+
+## 13. Sprint 5E Production Readiness, Deployment & Operational Hardening
+- [Sprint 5E Production Readiness Gap Analysis](file:///f:/sporekart-v3.0/docs/sprint-5e-production-readiness-gap-analysis.md)
+- [Sprint 5E Production Readiness Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5e-production-readiness.md)
+- [Production Deployment Runbook](file:///f:/sporekart-v3.0/docs/production-deployment-runbook.md)
+- [Production Rollback Runbook](file:///f:/sporekart-v3.0/docs/production-rollback-runbook.md)
+- [Production Smoke Test Specification](file:///f:/sporekart-v3.0/docs/production-smoke-test.md)
+- [Disaster Recovery Plan](file:///f:/sporekart-v3.0/docs/disaster-recovery.md)
+- [Incident Response Runbook](file:///f:/sporekart-v3.0/docs/incident-response-runbook.md)
+- [Release Readiness Checklist](file:///f:/sporekart-v3.0/docs/release-readiness-checklist.md)
