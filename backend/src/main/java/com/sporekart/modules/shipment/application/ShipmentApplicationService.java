@@ -330,6 +330,49 @@ public class ShipmentApplicationService {
     }
 
     @Transactional
+    public ShipmentDto syncShipmentWithProvider(String shipmentReference) {
+        Shipment shipment = shipmentRepository.findByShipmentReference(shipmentReference)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found: " + shipmentReference));
+
+        ShippingProvider provider = providerRegistry.getProvider(shipment.getProvider());
+        ShipmentTrackingResult tracking = provider.getTrackingInfo(shipment.getProviderShipmentId(), shipment.getAwb());
+
+        if (tracking != null && tracking.success()) {
+            for (ShipmentTrackingResult.TrackingCheckpoint cp : tracking.checkpoints()) {
+                shipment.addTrackingEvent(
+                        cp.eventId(),
+                        cp.providerStatus(),
+                        cp.normalizedStatus(),
+                        cp.description(),
+                        cp.location(),
+                        cp.timestamp()
+                );
+            }
+            Shipment saved = shipmentRepository.save(shipment);
+            syncOrderStatus(saved);
+            return ShipmentDto.fromDomain(saved);
+        }
+
+        return ShipmentDto.fromDomain(shipment);
+    }
+
+    @Transactional(readOnly = true)
+    public String getShipmentLabelUrl(String shipmentReference) {
+        Shipment shipment = shipmentRepository.findByShipmentReference(shipmentReference)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found: " + shipmentReference));
+        ShippingProvider provider = providerRegistry.getProvider(shipment.getProvider());
+        return provider.getLabelUrl(shipment.getProviderShipmentId(), shipment.getAwb());
+    }
+
+    @Transactional(readOnly = true)
+    public String getShipmentManifestUrl(String shipmentReference) {
+        Shipment shipment = shipmentRepository.findByShipmentReference(shipmentReference)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found: " + shipmentReference));
+        ShippingProvider provider = providerRegistry.getProvider(shipment.getProvider());
+        return provider.getManifestUrl(shipment.getProviderShipmentId(), shipment.getAwb());
+    }
+
+    @Transactional
     public void reconcileActiveShipments() {
         List<Shipment> active = shipmentRepository.findActiveShipmentsForReconciliation();
         log.info("Starting reconciliation for {} active shipments", active.size());

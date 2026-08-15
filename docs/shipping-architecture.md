@@ -1,35 +1,29 @@
-# SPOREKART v3.0 — SHIPPING ARCHITECTURE & PROVIDER ABSTRACTION
+# SPOREKART v3.0 — SHIPPING & DELIVERY ORCHESTRATION ARCHITECTURE
 
 ---
 
-## 1. Core Architectural Strategy
+## 1. Subsystem Architecture
 
-Sporekart v3.0 enforces a strict provider-agnostic shipping boundary. Third-party logistics SDKs or provider-specific REST APIs (e.g. Shiprocket, Delhivery, Bluedart) must **never** leak into the core `Order` or `Shipment` domain aggregates.
-
----
-
-## 2. SPI Boundary Interfaces
-
-```java
-public interface ShippingProvider {
-    ShipmentProviderType getProviderType();
-    ShipmentBookingResult createAndBookShipment(ShipmentBookingRequest request);
-    ShipmentCancellationResult cancelShipment(ShipmentCancellationRequest request);
-    ShipmentTrackingResult getTrackingInfo(String providerShipmentId, String awb);
-    boolean verifyWebhookSignature(String rawBody, Map<String, String> headers);
-    NormalizedWebhookEvent parseWebhookEvent(String rawBody);
-}
+```
+                          ORDER DOMAIN
+                               |
+                               v
+                        SHIPPING DOMAIN
+                   (Shipment Aggregate Root)
+                               |
+       +-----------------------+-----------------------+
+       |                       |                       |
+       v                       v                       v
+CARRIER REGISTRY         TRACKING HISTORY       RECONCILIATION
+ (Shiprocket /           (Append-Only Event     (Provider Polling
+   Mock Provider)             Ledger)              & Sync Engine)
 ```
 
-### Provider Registry & Selection
-
-- `ShippingProviderRegistry`: Manages all active `ShippingProvider` implementations (`MockShippingProvider`, `ShiprocketShippingProvider`).
-- Provider resolution is driven by configuration property `sporekart.shipping.provider` (`MOCK` vs `SHIPROCKET`).
-
 ---
 
-## 3. Data Transfer Objects (DTOs)
+## 2. Domain Invariants
 
-- `ShipmentBookingRequest`: Contains shipment reference, order reference, shipping address snapshot, package details, and item snapshots.
-- `ShipmentBookingResult`: Encapsulates provider shipment ID, AWB, tracking number, courier name, courier code, and estimated delivery date.
-- `NormalizedWebhookEvent`: Standardized provider event containing `providerEventId`, `providerShipmentId`, `awb`, `orderReference`, `rawProviderStatus`, `normalizedStatus` (`ShipmentStatus`), `description`, `location`, and `occurredAt`.
+1. **Provider Isolation**: External provider SDKs and DTOs (e.g. Shiprocket) are strictly isolated inside provider adapters and never exposed to the Order domain or customer APIs.
+2. **Immutable Address Snapshot**: `ShippingAddressSnapshot` is created at shipment creation time and preserved independently of subsequent customer profile changes.
+3. **Webhook Idempotency**: Webhook events are verified via provider signatures and deduplicated via `CONSTRAINT uq_shipping_provider_webhook UNIQUE (provider, provider_event_id)`.
+4. **Non-Regressive Transitions**: Shipment state transitions follow strict state machine rules (`ShipmentStateMachine.java`).

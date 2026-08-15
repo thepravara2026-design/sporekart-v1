@@ -22,4 +22,12 @@ public interface ShippingProvider {
     boolean verifyWebhookSignature(String rawBody, Map<String, String> headers);
 
     NormalizedWebhookEvent parseWebhookEvent(String rawBody);
+
+    default String getLabelUrl(String providerShipmentId, String awb) {
+        return "https://shipment-labels.sporekart.com/label-" + (awb != null ? awb : providerShipmentId) + ".pdf";
+    }
+
+    default String getManifestUrl(String providerShipmentId, String awb) {
+        return "https://shipment-manifests.sporekart.com/manifest-" + (awb != null ? awb : providerShipmentId) + ".pdf";
+    }
 }

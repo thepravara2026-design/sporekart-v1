@@ -19,4 +19,13 @@ export const ENDPOINTS = {
   ADMIN_INVENTORY_MOVEMENTS: (sku: string) => `/api/v1/admin/inventory/${sku}/movements`,
   ADMIN_INVENTORY_ADJUST: (sku: string) => `/api/v1/admin/inventory/${sku}/adjustments`,
   ADMIN_INVENTORY_DAMAGED: (sku: string) => `/api/v1/admin/inventory/${sku}/damaged`,
+  CUSTOMER_SHIPMENT_TRACKING: (orderRef: string) => `/api/v1/orders/${orderRef}/shipment`,
+  ADMIN_SHIPMENTS: '/api/v1/admin/shipments',
+  ADMIN_SHIPMENT_BY_REF: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}`,
+  ADMIN_SHIPMENT_RETRY: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}/retry`,
+  ADMIN_SHIPMENT_SYNC: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}/sync`,
+  ADMIN_SHIPMENT_CANCEL: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}/cancel`,
+  ADMIN_SHIPMENT_LABEL: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}/label`,
+  ADMIN_SHIPMENT_MANIFEST: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}/manifest`,
 } as const;
+

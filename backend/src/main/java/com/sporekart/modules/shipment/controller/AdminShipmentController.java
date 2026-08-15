@@ -66,7 +66,25 @@ public class AdminShipmentController {
         return ResponseEntity.ok(cancelled);
     }
 
-    @PostMapping("/{shipmentReference}/reconcile")
+    @PostMapping("/{shipmentReference}/sync")
+    public ResponseEntity<ShipmentDto> syncShipment(@PathVariable String shipmentReference) {
+        ShipmentDto synced = shipmentService.syncShipmentWithProvider(shipmentReference);
+        return ResponseEntity.ok(synced);
+    }
+
+    @GetMapping("/{shipmentReference}/label")
+    public ResponseEntity<Map<String, String>> getLabelUrl(@PathVariable String shipmentReference) {
+        String labelUrl = shipmentService.getShipmentLabelUrl(shipmentReference);
+        return ResponseEntity.ok(Map.of("labelUrl", labelUrl));
+    }
+
+    @GetMapping("/{shipmentReference}/manifest")
+    public ResponseEntity<Map<String, String>> getManifestUrl(@PathVariable String shipmentReference) {
+        String manifestUrl = shipmentService.getShipmentManifestUrl(shipmentReference);
+        return ResponseEntity.ok(Map.of("manifestUrl", manifestUrl));
+    }
+
+    @PostMapping("/reconcile")
     public ResponseEntity<Map<String, Object>> forceReconcile() {
         shipmentService.reconcileActiveShipments();
         return ResponseEntity.ok(Map.of("message", "Reconciliation triggered successfully", "status", "SUCCESS"));
