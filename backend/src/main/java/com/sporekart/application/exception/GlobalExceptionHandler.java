@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -260,17 +261,56 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
     }
 
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+        log.warn("Unsupported Media Type on {}: {}", request.getRequestURI(), ex.getContentType());
+        ApiErrorResponse response = ApiErrorResponse.of("UNSUPPORTED_MEDIA_TYPE", "Unsupported Content-Type. Only application/json is allowed", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex, HttpServletRequest request) {
+        log.warn("Rate limit exceeded on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("RATE_LIMIT_EXCEEDED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                .body(response);
+    }
+
+    @ExceptionHandler(PayloadTooLargeException.class)
+    public ResponseEntity<ApiErrorResponse> handlePayloadTooLarge(PayloadTooLargeException ex, HttpServletRequest request) {
+        log.warn("Payload too large on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("PAYLOAD_TOO_LARGE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
+    }
+
+    @ExceptionHandler(UnsupportedMediaTypeException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnsupportedMediaType(UnsupportedMediaTypeException ex, HttpServletRequest request) {
+        log.warn("Unsupported media type on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("UNSUPPORTED_MEDIA_TYPE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
+    }
+
+    @ExceptionHandler(InvalidIdempotencyKeyException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidIdempotencyKey(InvalidIdempotencyKeyException ex, HttpServletRequest request) {
+        log.warn("Invalid idempotency key on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_IDEMPOTENCY_KEY", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         log.warn("Invalid argument on {}: {}", request.getRequestURI(), ex.getMessage());
         String code = "BAD_REQUEST";
         if (ex.getMessage() != null) {
-            if (ex.getMessage().contains("sort field") || ex.getMessage().contains("sort direction")) {
+            if (ex.getMessage().contains("sort field") || ex.getMessage().contains("sort direction") || ex.getMessage().contains("Sort field")) {
                 code = "CATALOG_INVALID_SORT";
-            } else if (ex.getMessage().contains("Page size") || ex.getMessage().contains("Page index")) {
+            } else if (ex.getMessage().contains("Page size") || ex.getMessage().contains("Page index") || ex.getMessage().contains("page size")) {
                 code = "CATALOG_INVALID_PAGE_SIZE";
             } else if (ex.getMessage().contains("price") || ex.getMessage().contains("Price")) {
                 code = "CATALOG_INVALID_PRICE_RANGE";
+            } else if (ex.getMessage().contains("wildcard") || ex.getMessage().contains("Search query")) {
+                code = "INVALID_SEARCH_QUERY";
             }
         }
         ApiErrorResponse response = ApiErrorResponse.of(code, ex.getMessage(), request.getRequestURI());
@@ -354,4 +394,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
-

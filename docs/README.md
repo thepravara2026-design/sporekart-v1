@@ -96,3 +96,6 @@
 
 ## 9. Sprint 5A Security & Identity Hardening
 - [Sprint 5A Security & Identity Hardening Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5a-security-identity-hardening.md)
+
+## 10. Sprint 5B API Security & Abuse Protection
+- [Sprint 5B API Security & Abuse Protection Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5b-api-security-abuse-protection.md)

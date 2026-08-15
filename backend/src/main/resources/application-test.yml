@@ -24,6 +24,15 @@ app:
   version: 0.1.0-TEST
   cors:
     allowed-origins: http://localhost:5173
+  rate-limit:
+    enabled: true
+    auth-limit: 100
+    checkout-limit: 100
+    search-limit: 100
+    admin-limit: 100
+    webhook-limit: 200
+    general-mutation-limit: 200
+    general-read-limit: 500
 
 logging:
   level:

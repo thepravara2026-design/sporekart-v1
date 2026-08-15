@@ -87,6 +87,21 @@ public class CategoryApplicationService {
             throw new IllegalArgumentException("Page size cannot exceed maximum limit of " + MAX_PAGE_SIZE);
         }
 
+        if (search != null) {
+            search = search.trim();
+            if (search.isEmpty()) {
+                search = null;
+            } else {
+                if (search.length() > 100) {
+                    throw new IllegalArgumentException("Search query cannot exceed 100 characters");
+                }
+                String stripped = search.replaceAll("[%\\*\\?_]", "").trim();
+                if (stripped.isEmpty()) {
+                    throw new IllegalArgumentException("Search query contains excessive wildcards");
+                }
+            }
+        }
+
         Sort sort = parseAndValidateSort(sortParam, ALLOWED_CATEGORY_SORT_FIELDS, Sort.by(Sort.Direction.ASC, "name"));
         Pageable pageable = PageRequest.of(page, size, sort);
 
