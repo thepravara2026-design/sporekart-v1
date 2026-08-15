@@ -29,7 +29,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         } else {
             entity = OrderEntity.fromDomain(order);
         }
-        OrderEntity saved = jpaRepository.save(entity);
+        OrderEntity saved = jpaRepository.saveAndFlush(entity);
         return saved.toDomain();
     }
 

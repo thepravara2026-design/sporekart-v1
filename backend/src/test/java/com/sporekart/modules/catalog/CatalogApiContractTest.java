@@ -72,6 +72,7 @@ class CatalogApiContractTest {
     @Test
     void shouldConformToProductListingContract() throws Exception {
         mockMvc.perform(get("/api/v1/catalog/products")
+                        .param("search", "SKU-CONTRACT-001")
                         .param("page", "0")
                         .param("size", "10")
                         .param("sort", "price,desc")

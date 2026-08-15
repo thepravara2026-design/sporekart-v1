@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -87,6 +87,8 @@ public class InventoryApplicationService {
         // 3. Extract & sort SKUs deterministically (SKU ASC) to prevent deadlocks
         List<String> sortedSkus = order.getItems().stream()
                 .map(OrderItem::getSku)
+                .filter(Objects::nonNull)
+                .map(s -> s.trim().toUpperCase())
                 .distinct()
                 .sorted(Comparator.naturalOrder())
                 .toList();
@@ -94,21 +96,23 @@ public class InventoryApplicationService {
         // 4. Fetch inventory items with pessimistic write lock
         List<InventoryItem> lockedItems = inventoryRepository.findAllBySkuInOrderBySkuAscForUpdate(sortedSkus);
         Map<String, InventoryItem> inventoryMap = lockedItems.stream()
-                .collect(Collectors.toMap(InventoryItem::getSku, Function.identity()));
+                .collect(Collectors.toMap(i -> i.getSku().trim().toUpperCase(), Function.identity()));
 
         // Ensure all requested SKUs exist in inventory
         for (String sku : sortedSkus) {
             if (!inventoryMap.containsKey(sku)) {
+                log.warn("Inventory item missing for SKU: {}", sku);
                 throw new InventoryItemNotFoundException(sku);
             }
         }
 
         // 5. ATOMIC VALIDATION: Check stock availability for all items before applying any changes
         for (OrderItem item : order.getItems()) {
-            InventoryItem invItem = inventoryMap.get(item.getSku());
+            String itemSku = item.getSku().trim().toUpperCase();
+            InventoryItem invItem = inventoryMap.get(itemSku);
             if (invItem.getAvailableQuantity() < item.getQuantity()) {
-                log.warn("Insufficient stock for SKU {}: requested {}, available {}", item.getSku(), item.getQuantity(), invItem.getAvailableQuantity());
-                throw new InsufficientStockException(item.getSku(), item.getQuantity(), invItem.getAvailableQuantity());
+                log.warn("Insufficient stock for SKU {}: requested {}, available {}", itemSku, item.getQuantity(), invItem.getAvailableQuantity());
+                throw new InsufficientStockException(itemSku, item.getQuantity(), invItem.getAvailableQuantity());
             }
         }
 
@@ -118,7 +122,8 @@ public class InventoryApplicationService {
         List<StockReservationItem> reservationItems = new ArrayList<>();
 
         for (OrderItem item : order.getItems()) {
-            InventoryItem invItem = inventoryMap.get(item.getSku());
+            String itemSku = item.getSku().trim().toUpperCase();
+            InventoryItem invItem = inventoryMap.get(itemSku);
             int prevOnHand = invItem.getOnHandQuantity();
             int prevReserved = invItem.getReservedQuantity();
 
@@ -143,7 +148,7 @@ public class InventoryApplicationService {
                     invItem.getId(),
                     item.getProductId(),
                     item.getVariantId(),
-                    item.getSku(),
+                    itemSku,
                     item.getQuantity(),
                     now
             ));
@@ -185,16 +190,19 @@ public class InventoryApplicationService {
         // Extract SKUs in deterministic order
         List<String> sortedSkus = reservation.getItems().stream()
                 .map(StockReservationItem::getSku)
+                .filter(Objects::nonNull)
+                .map(s -> s.trim().toUpperCase())
                 .distinct()
                 .sorted(Comparator.naturalOrder())
                 .toList();
 
         List<InventoryItem> lockedItems = inventoryRepository.findAllBySkuInOrderBySkuAscForUpdate(sortedSkus);
         Map<String, InventoryItem> inventoryMap = lockedItems.stream()
-                .collect(Collectors.toMap(InventoryItem::getSku, Function.identity()));
+                .collect(Collectors.toMap(i -> i.getSku().trim().toUpperCase(), Function.identity()));
 
         for (StockReservationItem resItem : reservation.getItems()) {
-            InventoryItem invItem = inventoryMap.get(resItem.getSku());
+            String itemSku = resItem.getSku().trim().toUpperCase();
+            InventoryItem invItem = inventoryMap.get(itemSku);
             if (invItem != null) {
                 int prevOnHand = invItem.getOnHandQuantity();
                 int prevReserved = invItem.getReservedQuantity();
@@ -249,16 +257,19 @@ public class InventoryApplicationService {
     private void releaseReservationInternal(StockReservation reservation, String reason, MovementType movementType) {
         List<String> sortedSkus = reservation.getItems().stream()
                 .map(StockReservationItem::getSku)
+                .filter(Objects::nonNull)
+                .map(s -> s.trim().toUpperCase())
                 .distinct()
                 .sorted(Comparator.naturalOrder())
                 .toList();
 
         List<InventoryItem> lockedItems = inventoryRepository.findAllBySkuInOrderBySkuAscForUpdate(sortedSkus);
         Map<String, InventoryItem> inventoryMap = lockedItems.stream()
-                .collect(Collectors.toMap(InventoryItem::getSku, Function.identity()));
+                .collect(Collectors.toMap(i -> i.getSku().trim().toUpperCase(), Function.identity()));
 
         for (StockReservationItem resItem : reservation.getItems()) {
-            InventoryItem invItem = inventoryMap.get(resItem.getSku());
+            String itemSku = resItem.getSku().trim().toUpperCase();
+            InventoryItem invItem = inventoryMap.get(itemSku);
             if (invItem != null) {
                 int prevOnHand = invItem.getOnHandQuantity();
                 int prevReserved = invItem.getReservedQuantity();
@@ -286,10 +297,11 @@ public class InventoryApplicationService {
 
     @Transactional
     public InventoryItemDto adjustStock(StockAdjustmentCommand command) {
-        log.info("Admin stock adjustment for SKU {}: setting onHand to {}", command.sku(), command.newOnHandQuantity());
+        String normalizedSku = command.sku() != null ? command.sku().trim().toUpperCase() : null;
+        log.info("Admin stock adjustment for SKU {}: setting onHand to {}", normalizedSku, command.newOnHandQuantity());
 
-        InventoryItem invItem = inventoryRepository.findBySkuForUpdate(command.sku())
-                .orElseThrow(() -> new InventoryItemNotFoundException(command.sku()));
+        InventoryItem invItem = inventoryRepository.findBySkuForUpdate(normalizedSku)
+                .orElseThrow(() -> new InventoryItemNotFoundException(normalizedSku));
 
         int prevOnHand = invItem.getOnHandQuantity();
         int prevReserved = invItem.getReservedQuantity();
@@ -314,13 +326,14 @@ public class InventoryApplicationService {
 
     @Transactional
     public InventoryItemDto createOrUpdateInitialStock(UUID productId, UUID variantId, String sku, int onHand) {
-        Optional<InventoryItem> existingOpt = inventoryRepository.findBySku(sku);
+        String normalizedSku = sku != null ? sku.trim().toUpperCase() : null;
+        Optional<InventoryItem> existingOpt = inventoryRepository.findBySku(normalizedSku);
         InventoryItem item;
         if (existingOpt.isPresent()) {
             item = existingOpt.get();
             item.adjustOnHand(onHand);
         } else {
-            item = InventoryItem.createNew(productId, variantId, sku, onHand);
+            item = InventoryItem.createNew(productId, variantId, normalizedSku, onHand);
         }
         InventoryItem saved = inventoryRepository.save(item);
         return InventoryItemDto.fromDomain(saved);
@@ -328,8 +341,9 @@ public class InventoryApplicationService {
 
     @Transactional(readOnly = true)
     public InventoryItemDto getInventoryBySku(String sku) {
-        return inventoryRepository.findBySku(sku)
+        String normalizedSku = sku != null ? sku.trim().toUpperCase() : null;
+        return inventoryRepository.findBySku(normalizedSku)
                 .map(InventoryItemDto::fromDomain)
-                .orElseThrow(() -> new InventoryItemNotFoundException(sku));
+                .orElseThrow(() -> new InventoryItemNotFoundException(normalizedSku));
     }
 }

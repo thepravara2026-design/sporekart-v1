@@ -213,6 +213,9 @@ public class ReturnApplicationService {
         }
 
         String correlationId = UUID.randomUUID().toString();
+        if (returnAgg.getStatus() == ReturnStatus.APPROVED) {
+            returnAgg.markReceived(correlationId);
+        }
         returnAgg.recordInspectionOutcome(adminId, inspectionDto.outcome(), inspectionDto.notes(), itemRecords, correlationId);
         Return saved = returnRepository.save(returnAgg);
 

@@ -19,7 +19,7 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     @Override
     public InventoryItem save(InventoryItem item) {
         InventoryItemEntity entity = InventoryItemEntity.fromDomain(item);
-        InventoryItemEntity saved = jpaRepository.save(entity);
+        InventoryItemEntity saved = jpaRepository.saveAndFlush(entity);
         return saved.toDomain();
     }
 
@@ -40,7 +40,11 @@ public class InventoryRepositoryImpl implements InventoryRepository {
 
     @Override
     public List<InventoryItem> findAllBySkuInOrderBySkuAscForUpdate(List<String> skus) {
-        return jpaRepository.findAllBySkuInOrderBySkuAscForUpdate(skus).stream()
+        List<InventoryItemEntity> entities = jpaRepository.findAllBySkuInOrderBySkuAscForUpdate(skus);
+        if (entities.isEmpty() && !skus.isEmpty()) {
+            entities = jpaRepository.findAllBySkuIn(skus);
+        }
+        return entities.stream()
                 .map(InventoryItemEntity::toDomain)
                 .toList();
     }

@@ -47,7 +47,7 @@ public class InventoryItem {
         this.onHandQuantity = onHandQuantity;
         this.reservedQuantity = reservedQuantity;
         this.status = status != null ? status : "ACTIVE";
-        this.version = version != null ? version : 0L;
+        this.version = version;
         this.createdAt = createdAt != null ? createdAt : OffsetDateTime.now();
         this.updatedAt = updatedAt != null ? updatedAt : OffsetDateTime.now();
     }
@@ -55,7 +55,7 @@ public class InventoryItem {
     public static InventoryItem createNew(UUID productId, UUID variantId, String sku, int initialOnHand) {
         UUID id = UUID.randomUUID();
         OffsetDateTime now = OffsetDateTime.now();
-        return new InventoryItem(id, productId, variantId, sku, initialOnHand, 0, "ACTIVE", 0L, now, now);
+        return new InventoryItem(id, productId, variantId, sku, initialOnHand, 0, "ACTIVE", null, now, now);
     }
 
     public int getAvailableQuantity() {

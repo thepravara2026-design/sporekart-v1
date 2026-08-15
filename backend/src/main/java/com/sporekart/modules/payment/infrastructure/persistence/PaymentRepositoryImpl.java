@@ -3,6 +3,7 @@ package com.sporekart.modules.payment.infrastructure.persistence;
 import com.sporekart.modules.payment.domain.Payment;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,8 +18,25 @@ public class PaymentRepositoryImpl implements PaymentRepository {
 
     @Override
     public Payment save(Payment payment) {
-        PaymentEntity entity = PaymentEntity.fromDomain(payment);
-        PaymentEntity saved = jpaRepository.save(entity);
+        Optional<PaymentEntity> existingOpt = jpaRepository.findById(payment.getId());
+        PaymentEntity entity;
+        if (existingOpt.isPresent()) {
+            entity = existingOpt.get();
+            entity.setStatus(payment.getStatus());
+            entity.setActiveAttemptId(payment.getActiveAttemptId());
+            entity.setAmount(payment.getAmount());
+            entity.setCurrency(payment.getCurrency());
+            entity.setUpdatedAt(payment.getUpdatedAt());
+            if (payment.getAttempts() != null) {
+                List<PaymentAttemptEntity> attemptEntities = payment.getAttempts().stream()
+                        .map(att -> PaymentAttemptEntity.fromDomain(att, entity))
+                        .toList();
+                entity.setAttempts(attemptEntities);
+            }
+        } else {
+            entity = PaymentEntity.fromDomain(payment);
+        }
+        PaymentEntity saved = jpaRepository.saveAndFlush(entity);
         return saved.toDomain();
     }
 
