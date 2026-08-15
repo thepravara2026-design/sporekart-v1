@@ -54,6 +54,7 @@ public class OrderApplicationService {
     private final ReservationRepository reservationRepository;
     private final InventoryApplicationService inventoryApplicationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.sporekart.application.observability.metrics.CommerceMetricsService metricsService;
 
     public OrderApplicationService(
             OrderRepository orderRepository,
@@ -65,6 +66,21 @@ public class OrderApplicationService {
             InventoryApplicationService inventoryApplicationService,
             ApplicationEventPublisher eventPublisher
     ) {
+        this(orderRepository, historyRepository, cartRepository, checkoutPricingService, orderNumberPort, reservationRepository, inventoryApplicationService, eventPublisher, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public OrderApplicationService(
+            OrderRepository orderRepository,
+            OrderStatusHistoryRepository historyRepository,
+            CartRepository cartRepository,
+            CheckoutPricingService checkoutPricingService,
+            OrderNumberPort orderNumberPort,
+            ReservationRepository reservationRepository,
+            InventoryApplicationService inventoryApplicationService,
+            ApplicationEventPublisher eventPublisher,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) com.sporekart.application.observability.metrics.CommerceMetricsService metricsService
+    ) {
         this.orderRepository = orderRepository;
         this.historyRepository = historyRepository;
         this.cartRepository = cartRepository;
@@ -73,6 +89,7 @@ public class OrderApplicationService {
         this.reservationRepository = reservationRepository;
         this.inventoryApplicationService = inventoryApplicationService;
         this.eventPublisher = eventPublisher;
+        this.metricsService = metricsService;
     }
 
     @Transactional
@@ -150,6 +167,10 @@ public class OrderApplicationService {
 
         // 7. Persist order & initial status history
         Order savedOrder = orderRepository.save(order);
+
+        if (metricsService != null) {
+            metricsService.recordOrderCreated("web");
+        }
         recordHistory(savedOrder.getId(), null, OrderStatus.CREATED, "Order created from checkout", OrderActorType.CUSTOMER, customerId, command.idempotencyKey());
 
         // 8. Transition cart to CHECKED_OUT

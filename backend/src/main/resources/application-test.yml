@@ -20,6 +20,25 @@ spring:
     clean-on-validation-error: true
     locations: classpath:db/migration
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 app:
   version: 0.1.0-TEST
   cors:
@@ -33,6 +52,8 @@ app:
     webhook-limit: 200
     general-mutation-limit: 200
     general-read-limit: 500
+  observability:
+    slow-request-threshold-ms: 100
 
 logging:
   level:

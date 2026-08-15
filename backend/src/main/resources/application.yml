@@ -36,10 +36,20 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: never
+      show-details: when_authorized
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 app:
   version: ${APP_VERSION:0.1.0-SNAPSHOT}
@@ -48,6 +58,11 @@ app:
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     requests-per-minute: ${RATE_LIMIT_RPM:60}
+  observability:
+    slow-request-threshold-ms: ${SLOW_REQUEST_THRESHOLD_MS:1000}
+    tracing:
+      enabled: true
+      sample-rate: 1.0
 
 logging:
   level:
@@ -57,4 +72,4 @@ logging:
     org.hibernate: WARN
     org.springframework.security: WARN
   pattern:
-    level: "%5p [${spring.application.name:},%X{requestId:-},%X{userId:-}]"
+    level: "%5p [${spring.application.name:},%X{requestId:-},%X{traceId:-},%X{userId:-}]"

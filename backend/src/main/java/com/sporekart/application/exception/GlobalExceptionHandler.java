@@ -19,6 +19,16 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    private final com.sporekart.application.observability.metrics.CommerceMetricsService metricsService;
+
+    public GlobalExceptionHandler() {
+        this(null);
+    }
+
+    public GlobalExceptionHandler(@org.springframework.beans.factory.annotation.Autowired(required = false) com.sporekart.application.observability.metrics.CommerceMetricsService metricsService) {
+        this.metricsService = metricsService;
+    }
+
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(NoHandlerFoundException ex, HttpServletRequest request) {
         log.warn("Resource not found: {} {}", request.getMethod(), request.getRequestURI());

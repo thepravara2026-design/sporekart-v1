@@ -99,3 +99,6 @@
 
 ## 10. Sprint 5B API Security & Abuse Protection
 - [Sprint 5B API Security & Abuse Protection Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5b-api-security-abuse-protection.md)
+
+## 11. Sprint 5C Observability & Production Diagnostics
+- [Sprint 5C Observability & Production Diagnostics Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5c-observability-production-diagnostics.md)

@@ -19,10 +19,13 @@ public class IdempotencyService {
     private static final int MAX_KEY_LENGTH = 128;
 
     private final IdempotencyRecordRepository repository;
+    private final com.sporekart.application.observability.metrics.CommerceMetricsService metricsService;
 
     @Autowired
-    public IdempotencyService(@Autowired(required = false) IdempotencyRecordRepository repository) {
+    public IdempotencyService(@Autowired(required = false) IdempotencyRecordRepository repository,
+                              @Autowired(required = false) com.sporekart.application.observability.metrics.CommerceMetricsService metricsService) {
         this.repository = repository;
+        this.metricsService = metricsService;
     }
 
     @Transactional
@@ -41,10 +44,16 @@ public class IdempotencyService {
 
             if (!existing.getRequestHash().equals(requestHash)) {
                 log.warn("Idempotency payload mismatch for actor: {} and key: {}", actorId, idempotencyKey);
+                if (metricsService != null) {
+                    metricsService.recordIdempotencyConflict();
+                }
                 throw new InvalidIdempotencyKeyException("Idempotency key reused with a different request payload");
             }
 
             log.info("Idempotency match found for actor: {} key: {} status: {}", actorId, idempotencyKey, existing.getStatus());
+            if (metricsService != null) {
+                metricsService.recordIdempotencyReplayed();
+            }
             return Optional.of(existing);
         }
 

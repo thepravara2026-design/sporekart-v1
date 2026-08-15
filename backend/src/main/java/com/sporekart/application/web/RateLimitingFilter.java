@@ -62,6 +62,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private static final long WINDOW_MS = 60_000L;
 
     private final ConcurrentHashMap<String, BucketState> buckets = new ConcurrentHashMap<>();
+    private final com.sporekart.application.observability.metrics.CommerceMetricsService metricsService;
+
+    public RateLimitingFilter(@org.springframework.beans.factory.annotation.Autowired(required = false) com.sporekart.application.observability.metrics.CommerceMetricsService metricsService) {
+        this.metricsService = metricsService;
+    }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -101,6 +106,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         if (current > maxAllowed) {
             log.warn("Rate limit breached for key: {} on {} {}, count: {} (max: {})",
                     rateKey, method, uri, current, maxAllowed);
+            if (metricsService != null) {
+                metricsService.recordRateLimitRejected(category.name());
+            }
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setHeader("Retry-After", "60");
