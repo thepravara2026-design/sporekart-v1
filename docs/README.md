@@ -129,3 +129,6 @@
 
 ## 16. Pre-Sprint 6 Baseline Verification
 - [Pre-Sprint 6 Baseline Verification Report](file:///f:/sporekart-v3.0/docs/pre-sprint-6-baseline-verification.md)
+
+## 17. Sprint 6B Configuration & Environment Hardening
+- [Sprint 6B Configuration & Environment Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6b-configuration-hardening.md)

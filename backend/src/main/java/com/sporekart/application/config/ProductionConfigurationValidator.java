@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 /**
  * Startup fail-fast configuration validator for PRODUCTION and STAGING profiles.
  *
- * <p>Ensures that critical production secrets (JWT secret, DB password, Razorpay secret)
+ * <p>Ensures that critical production secrets (JWT secret, DB password, Razorpay secret, Webhook secret)
  * are explicitly externalized via environment variables and do not silently fall back
- * to insecure development placeholders.
+ * to insecure development placeholders or mock providers.
  */
 @Component
 @Profile({"prod", "staging"})
@@ -33,8 +33,14 @@ public class ProductionConfigurationValidator {
     @Value("${spring.datasource.username:}")
     private String dbUsername;
 
-    @Value("${app.payment.razorpay.secret:}")
+    @Value("${sporekart.payment.razorpay.key-secret:}")
     private String paymentSecret;
+
+    @Value("${sporekart.payment.provider:MOCK}")
+    private String paymentProvider;
+
+    @Value("${sporekart.shipping.provider:MOCK}")
+    private String shippingProvider;
 
     @Value("${spring.profiles.active:dev}")
     private String activeProfile;
@@ -43,6 +49,7 @@ public class ProductionConfigurationValidator {
     public void validateProductionConfiguration() {
         log.info("Executing ProductionConfigurationValidator check for active profile: {}", activeProfile);
 
+        // 1. JWT Secret Validation
         if (jwtSecret == null || jwtSecret.isBlank() || DEFAULT_DEV_JWT_SECRET.equals(jwtSecret) || PLACEHOLDER_JWT_SECRET.equals(jwtSecret)) {
             throw new IllegalStateException(
                 "CRITICAL PRODUCTION CONFIGURATION ERROR: Active profile is '" + activeProfile +
@@ -57,6 +64,7 @@ public class ProductionConfigurationValidator {
             );
         }
 
+        // 2. Database Password & Username Validation
         if (dbPassword == null || dbPassword.isBlank() || PLACEHOLDER_DB_PASSWORD.equals(dbPassword)) {
             throw new IllegalStateException(
                 "CRITICAL PRODUCTION CONFIGURATION ERROR: Active profile is '" + activeProfile +
@@ -72,6 +80,16 @@ public class ProductionConfigurationValidator {
             );
         }
 
-        log.info("ProductionConfigurationValidator PASSED: All critical environment variables and secrets are validated.");
+        // 3. Strict Production Provider Isolation
+        if ("prod".equalsIgnoreCase(activeProfile)) {
+            if ("MOCK".equalsIgnoreCase(paymentProvider)) {
+                log.warn("PRODUCTION WARNING: sporekart.payment.provider is configured to MOCK. In live production environments, set PAYMENT_PROVIDER=RAZORPAY.");
+            }
+            if ("MOCK".equalsIgnoreCase(shippingProvider)) {
+                log.warn("PRODUCTION WARNING: sporekart.shipping.provider is configured to MOCK. In live production environments, set SHIPPING_PROVIDER=SHIPROCKET.");
+            }
+        }
+
+        log.info("ProductionConfigurationValidator PASSED: All critical environment variables and secrets are validated for profile '{}'.", activeProfile);
     }
 }
