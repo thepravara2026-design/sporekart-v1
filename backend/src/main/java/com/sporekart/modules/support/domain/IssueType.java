@@ -1,0 +1,19 @@
+package com.sporekart.modules.support.domain;
+
+public enum IssueType {
+    ORDER_NOT_RECEIVED,
+    ORDER_DELAYED,
+    WRONG_ITEM,
+    MISSING_ITEM,
+    DAMAGED_ITEM,
+    DEFECTIVE_ITEM,
+    PAYMENT_FAILED,
+    PAYMENT_DEBITED_ORDER_FAILED,
+    REFUND_DELAYED,
+    REFUND_NOT_RECEIVED,
+    RETURN_DELAYED,
+    RETURN_REJECTED,
+    REPLACEMENT_REQUEST,
+    ACCOUNT_ISSUE,
+    OTHER
+}
