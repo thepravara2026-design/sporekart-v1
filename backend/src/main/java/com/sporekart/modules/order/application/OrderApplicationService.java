@@ -280,6 +280,11 @@ public class OrderApplicationService {
         return transitionOrder(orderId, OrderStatus.COMPLETED, "Order lifecycle completed successfully", OrderActorType.ADMIN, adminId);
     }
 
+    @Transactional
+    public OrderDto executeTransition(UUID orderId, OrderStatus targetStatus, String reason, OrderActorType actorType, String actorId) {
+        return transitionOrder(orderId, targetStatus, reason != null && !reason.isBlank() ? reason : "State transition to " + targetStatus, actorType, actorId);
+    }
+
     private OrderDto transitionOrder(UUID orderId, OrderStatus targetStatus, String reason, OrderActorType actorType, String actorId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
@@ -290,12 +295,24 @@ public class OrderApplicationService {
 
         OrderStatus prev = order.getStatus();
         switch (targetStatus) {
+            case PAYMENT_PENDING -> order.transitionToPaymentPending();
+            case PAID -> order.markPaid();
+            case CONFIRMED -> order.markConfirmed();
             case PROCESSING -> order.startProcessing();
             case READY_FOR_FULFILMENT -> order.markReadyForFulfilment();
             case SHIPPED -> order.markShipped();
             case OUT_FOR_DELIVERY -> order.markOutForDelivery();
             case DELIVERED -> order.markDelivered();
             case COMPLETED -> order.markCompleted();
+            case PAYMENT_FAILED -> order.markPaymentFailed(reason);
+            case CANCELLED -> {
+                order.cancel();
+                releaseInventoryIfPresent(orderId, reason);
+            }
+            case EXPIRED -> {
+                order.expire();
+                releaseInventoryIfPresent(orderId, reason);
+            }
             default -> throw new IllegalArgumentException("Unsupported operational transition: " + targetStatus);
         }
 
@@ -303,7 +320,7 @@ public class OrderApplicationService {
         recordHistory(orderId, prev, targetStatus, reason, actorType, actorId, null);
         eventPublisher.publishEvent(OrderLifecycleEvent.create(orderId, order.getOrderNumber(), prev, targetStatus, reason, actorType, actorId, null));
 
-        log.info("Order {} transitioned from {} to {}", orderId, prev, targetStatus);
+        log.info("Order {} transitioned from {} to {} by {} ({})", orderId, prev, targetStatus, actorType, actorId);
         return OrderDto.fromDomain(saved);
     }
 

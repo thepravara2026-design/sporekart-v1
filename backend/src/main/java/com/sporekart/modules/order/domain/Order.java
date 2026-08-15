@@ -118,6 +118,10 @@ public final class Order {
         changeStatus(OrderStatus.PAID);
     }
 
+    public void markConfirmed() {
+        changeStatus(OrderStatus.CONFIRMED);
+    }
+
     public void markPaymentFailed(String reason) {
         changeStatus(OrderStatus.PAYMENT_FAILED);
     }

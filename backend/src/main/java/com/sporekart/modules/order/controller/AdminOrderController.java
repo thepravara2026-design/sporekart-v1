@@ -57,6 +57,23 @@ public class AdminOrderController {
         return ResponseEntity.ok(ApiResponse.success(timeline));
     }
 
+    @PostMapping("/{orderId}/transitions")
+    public ResponseEntity<ApiResponse<OrderDto>> executeGenericTransition(
+            @PathVariable UUID orderId,
+            @jakarta.validation.Valid @RequestBody com.sporekart.modules.order.application.dto.OrderTransitionRequestDto request,
+            Authentication authentication
+    ) {
+        String adminId = resolveAdminId(authentication);
+        OrderDto updated = orderApplicationService.executeTransition(
+                orderId,
+                request.targetStatus(),
+                request.reason(),
+                com.sporekart.modules.order.domain.OrderActorType.ADMIN,
+                adminId
+        );
+        return ResponseEntity.ok(ApiResponse.success(updated));
+    }
+
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<ApiResponse<OrderDto>> cancelOrderAsAdmin(
             @PathVariable UUID orderId,
