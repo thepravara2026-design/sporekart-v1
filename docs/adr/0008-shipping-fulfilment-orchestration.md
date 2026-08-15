@@ -1,4 +1,4 @@
-# ADR 0008: Shipping, Fulfilment & Delivery Orchestration
+  # ADR 0008: Shipping, Fulfilment & Delivery Orchestration
 
 ## Context
 SPOREKART v3.0 requires a production-grade logistics and fulfilment subsystem capable of handling order dispatch, multi-carrier booking, AWB generation, real-time shipment tracking, delivery webhooks, and status synchronization with the Order domain (`Sprint 3F`).

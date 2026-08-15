@@ -284,6 +284,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.returns.domain.ReturnNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleReturnNotFound(com.sporekart.modules.returns.domain.ReturnNotFoundException ex, HttpServletRequest request) {
+        log.warn("Return not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("RETURN_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.returns.domain.ReturnEligibilityException.class)
+    public ResponseEntity<ApiErrorResponse> handleReturnEligibility(com.sporekart.modules.returns.domain.ReturnEligibilityException ex, HttpServletRequest request) {
+        log.warn("Return eligibility failed on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of(ex.getReasonCode(), ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.returns.domain.InvalidReturnStateTransitionException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidReturnStateTransition(com.sporekart.modules.returns.domain.InvalidReturnStateTransitionException ex, HttpServletRequest request) {
+        log.warn("Invalid return state transition on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_RETURN_STATE_TRANSITION", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.returns.domain.ReturnAccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleReturnAccessDenied(com.sporekart.modules.returns.domain.ReturnAccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Return access denied on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("RETURN_ACCESS_DENIED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception on {}: ", request.getRequestURI(), ex);

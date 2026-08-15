@@ -49,4 +49,18 @@ public class MockPaymentProvider implements PaymentProvider {
     public PaymentStatusResult fetchPaymentStatus(String providerPaymentId) {
         return new PaymentStatusResult(providerPaymentId, "order_mock_123", PaymentStatus.SUCCESS, null, "INR", null, null);
     }
+
+    @Override
+    public com.sporekart.modules.payment.infrastructure.provider.dto.PaymentRefundResult processRefund(com.sporekart.modules.payment.infrastructure.provider.dto.PaymentRefundRequest request) {
+        if ("FAIL_REFUND".equals(request.reason())) {
+            return new com.sporekart.modules.payment.infrastructure.provider.dto.PaymentRefundResult(
+                    false, null, request.amount(), request.currency(), "{\"status\":\"failed\"}", "Simulated provider refund failure"
+            );
+        }
+        String providerRefundId = "rfnd_mock_" + UUID.randomUUID().toString().replace("-", "").substring(0, 14);
+        String mockResponse = "{\"id\":\"" + providerRefundId + "\",\"entity\":\"refund\",\"amount\":" + request.amount() + ",\"status\":\"processed\"}";
+        return new com.sporekart.modules.payment.infrastructure.provider.dto.PaymentRefundResult(
+                true, providerRefundId, request.amount(), request.currency(), mockResponse, null
+        );
+    }
 }

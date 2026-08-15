@@ -62,6 +62,8 @@ public class SecurityConfig {
                         "/api/v1/payments/webhooks/**",
                         "/api/v1/webhooks/**",
                         "/api/v1/orders/**",
+                        "/api/v1/returns/**",
+                        "/api/v1/customer/**",
                         "/api/v1/admin/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**").permitAll()

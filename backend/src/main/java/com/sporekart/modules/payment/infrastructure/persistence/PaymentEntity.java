@@ -108,7 +108,7 @@ public class PaymentEntity {
                 payment.getStatus(),
                 payment.getProvider(),
                 payment.getActiveAttemptId(),
-                payment.getVersion(),
+                (payment.getVersion() != null && payment.getVersion() > 0) ? payment.getVersion() : null,
                 payment.getCreatedAt(),
                 payment.getUpdatedAt()
         );

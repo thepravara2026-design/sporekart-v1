@@ -67,6 +67,16 @@ public class RazorpayPaymentProvider implements PaymentProvider {
         return new PaymentStatusResult(providerPaymentId, "order_rzp_123", PaymentStatus.SUCCESS, null, "INR", null, null);
     }
 
+    @Override
+    public com.sporekart.modules.payment.infrastructure.provider.dto.PaymentRefundResult processRefund(com.sporekart.modules.payment.infrastructure.provider.dto.PaymentRefundRequest request) {
+        log.info("Processing Razorpay refund for paymentRef: {}, refundRef: {}, amount: {}", request.paymentReference(), request.refundReference(), request.amount());
+        String providerRefundId = "rfnd_rzp_" + UUID.randomUUID().toString().replace("-", "").substring(0, 14);
+        String rawJson = "{\"id\":\"" + providerRefundId + "\",\"entity\":\"refund\",\"amount\":" + request.amount().multiply(new java.math.BigDecimal(100)).longValue() + ",\"status\":\"processed\"}";
+        return new com.sporekart.modules.payment.infrastructure.provider.dto.PaymentRefundResult(
+                true, providerRefundId, request.amount(), request.currency(), rawJson, null
+        );
+    }
+
     public static boolean verifyHmacSha256(String payload, String expectedSignature, String secret) {
         if (payload == null || expectedSignature == null || secret == null) {
             return false;

@@ -5,4 +5,12 @@ export const ENDPOINTS = {
   PRODUCT_BY_ID: (id: string) => `/api/v1/catalog/products/${id}`,
   CATEGORIES: '/api/v1/catalog/categories',
   CATEGORY_BY_ID: (id: string) => `/api/v1/catalog/categories/${id}`,
+  RETURNS_ELIGIBILITY: (orderRef: string) => `/api/v1/returns/eligibility/${orderRef}`,
+  RETURNS_CREATE: '/api/v1/returns',
+  RETURN_BY_REF: (returnRef: string) => `/api/v1/returns/${returnRef}`,
+  RETURNS_CUSTOMER: '/api/v1/returns',
+  ADMIN_RETURNS: '/api/v1/admin/returns',
+  ADMIN_RETURN_APPROVE: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/approve`,
+  ADMIN_RETURN_REJECT: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/reject`,
+  ADMIN_RETURN_INSPECT: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/inspect`,
 } as const;
