@@ -1,35 +1,32 @@
-# SPOREKART v3.0 — RETURNS & REFUNDS ARCHITECTURE
+# SPOREKART v3.0 — RETURNS & REFUNDS DOMAIN ARCHITECTURE
 
 ---
 
 ## 1. Subsystem Architecture
 
 ```
-                                 ORDER DOMAIN
-                                      |
-         +----------------------------+----------------------------+
-         |                                                         |
-         v                                                         v
-  PAYMENT DOMAIN                                            SHIPMENT DOMAIN
-  (Payment / Razorpay)                                   (ShippingProvider SPI)
-         |                                                         |
-         +----------------------------+----------------------------+
-                                      |
-                                      v
-                                RETURN DOMAIN
-                                      |
-         +----------------------------+----------------------------+
-         |                            |                            |
-         v                            v                            v
-  REVERSE LOGISTICS              INSPECTION                REFUND ORCHESTRATION
-  (Reverse Shipment)        (Warehouse QA)            (PaymentProvider Refund)
+                       ORDER DOMAIN
+                            |
+                            v
+                      RETURN DOMAIN
+                 (Return Aggregate Root)
+                            |
+      +---------------------+---------------------+
+      |                     |                     |
+      v                     v                     v
+REVERSE LOGISTICS       INSPECTION         REFUND ORCHESTRATOR
+ (Shipping SPI)      (Quality Outcome)    (Payment Refund SPI)
+                            |                     |
+                            v                     v
+                    INVENTORY RESTOCK       GATEWAY REFUND
+                     (Movement Ledger)       (Idempotent Key)
 ```
 
 ---
 
-## 2. Invariants & Financial Protection
+## 2. Core Domain Invariants
 
-1. **Item Quantity Limits**: Cumulative requested return quantity for an order item across all active return requests cannot exceed the purchased quantity.
-2. **Refund Cap**: Cumulative processed refunds for an order cannot exceed the order total amount.
-3. **Idempotency**: All payment provider refund requests use deterministic idempotency key format `RFD-{returnReference}`.
-4. **Inventory Restock**: Accepted return items emit `ReturnAcceptedEvent` to increment available inventory via `InventoryApplicationService` without coupling the return domain to internal inventory tables.
+1. **Domain Isolation**: Return coordinates post-purchase workflows; Shipping owns transport; Payment owns gateway refund execution; Inventory owns stock ledgers.
+2. **Quantity Ceiling Protection**: Requested return quantity cannot exceed delivered order quantity minus previously returned/pending quantities.
+3. **Idempotent Refund Execution**: Refund records enforce UNIQUE `idempotency_key` constraint preventing duplicate gateway refunds.
+4. **Receipt vs Acceptance**: Physical return receipt (`RECEIVED`) is distinct from quality inspection acceptance (`ACCEPTED` / `PARTIALLY_ACCEPTED`). Restocking and refunds only trigger on inspection acceptance.

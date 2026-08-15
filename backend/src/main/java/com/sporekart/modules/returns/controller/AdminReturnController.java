@@ -102,4 +102,14 @@ public class AdminReturnController {
         ReturnDto result = returnApplicationService.reconcileRefundStatus(returnReference, adminId);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/{returnReference}/sync")
+    public ResponseEntity<ReturnDto> syncReturn(
+            @PathVariable String returnReference,
+            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+    ) {
+        log.info("REST Admin: Sync return refund {}", returnReference);
+        ReturnDto result = returnApplicationService.reconcileRefundStatus(returnReference, adminId);
+        return ResponseEntity.ok(result);
+    }
 }
