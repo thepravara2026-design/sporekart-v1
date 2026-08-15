@@ -1,7 +1,5 @@
 package com.sporekart.modules.order.domain;
 
-import com.sporekart.modules.order.domain.exception.OrderNotCancellableException;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -26,8 +24,47 @@ public final class Order {
     private final AddressSnapshot shippingAddress;
     private final String customerNotes;
     private final List<OrderItem> items;
+    private Long version;
     private final OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+
+    public Order(
+            UUID id,
+            String orderNumber,
+            String customerId,
+            OrderStatus status,
+            String currency,
+            BigDecimal subtotal,
+            BigDecimal discountTotal,
+            BigDecimal taxTotal,
+            BigDecimal shippingFee,
+            BigDecimal grandTotal,
+            String idempotencyKey,
+            AddressSnapshot shippingAddress,
+            String customerNotes,
+            List<OrderItem> items,
+            Long version,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
+        this.id = Objects.requireNonNull(id, "Order ID cannot be null");
+        this.orderNumber = Objects.requireNonNull(orderNumber, "Order number cannot be null");
+        this.customerId = Objects.requireNonNull(customerId, "Customer ID cannot be null");
+        this.status = Objects.requireNonNull(status, "Order status cannot be null");
+        this.currency = currency != null ? currency : "INR";
+        this.subtotal = Objects.requireNonNull(subtotal, "Subtotal cannot be null");
+        this.discountTotal = discountTotal != null ? discountTotal : BigDecimal.ZERO;
+        this.taxTotal = taxTotal != null ? taxTotal : BigDecimal.ZERO;
+        this.shippingFee = shippingFee != null ? shippingFee : BigDecimal.ZERO;
+        this.grandTotal = Objects.requireNonNull(grandTotal, "Grand total cannot be null");
+        this.idempotencyKey = idempotencyKey;
+        this.shippingAddress = Objects.requireNonNull(shippingAddress, "Shipping address snapshot cannot be null");
+        this.customerNotes = customerNotes;
+        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
+        this.version = version != null ? version : 0L;
+        this.createdAt = createdAt != null ? createdAt : OffsetDateTime.now();
+        this.updatedAt = updatedAt != null ? updatedAt : OffsetDateTime.now();
+    }
 
     public Order(
             UUID id,
@@ -47,22 +84,7 @@ public final class Order {
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
     ) {
-        this.id = Objects.requireNonNull(id, "Order ID cannot be null");
-        this.orderNumber = Objects.requireNonNull(orderNumber, "Order number cannot be null");
-        this.customerId = Objects.requireNonNull(customerId, "Customer ID cannot be null");
-        this.status = Objects.requireNonNull(status, "Order status cannot be null");
-        this.currency = currency != null ? currency : "INR";
-        this.subtotal = Objects.requireNonNull(subtotal, "Subtotal cannot be null");
-        this.discountTotal = discountTotal != null ? discountTotal : BigDecimal.ZERO;
-        this.taxTotal = taxTotal != null ? taxTotal : BigDecimal.ZERO;
-        this.shippingFee = shippingFee != null ? shippingFee : BigDecimal.ZERO;
-        this.grandTotal = Objects.requireNonNull(grandTotal, "Grand total cannot be null");
-        this.idempotencyKey = idempotencyKey;
-        this.shippingAddress = Objects.requireNonNull(shippingAddress, "Shipping address snapshot cannot be null");
-        this.customerNotes = customerNotes;
-        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
-        this.createdAt = createdAt != null ? createdAt : OffsetDateTime.now();
-        this.updatedAt = updatedAt != null ? updatedAt : OffsetDateTime.now();
+        this(id, orderNumber, customerId, status, currency, subtotal, discountTotal, taxTotal, shippingFee, grandTotal, idempotencyKey, shippingAddress, customerNotes, items, 0L, createdAt, updatedAt);
     }
 
     public static Order createNewOrder(
@@ -84,28 +106,69 @@ public final class Order {
         return new Order(
                 id, orderNumber, customerId, OrderStatus.CREATED,
                 currency, subtotal, discountTotal, taxTotal, shippingFee, grandTotal,
-                idempotencyKey, shippingAddress, customerNotes, items, now, now
+                idempotencyKey, shippingAddress, customerNotes, items, 0L, now, now
         );
     }
 
-    public void cancel() {
-        if (this.status != OrderStatus.CREATED && this.status != OrderStatus.PAYMENT_PENDING) {
-            throw new OrderNotCancellableException(this.id, this.status);
-        }
-        this.status = OrderStatus.CANCELLED;
-        this.updatedAt = OffsetDateTime.now();
+    public void transitionToPaymentPending() {
+        changeStatus(OrderStatus.PAYMENT_PENDING);
     }
 
     public void markPaid() {
-        if (this.status == OrderStatus.PAID) {
-            return;
+        changeStatus(OrderStatus.PAID);
+    }
+
+    public void markPaymentFailed(String reason) {
+        changeStatus(OrderStatus.PAYMENT_FAILED);
+    }
+
+    public void startProcessing() {
+        changeStatus(OrderStatus.PROCESSING);
+    }
+
+    public void markReadyForFulfilment() {
+        changeStatus(OrderStatus.READY_FOR_FULFILMENT);
+    }
+
+    public void markShipped() {
+        changeStatus(OrderStatus.SHIPPED);
+    }
+
+    public void markOutForDelivery() {
+        changeStatus(OrderStatus.OUT_FOR_DELIVERY);
+    }
+
+    public void markDelivered() {
+        changeStatus(OrderStatus.DELIVERED);
+    }
+
+    public void markCompleted() {
+        changeStatus(OrderStatus.COMPLETED);
+    }
+
+    public void cancel() {
+        changeStatus(OrderStatus.CANCELLED);
+    }
+
+    public void expire() {
+        changeStatus(OrderStatus.EXPIRED);
+    }
+
+    private void changeStatus(OrderStatus targetStatus) {
+        if (this.status == targetStatus) {
+            return; // Idempotent
         }
-        this.status = OrderStatus.PAID;
+        OrderStateMachine.validateTransition(this.id, this.status, targetStatus);
+        this.status = targetStatus;
         this.updatedAt = OffsetDateTime.now();
     }
 
     public boolean isCancellable() {
-        return this.status == OrderStatus.CREATED || this.status == OrderStatus.PAYMENT_PENDING;
+        return this.status.isCancellable();
+    }
+
+    public boolean isTerminal() {
+        return this.status.isTerminal();
     }
 
     // Getters
@@ -123,6 +186,7 @@ public final class Order {
     public AddressSnapshot getShippingAddress() { return shippingAddress; }
     public String getCustomerNotes() { return customerNotes; }
     public List<OrderItem> getItems() { return Collections.unmodifiableList(items); }
+    public Long getVersion() { return version; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
 

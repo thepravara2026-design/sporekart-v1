@@ -20,4 +20,11 @@ public interface SpringDataJpaOrderRepository extends JpaRepository<OrderEntity,
     Page<OrderEntity> findByCustomerIdOrderByCreatedAtDesc(String customerId, Pageable pageable);
 
     Optional<OrderEntity> findByCustomerIdAndIdempotencyKey(String customerId, String idempotencyKey);
+
+    @Query("SELECT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.orderNumber = :orderNumber")
+    Optional<OrderEntity> findByOrderNumber(@Param("orderNumber") String orderNumber);
+
+    Page<OrderEntity> findByStatusOrderByCreatedAtDesc(com.sporekart.modules.order.domain.OrderStatus status, Pageable pageable);
+
+    java.util.List<OrderEntity> findByStatusIn(java.util.List<com.sporekart.modules.order.domain.OrderStatus> statuses);
 }

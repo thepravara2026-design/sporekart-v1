@@ -5,6 +5,7 @@ import com.sporekart.modules.order.application.OrderApplicationService;
 import com.sporekart.modules.order.application.dto.CreateOrderCommand;
 import com.sporekart.modules.order.application.dto.OrderDto;
 import com.sporekart.modules.order.application.dto.OrderSummaryDto;
+import com.sporekart.modules.order.application.dto.OrderTimelineDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -56,24 +58,57 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(history));
     }
 
-    @GetMapping("/{orderId}")
+    @GetMapping("/{orderReference}")
     public ResponseEntity<ApiResponse<OrderDto>> getOrderDetail(
-            @PathVariable UUID orderId,
+            @PathVariable String orderReference,
             Authentication authentication
     ) {
         String customerId = resolveCustomerId(authentication);
-        OrderDto order = orderApplicationService.getOrderDetail(customerId, orderId);
+        OrderDto order;
+        if (isUuid(orderReference)) {
+            order = orderApplicationService.getOrderDetail(customerId, UUID.fromString(orderReference));
+        } else {
+            order = orderApplicationService.getOrderDetail(customerId, orderReference);
+        }
         return ResponseEntity.ok(ApiResponse.success(order));
     }
 
-    @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<ApiResponse<OrderDto>> cancelOrder(
-            @PathVariable UUID orderId,
+    @GetMapping("/{orderReference}/timeline")
+    public ResponseEntity<ApiResponse<OrderTimelineDto>> getOrderTimeline(
+            @PathVariable String orderReference,
             Authentication authentication
     ) {
         String customerId = resolveCustomerId(authentication);
-        OrderDto cancelledOrder = orderApplicationService.cancelOrder(customerId, orderId);
+        OrderTimelineDto timeline = orderApplicationService.getOrderTimeline(customerId, orderReference);
+        return ResponseEntity.ok(ApiResponse.success(timeline));
+    }
+
+    @PostMapping("/{orderReference}/cancel")
+    public ResponseEntity<ApiResponse<OrderDto>> cancelOrder(
+            @PathVariable String orderReference,
+            @RequestBody(required = false) Map<String, String> body,
+            Authentication authentication
+    ) {
+        String customerId = resolveCustomerId(authentication);
+        String reason = body != null ? body.get("reason") : null;
+        UUID orderId;
+        if (isUuid(orderReference)) {
+            orderId = UUID.fromString(orderReference);
+        } else {
+            OrderDto existing = orderApplicationService.getOrderDetail(customerId, orderReference);
+            orderId = existing.id();
+        }
+        OrderDto cancelledOrder = orderApplicationService.cancelOrder(customerId, orderId, reason);
         return ResponseEntity.ok(ApiResponse.success(cancelledOrder));
+    }
+
+    private boolean isUuid(String input) {
+        try {
+            UUID.fromString(input);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private String resolveCustomerId(Authentication authentication) {

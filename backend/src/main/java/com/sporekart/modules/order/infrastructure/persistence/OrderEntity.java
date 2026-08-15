@@ -88,6 +88,10 @@ public class OrderEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
 
+    @jakarta.persistence.Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -177,6 +181,7 @@ public class OrderEntity {
                     .toList();
             entity.setItems(itemEntities);
         }
+        entity.setVersion(order.getVersion());
 
         return entity;
     }
@@ -212,6 +217,7 @@ public class OrderEntity {
                 address,
                 this.customerNotes,
                 domainItems,
+                this.version,
                 this.createdAt,
                 this.updatedAt
         );
@@ -286,6 +292,9 @@ public class OrderEntity {
             this.items.addAll(items);
         }
     }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }

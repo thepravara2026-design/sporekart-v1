@@ -172,6 +172,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.order.domain.exception.InvalidOrderStateTransitionException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidOrderStateTransition(com.sporekart.modules.order.domain.exception.InvalidOrderStateTransitionException ex, HttpServletRequest request) {
+        log.warn("Invalid order state transition on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_ORDER_STATE_TRANSITION", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.payment.domain.exception.PaymentNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handlePaymentNotFound(com.sporekart.modules.payment.domain.exception.PaymentNotFoundException ex, HttpServletRequest request) {
         log.warn("Payment not found on {}: {}", request.getRequestURI(), ex.getMessage());

@@ -126,6 +126,7 @@ sporekart/
 - [Order Module Specification & Handoff](docs/order.md)
 - [Inventory Module Specification & Handoff](docs/inventory.md)
 - [Payment Module Specification & Handoff](docs/payment.md)
+- [Order Lifecycle & State Machine](docs/order_lifecycle.md)
 - [Catalog Testing Strategy & Suite](docs/testing/catalog-testing.md)
 - [Troubleshooting & Diagnostics Guide](docs/troubleshooting.md)
 - [Technical Debt Register](docs/catalog/technical-debt.md)
@@ -136,3 +137,4 @@ sporekart/
 - [ADR 0004: Order Domain & Creation](docs/adr/0004-order-domain-and-creation.md)
 - [ADR 0005: Inventory Reservation & Stock Consistency](docs/adr/0005-inventory-reservation-and-stock-consistency.md)
 - [ADR 0006: Payment Domain & Provider Orchestration](docs/adr/0006-payment-domain-and-provider-orchestration.md)
+- [ADR 0007: Order Lifecycle & State Machine](docs/adr/0007-order-lifecycle-and-state-machine.md)

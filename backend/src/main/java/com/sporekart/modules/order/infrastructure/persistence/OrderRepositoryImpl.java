@@ -1,10 +1,12 @@
 package com.sporekart.modules.order.infrastructure.persistence;
 
 import com.sporekart.modules.order.domain.Order;
+import com.sporekart.modules.order.domain.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,6 +37,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
+    public Optional<Order> findByOrderNumber(String orderNumber) {
+        return jpaRepository.findByOrderNumber(orderNumber).map(OrderEntity::toDomain);
+    }
+
+    @Override
     public Optional<Order> findByOrderNumberAndCustomerId(String orderNumber, String customerId) {
         return jpaRepository.findByOrderNumberAndCustomerId(orderNumber, customerId).map(OrderEntity::toDomain);
     }
@@ -47,5 +54,20 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public Optional<Order> findByCustomerIdAndIdempotencyKey(String customerId, String idempotencyKey) {
         return jpaRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey).map(OrderEntity::toDomain);
+    }
+
+    @Override
+    public Page<Order> findAll(Pageable pageable) {
+        return jpaRepository.findAll(pageable).map(OrderEntity::toDomain);
+    }
+
+    @Override
+    public Page<Order> findByStatus(OrderStatus status, Pageable pageable) {
+        return jpaRepository.findByStatusOrderByCreatedAtDesc(status, pageable).map(OrderEntity::toDomain);
+    }
+
+    @Override
+    public List<Order> findByStatusIn(List<OrderStatus> statuses) {
+        return jpaRepository.findByStatusIn(statuses).stream().map(OrderEntity::toDomain).toList();
     }
 }
