@@ -96,6 +96,14 @@ public final class Order {
         this.updatedAt = OffsetDateTime.now();
     }
 
+    public void markPaid() {
+        if (this.status == OrderStatus.PAID) {
+            return;
+        }
+        this.status = OrderStatus.PAID;
+        this.updatedAt = OffsetDateTime.now();
+    }
+
     public boolean isCancellable() {
         return this.status == OrderStatus.CREATED || this.status == OrderStatus.PAYMENT_PENDING;
     }

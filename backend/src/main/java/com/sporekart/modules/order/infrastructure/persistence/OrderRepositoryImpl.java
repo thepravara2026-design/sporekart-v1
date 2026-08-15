@@ -25,6 +25,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
+    public Optional<Order> findById(UUID id) {
+        return jpaRepository.findById(id).map(OrderEntity::toDomain);
+    }
+
+    @Override
     public Optional<Order> findByIdAndCustomerId(UUID id, String customerId) {
         return jpaRepository.findByIdAndCustomerId(id, customerId).map(OrderEntity::toDomain);
     }

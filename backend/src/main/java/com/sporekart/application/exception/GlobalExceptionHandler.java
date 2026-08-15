@@ -172,6 +172,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.payment.domain.exception.PaymentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePaymentNotFound(com.sporekart.modules.payment.domain.exception.PaymentNotFoundException ex, HttpServletRequest request) {
+        log.warn("Payment not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("PAYMENT_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.payment.domain.exception.PaymentVerificationFailedException.class)
+    public ResponseEntity<ApiErrorResponse> handlePaymentVerificationFailed(com.sporekart.modules.payment.domain.exception.PaymentVerificationFailedException ex, HttpServletRequest request) {
+        log.warn("Payment verification failed on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("PAYMENT_VERIFICATION_FAILED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.payment.domain.exception.PaymentInvalidStateException.class)
+    public ResponseEntity<ApiErrorResponse> handlePaymentInvalidState(com.sporekart.modules.payment.domain.exception.PaymentInvalidStateException ex, HttpServletRequest request) {
+        log.warn("Payment invalid state on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("PAYMENT_INVALID_STATE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.payment.domain.exception.PaymentProviderUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handlePaymentProviderUnavailable(com.sporekart.modules.payment.domain.exception.PaymentProviderUnavailableException ex, HttpServletRequest request) {
+        log.error("Payment provider unavailable on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("PAYMENT_PROVIDER_UNAVAILABLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.payment.domain.exception.OrderNotPayableException.class)
+    public ResponseEntity<ApiErrorResponse> handleOrderNotPayable(com.sporekart.modules.payment.domain.exception.OrderNotPayableException ex, HttpServletRequest request) {
+        log.warn("Order not payable on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("ORDER_NOT_PAYABLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex, HttpServletRequest request) {
         log.warn("Category not found on {}: {}", request.getRequestURI(), ex.getMessage());

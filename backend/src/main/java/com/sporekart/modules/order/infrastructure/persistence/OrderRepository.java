@@ -11,6 +11,8 @@ public interface OrderRepository {
 
     Order save(Order order);
 
+    Optional<Order> findById(UUID id);
+
     Optional<Order> findByIdAndCustomerId(UUID id, String customerId);
 
     Optional<Order> findByOrderNumberAndCustomerId(String orderNumber, String customerId);
