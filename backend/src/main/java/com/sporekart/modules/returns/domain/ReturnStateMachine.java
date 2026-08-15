@@ -22,7 +22,18 @@ public class ReturnStateMachine {
             )),
             Map.entry(ReturnStatus.APPROVED, EnumSet.of(
                     ReturnStatus.APPROVED,
+                    ReturnStatus.REVERSE_SHIPMENT_CREATED,
                     ReturnStatus.PICKUP_SCHEDULED,
+                    ReturnStatus.PICKED_UP,
+                    ReturnStatus.IN_TRANSIT,
+                    ReturnStatus.RECEIVED,
+                    ReturnStatus.CANCELLED,
+                    ReturnStatus.EXCEPTION
+            )),
+            Map.entry(ReturnStatus.REVERSE_SHIPMENT_CREATED, EnumSet.of(
+                    ReturnStatus.REVERSE_SHIPMENT_CREATED,
+                    ReturnStatus.PICKUP_SCHEDULED,
+                    ReturnStatus.PICKUP_FAILED,
                     ReturnStatus.PICKED_UP,
                     ReturnStatus.IN_TRANSIT,
                     ReturnStatus.RECEIVED,
@@ -31,9 +42,17 @@ public class ReturnStateMachine {
             )),
             Map.entry(ReturnStatus.PICKUP_SCHEDULED, EnumSet.of(
                     ReturnStatus.PICKUP_SCHEDULED,
+                    ReturnStatus.PICKUP_FAILED,
                     ReturnStatus.PICKED_UP,
                     ReturnStatus.IN_TRANSIT,
                     ReturnStatus.RECEIVED,
+                    ReturnStatus.EXCEPTION
+            )),
+            Map.entry(ReturnStatus.PICKUP_FAILED, EnumSet.of(
+                    ReturnStatus.PICKUP_FAILED,
+                    ReturnStatus.PICKUP_SCHEDULED,
+                    ReturnStatus.APPROVED,
+                    ReturnStatus.CANCELLED,
                     ReturnStatus.EXCEPTION
             )),
             Map.entry(ReturnStatus.PICKED_UP, EnumSet.of(

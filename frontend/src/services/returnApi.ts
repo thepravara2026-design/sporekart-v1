@@ -75,6 +75,7 @@ export interface ReturnDto {
   receivedAt: string | null;
   inspectedAt: string | null;
   completedAt: string | null;
+  reverseShipmentId?: string | null;
   totalRefundableAmount: number;
   items: ReturnItemDto[];
   statusHistory: ReturnStatusHistoryDto[];
@@ -172,6 +173,24 @@ export const returnApi = {
     const res = await axiosInstance.post<ApiResponse<ReturnDto>>(
       ENDPOINTS.ADMIN_RETURN_REJECT(returnRef),
       { reason },
+      { headers: { 'X-Admin-Id': adminId } }
+    );
+    return res.data.data;
+  },
+
+  createReverseShipment: async (returnRef: string, adminId: string = 'admin-1'): Promise<ReturnDto> => {
+    const res = await axiosInstance.post<ApiResponse<ReturnDto>>(
+      `/api/v1/admin/returns/${returnRef}/create-reverse-shipment`,
+      {},
+      { headers: { 'X-Admin-Id': adminId } }
+    );
+    return res.data.data;
+  },
+
+  reconcileReturn: async (returnRef: string, adminId: string = 'admin-1'): Promise<ReturnDto> => {
+    const res = await axiosInstance.post<ApiResponse<ReturnDto>>(
+      `/api/v1/admin/returns/${returnRef}/reconcile`,
+      {},
       { headers: { 'X-Admin-Id': adminId } }
     );
     return res.data.data;

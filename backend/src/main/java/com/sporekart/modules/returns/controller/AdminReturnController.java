@@ -82,4 +82,24 @@ public class AdminReturnController {
         ReturnDto result = returnApplicationService.orchestrateRefund(returnReference, adminId);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/{returnReference}/create-reverse-shipment")
+    public ResponseEntity<ReturnDto> createReverseShipment(
+            @PathVariable String returnReference,
+            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+    ) {
+        log.info("REST Admin: Create reverse shipment for return {}", returnReference);
+        ReturnDto result = returnApplicationService.createReverseShipment(returnReference, adminId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{returnReference}/reconcile")
+    public ResponseEntity<ReturnDto> reconcileRefund(
+            @PathVariable String returnReference,
+            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+    ) {
+        log.info("REST Admin: Reconcile return refund {}", returnReference);
+        ReturnDto result = returnApplicationService.reconcileRefundStatus(returnReference, adminId);
+        return ResponseEntity.ok(result);
+    }
 }

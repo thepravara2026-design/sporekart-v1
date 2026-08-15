@@ -14,6 +14,10 @@ class ReturnStateMachineTest {
     @DisplayName("Should allow valid transitions in normal flow")
     void testValidTransitions() {
         assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.REQUESTED, ReturnStatus.APPROVED));
+        assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.APPROVED, ReturnStatus.REVERSE_SHIPMENT_CREATED));
+        assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.REVERSE_SHIPMENT_CREATED, ReturnStatus.PICKUP_SCHEDULED));
+        assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.PICKUP_SCHEDULED, ReturnStatus.PICKUP_FAILED));
+        assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.PICKUP_FAILED, ReturnStatus.APPROVED));
         assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.APPROVED, ReturnStatus.PICKUP_SCHEDULED));
         assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.PICKUP_SCHEDULED, ReturnStatus.PICKED_UP));
         assertDoesNotThrow(() -> ReturnStateMachine.validateTransition(ReturnStatus.PICKED_UP, ReturnStatus.IN_TRANSIT));

@@ -26,6 +26,7 @@ public record ReturnDto(
         OffsetDateTime receivedAt,
         OffsetDateTime inspectedAt,
         OffsetDateTime completedAt,
+        UUID reverseShipmentId,
         long version,
         BigDecimal totalRefundableAmount,
         List<ReturnItemDto> items,
@@ -33,6 +34,32 @@ public record ReturnDto(
         ReturnInspectionDto inspection,
         RefundRecordDto refundRecord
 ) {
+    public ReturnDto(
+            UUID id,
+            String returnReference,
+            UUID orderId,
+            String orderReference,
+            String customerId,
+            ReturnStatus status,
+            ReturnReasonCode reasonCode,
+            String reasonDescription,
+            String evidenceUrls,
+            String policyVersion,
+            OffsetDateTime requestedAt,
+            OffsetDateTime approvedAt,
+            OffsetDateTime receivedAt,
+            OffsetDateTime inspectedAt,
+            OffsetDateTime completedAt,
+            long version,
+            BigDecimal totalRefundableAmount,
+            List<ReturnItemDto> items,
+            List<ReturnStatusHistoryDto> statusHistory,
+            ReturnInspectionDto inspection,
+            RefundRecordDto refundRecord
+    ) {
+        this(id, returnReference, orderId, orderReference, customerId, status, reasonCode, reasonDescription, evidenceUrls, policyVersion, requestedAt, approvedAt, receivedAt, inspectedAt, completedAt, null, version, totalRefundableAmount, items, statusHistory, inspection, refundRecord);
+    }
+
     public static ReturnDto fromDomain(Return r) {
         return fromDomain(r, null);
     }
@@ -64,6 +91,7 @@ public record ReturnDto(
                 r.getReceivedAt(),
                 r.getInspectedAt(),
                 r.getCompletedAt(),
+                r.getReverseShipmentId(),
                 r.getVersion(),
                 r.calculateTotalRefundableAmount(),
                 itemDtos,

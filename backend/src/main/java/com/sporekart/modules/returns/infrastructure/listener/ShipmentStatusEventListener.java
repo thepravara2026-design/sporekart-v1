@@ -36,19 +36,19 @@ public class ShipmentStatusEventListener {
             String correlationId = event.occurredAt() != null ? event.occurredAt().toString() : event.shipmentReference();
             switch (event.newStatus()) {
                 case BOOKED, PICKUP_SCHEDULED -> {
-                    if (ret.getStatus() == ReturnStatus.APPROVED) {
+                    if (ret.getStatus() == ReturnStatus.APPROVED || ret.getStatus() == ReturnStatus.REVERSE_SHIPMENT_CREATED) {
                         ret.transitionTo(ReturnStatus.PICKUP_SCHEDULED, "Reverse shipment booked: " + event.shipmentReference(), "SYSTEM", "SYSTEM", correlationId);
                         returnRepository.save(ret);
                     }
                 }
                 case PICKED_UP -> {
-                    if (ret.getStatus() == ReturnStatus.PICKUP_SCHEDULED || ret.getStatus() == ReturnStatus.APPROVED) {
+                    if (ret.getStatus() == ReturnStatus.PICKUP_SCHEDULED || ret.getStatus() == ReturnStatus.APPROVED || ret.getStatus() == ReturnStatus.REVERSE_SHIPMENT_CREATED) {
                         ret.transitionTo(ReturnStatus.PICKED_UP, "Carrier picked up return package", "SYSTEM", "SYSTEM", correlationId);
                         returnRepository.save(ret);
                     }
                 }
                 case IN_TRANSIT, OUT_FOR_DELIVERY -> {
-                    if (ret.getStatus() == ReturnStatus.PICKED_UP || ret.getStatus() == ReturnStatus.PICKUP_SCHEDULED) {
+                    if (ret.getStatus() == ReturnStatus.PICKED_UP || ret.getStatus() == ReturnStatus.PICKUP_SCHEDULED || ret.getStatus() == ReturnStatus.REVERSE_SHIPMENT_CREATED) {
                         ret.transitionTo(ReturnStatus.IN_TRANSIT, "Reverse shipment in transit to warehouse", "SYSTEM", "SYSTEM", correlationId);
                         returnRepository.save(ret);
                     }
@@ -56,6 +56,12 @@ public class ShipmentStatusEventListener {
                 case DELIVERED -> {
                     if (ret.getStatus() != ReturnStatus.RECEIVED && ret.getStatus() != ReturnStatus.INSPECTION_PENDING && ret.getStatus() != ReturnStatus.INSPECTED) {
                         ret.markReceived(correlationId);
+                        returnRepository.save(ret);
+                    }
+                }
+                case DELIVERY_FAILED -> {
+                    if (ret.getStatus() == ReturnStatus.PICKUP_SCHEDULED || ret.getStatus() == ReturnStatus.REVERSE_SHIPMENT_CREATED) {
+                        ret.markPickupFailed("Reverse pickup failed: " + event.shipmentReference(), "SYSTEM", correlationId);
                         returnRepository.save(ret);
                     }
                 }

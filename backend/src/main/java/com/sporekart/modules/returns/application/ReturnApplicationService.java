@@ -330,6 +330,44 @@ public class ReturnApplicationService {
         }
     }
 
+    @Transactional
+    public ReturnDto createReverseShipment(String returnReference, String adminId) {
+        log.info("Creating reverse shipment for return {} by admin {}", returnReference, adminId);
+        Return returnAgg = returnRepository.findByReturnReference(returnReference)
+                .orElseThrow(() -> new ReturnNotFoundException(returnReference));
+
+        UUID reverseShipmentId = UUID.randomUUID();
+        returnAgg.assignReverseShipment(reverseShipmentId, adminId, UUID.randomUUID().toString());
+        Return saved = returnRepository.save(returnAgg);
+
+        log.info("Reverse shipment {} assigned to return {}", reverseShipmentId, saved.getReturnReference());
+        return ReturnDto.fromDomain(saved);
+    }
+
+    @Transactional
+    public ReturnDto reconcileRefundStatus(String returnReference, String actorId) {
+        log.info("Reconciling refund status for return {} by actor {}", returnReference, actorId);
+        Return returnAgg = returnRepository.findByReturnReference(returnReference)
+                .orElseThrow(() -> new ReturnNotFoundException(returnReference));
+
+        Optional<RefundRecordEntity> refundOpt = refundRecordRepository.findByReturnId(returnAgg.getId()).stream().findFirst();
+        if (refundOpt.isEmpty()) {
+            return orchestrateRefund(returnReference, actorId);
+        }
+
+        RefundRecordEntity refundRecord = refundOpt.get();
+        if ("PROCESSED".equals(refundRecord.getStatus())) {
+            if (returnAgg.getStatus() != ReturnStatus.REFUNDED) {
+                returnAgg.markRefunded(UUID.randomUUID().toString());
+                returnRepository.save(returnAgg);
+            }
+            return ReturnDto.fromDomain(returnAgg, RefundRecordDto.fromEntity(refundRecord));
+        }
+
+        // Retry refund orchestration
+        return orchestrateRefund(returnReference, actorId);
+    }
+
     @Transactional(readOnly = true)
     public ReturnDto getReturnByReference(String returnReference, String customerId) {
         Return returnAgg = returnRepository.findByReturnReference(returnReference)

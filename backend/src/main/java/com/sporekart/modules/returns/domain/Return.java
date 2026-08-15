@@ -23,6 +23,7 @@ public class Return {
     private OffsetDateTime receivedAt;
     private OffsetDateTime inspectedAt;
     private OffsetDateTime completedAt;
+    private UUID reverseShipmentId;
     private long version;
 
     private final List<ReturnItem> items = new ArrayList<>();
@@ -45,6 +46,7 @@ public class Return {
             OffsetDateTime receivedAt,
             OffsetDateTime inspectedAt,
             OffsetDateTime completedAt,
+            UUID reverseShipmentId,
             long version,
             List<ReturnItem> items,
             List<ReturnStatusHistory> statusHistory,
@@ -65,10 +67,35 @@ public class Return {
         this.receivedAt = receivedAt;
         this.inspectedAt = inspectedAt;
         this.completedAt = completedAt;
+        this.reverseShipmentId = reverseShipmentId;
         this.version = version;
         if (items != null) this.items.addAll(items);
         if (statusHistory != null) this.statusHistory.addAll(statusHistory);
         this.inspection = inspection;
+    }
+
+    public Return(
+            UUID id,
+            String returnReference,
+            UUID orderId,
+            String orderReference,
+            String customerId,
+            ReturnStatus status,
+            ReturnReasonCode reasonCode,
+            String reasonDescription,
+            String evidenceUrls,
+            String policyVersion,
+            OffsetDateTime requestedAt,
+            OffsetDateTime approvedAt,
+            OffsetDateTime receivedAt,
+            OffsetDateTime inspectedAt,
+            OffsetDateTime completedAt,
+            long version,
+            List<ReturnItem> items,
+            List<ReturnStatusHistory> statusHistory,
+            ReturnInspection inspection
+    ) {
+        this(id, returnReference, orderId, orderReference, customerId, status, reasonCode, reasonDescription, evidenceUrls, policyVersion, requestedAt, approvedAt, receivedAt, inspectedAt, completedAt, null, version, items, statusHistory, inspection);
     }
 
     public static Return createNewRequest(
@@ -119,6 +146,7 @@ public class Return {
     public OffsetDateTime getReceivedAt() { return receivedAt; }
     public OffsetDateTime getInspectedAt() { return inspectedAt; }
     public OffsetDateTime getCompletedAt() { return completedAt; }
+    public UUID getReverseShipmentId() { return reverseShipmentId; }
     public long getVersion() { return version; }
     public List<ReturnItem> getItems() { return Collections.unmodifiableList(items); }
     public List<ReturnStatusHistory> getStatusHistory() { return Collections.unmodifiableList(statusHistory); }
@@ -141,6 +169,15 @@ public class Return {
         for (ReturnItem item : items) {
             item.approve(item.getRequestedQuantity());
         }
+    }
+
+    public void assignReverseShipment(UUID reverseShipmentId, String actorId, String correlationId) {
+        this.reverseShipmentId = reverseShipmentId;
+        transitionTo(ReturnStatus.REVERSE_SHIPMENT_CREATED, "Reverse shipment created", "ADMIN", actorId, correlationId);
+    }
+
+    public void markPickupFailed(String reason, String actorId, String correlationId) {
+        transitionTo(ReturnStatus.PICKUP_FAILED, reason != null ? reason : "Return pickup failed", "SYSTEM", actorId, correlationId);
     }
 
     public void reject(String adminId, String reason, String correlationId) {

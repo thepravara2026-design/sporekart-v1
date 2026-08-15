@@ -66,6 +66,9 @@ public class ReturnEntity {
     @Column(name = "completed_at")
     private OffsetDateTime completedAt;
 
+    @Column(name = "reverse_shipment_id")
+    private UUID reverseShipmentId;
+
     @Version
     private Long version;
 
@@ -103,6 +106,7 @@ public class ReturnEntity {
         entity.receivedAt = r.getReceivedAt();
         entity.inspectedAt = r.getInspectedAt();
         entity.completedAt = r.getCompletedAt();
+        entity.reverseShipmentId = r.getReverseShipmentId();
         entity.version = (r.getVersion() <= 0) ? null : r.getVersion();
         entity.createdAt = r.getRequestedAt() != null ? r.getRequestedAt() : OffsetDateTime.now();
         entity.updatedAt = OffsetDateTime.now();
@@ -132,6 +136,7 @@ public class ReturnEntity {
         this.receivedAt = r.getReceivedAt();
         this.inspectedAt = r.getInspectedAt();
         this.completedAt = r.getCompletedAt();
+        this.reverseShipmentId = r.getReverseShipmentId();
         this.updatedAt = OffsetDateTime.now();
 
         // Update items
@@ -192,6 +197,7 @@ public class ReturnEntity {
                 receivedAt,
                 inspectedAt,
                 completedAt,
+                reverseShipmentId,
                 version != null ? version : 0L,
                 domainItems,
                 domainHistory,
