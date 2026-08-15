@@ -107,7 +107,7 @@ sporekart/
    ```
 
 4. **Run Test Suites**
-   - Backend Tests: `cd backend && mvn clean test` (50 tests passing)
+   - Backend Tests: `cd backend && mvn clean test` (186 tests passing across Catalog, Cart, Checkout, Order, Inventory, Payment, State Machine, Shipping)
    - Frontend Tests: `cd frontend && npm run test` (20 tests passing)
 
 5. **Verify API Endpoints & Docs**
@@ -127,6 +127,7 @@ sporekart/
 - [Inventory Module Specification & Handoff](docs/inventory.md)
 - [Payment Module Specification & Handoff](docs/payment.md)
 - [Order Lifecycle & State Machine](docs/order_lifecycle.md)
+- [Shipping, Fulfilment & Delivery Specification](docs/shipping_fulfilment.md)
 - [Catalog Testing Strategy & Suite](docs/testing/catalog-testing.md)
 - [Troubleshooting & Diagnostics Guide](docs/troubleshooting.md)
 - [Technical Debt Register](docs/catalog/technical-debt.md)
@@ -138,3 +139,4 @@ sporekart/
 - [ADR 0005: Inventory Reservation & Stock Consistency](docs/adr/0005-inventory-reservation-and-stock-consistency.md)
 - [ADR 0006: Payment Domain & Provider Orchestration](docs/adr/0006-payment-domain-and-provider-orchestration.md)
 - [ADR 0007: Order Lifecycle & State Machine](docs/adr/0007-order-lifecycle-and-state-machine.md)
+- [ADR 0008: Shipping, Fulfilment & Delivery Orchestration](docs/adr/0008-shipping-fulfilment-orchestration.md)

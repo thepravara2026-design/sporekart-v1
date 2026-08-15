@@ -16,7 +16,7 @@ public class OrderStateMachine {
             Map.entry(OrderStatus.CONFIRMED, EnumSet.of(OrderStatus.PROCESSING, OrderStatus.CANCELLED)),
             Map.entry(OrderStatus.PROCESSING, EnumSet.of(OrderStatus.READY_FOR_FULFILMENT, OrderStatus.CANCELLED)),
             Map.entry(OrderStatus.READY_FOR_FULFILMENT, EnumSet.of(OrderStatus.SHIPPED, OrderStatus.CANCELLED)),
-            Map.entry(OrderStatus.SHIPPED, EnumSet.of(OrderStatus.OUT_FOR_DELIVERY)),
+            Map.entry(OrderStatus.SHIPPED, EnumSet.of(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.DELIVERED)),
             Map.entry(OrderStatus.OUT_FOR_DELIVERY, EnumSet.of(OrderStatus.DELIVERED)),
             Map.entry(OrderStatus.DELIVERED, EnumSet.of(OrderStatus.COMPLETED)),
             Map.entry(OrderStatus.PAYMENT_FAILED, EnumSet.of(OrderStatus.PAYMENT_PENDING, OrderStatus.EXPIRED, OrderStatus.CANCELLED)),

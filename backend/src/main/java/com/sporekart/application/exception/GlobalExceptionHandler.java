@@ -277,6 +277,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.shipment.domain.InvalidShipmentStateTransitionException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidShipmentStateTransition(com.sporekart.modules.shipment.domain.InvalidShipmentStateTransitionException ex, HttpServletRequest request) {
+        log.warn("Invalid shipment state transition on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_SHIPMENT_STATE_TRANSITION", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception on {}: ", request.getRequestURI(), ex);
@@ -284,3 +291,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
+

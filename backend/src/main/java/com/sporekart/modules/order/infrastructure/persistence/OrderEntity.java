@@ -181,9 +181,21 @@ public class OrderEntity {
                     .toList();
             entity.setItems(itemEntities);
         }
-        entity.setVersion(order.getVersion());
+        if (order.getVersion() != null && order.getVersion() > 0) {
+            entity.setVersion(order.getVersion());
+        } else {
+            entity.setVersion(null);
+        }
 
         return entity;
+    }
+
+    public void updateFromDomain(Order order) {
+        this.status = order.getStatus();
+        this.updatedAt = order.getUpdatedAt();
+        if (order.getCustomerNotes() != null) {
+            this.customerNotes = order.getCustomerNotes();
+        }
     }
 
     public Order toDomain() {
