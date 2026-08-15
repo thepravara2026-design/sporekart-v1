@@ -2,6 +2,8 @@ package com.sporekart.modules.review.controller;
 
 import com.sporekart.modules.review.application.ReviewApplicationService;
 import com.sporekart.modules.review.application.dto.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Reviews", description = "Customer product reviews — submission, helpfulness voting, and retrieval")
+@SecurityRequirement(name = "bearerAuth")
 public class CustomerReviewController {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerReviewController.class);

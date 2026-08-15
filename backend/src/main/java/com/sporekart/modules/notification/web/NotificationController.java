@@ -6,6 +6,8 @@ import com.sporekart.modules.notification.application.NotificationPreferenceServ
 import com.sporekart.modules.notification.domain.Notification;
 import com.sporekart.modules.notification.domain.NotificationCategory;
 import com.sporekart.modules.notification.domain.NotificationPreference;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Notifications", description = "Customer notification inbox, mark-as-read operations, and channel preference management")
+@SecurityRequirement(name = "bearerAuth")
 public class NotificationController {
 
     private final NotificationApplicationService notificationService;

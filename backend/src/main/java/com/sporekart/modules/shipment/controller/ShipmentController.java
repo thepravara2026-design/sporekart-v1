@@ -3,6 +3,12 @@ package com.sporekart.modules.shipment.controller;
 import com.sporekart.modules.shipment.application.ShipmentApplicationService;
 import com.sporekart.modules.shipment.application.dto.ShipmentDto;
 import com.sporekart.modules.shipment.application.dto.ShipmentTrackingResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/orders/{orderReference}")
+@Tag(name = "Shipments", description = "Customer shipment tracking and delivery status for orders")
+@SecurityRequirement(name = "bearerAuth")
 public class ShipmentController {
 
     private final ShipmentApplicationService shipmentService;
@@ -21,8 +29,14 @@ public class ShipmentController {
     }
 
     @GetMapping("/shipment")
+    @Operation(summary = "Get Order Shipment Details", description = "Retrieves shipment details for an order, including current status, AWB number, courier, and tracking URL.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Shipment details retrieved"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "404", description = "Shipment not found for order")
+    })
     public ResponseEntity<ShipmentDto> getShipmentDetails(
-            @PathVariable String orderReference,
+            @Parameter(description = "Order reference or UUID") @PathVariable String orderReference,
             Authentication authentication
     ) {
         String customerId = resolveCustomerId(authentication);
@@ -31,8 +45,14 @@ public class ShipmentController {
     }
 
     @GetMapping("/tracking")
+    @Operation(summary = "Get Shipment Tracking Timeline", description = "Returns the full tracking event timeline for a shipment, including courier scan events and delivery checkpoints.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tracking timeline retrieved"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "404", description = "Shipment not found for order")
+    })
     public ResponseEntity<ShipmentTrackingResponseDto> getTrackingTimeline(
-            @PathVariable String orderReference,
+            @Parameter(description = "Order reference or UUID") @PathVariable String orderReference,
             Authentication authentication
     ) {
         String customerId = resolveCustomerId(authentication);

@@ -135,3 +135,6 @@
 
 ## 18. Sprint 6C Security Hardening
 - [Sprint 6C Security Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6c-security-hardening.md)
+
+## 19. Sprint 6D API & Contract Hardening
+- [Sprint 6D API & Contract Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6d-api-contract-hardening.md)

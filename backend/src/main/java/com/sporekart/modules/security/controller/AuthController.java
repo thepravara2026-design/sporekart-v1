@@ -3,6 +3,11 @@ package com.sporekart.modules.security.controller;
 import com.sporekart.modules.security.application.AuthenticationApplicationService;
 import com.sporekart.modules.security.application.dto.*;
 import com.sporekart.modules.security.infrastructure.jwt.UserPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -16,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Authentication & Identity", description = "JWT-based stateless authentication — registration, login, token refresh, session management, and account operations")
 public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
@@ -27,6 +33,16 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(
+            summary = "Register New Customer Account",
+            description = "Creates a new customer account with email/password credentials. Returns the user profile on success.",
+            security = {} // Public endpoint — no JWT required
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Account registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload (validation failure)"),
+            @ApiResponse(responseCode = "409", description = "Email address already registered")
+    })
     public ResponseEntity<UserProfileDto> register(
             @Valid @RequestBody RegisterRequestDto requestDto,
             HttpServletRequest httpRequest
@@ -39,6 +55,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(
+            summary = "Login — Obtain JWT Token Pair",
+            description = "Authenticates with email and password. Returns a short-lived access token and a long-lived refresh token.",
+            security = {} // Public endpoint — no JWT required
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful — JWT access and refresh tokens returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "423", description = "Account is locked due to repeated failed login attempts")
+    })
     public ResponseEntity<AuthTokenResponseDto> login(
             @Valid @RequestBody LoginRequestDto requestDto,
             HttpServletRequest httpRequest
@@ -51,6 +78,16 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(
+            summary = "Refresh Access Token",
+            description = "Exchanges a valid refresh token for a new JWT access token pair. The old refresh token is rotated (invalidated).",
+            security = {} // Uses refresh token in body, not Bearer header
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token refreshed successfully"),
+            @ApiResponse(responseCode = "400", description = "Missing or malformed refresh token"),
+            @ApiResponse(responseCode = "401", description = "Refresh token is invalid, expired, or already used")
+    })
     public ResponseEntity<AuthTokenResponseDto> refreshToken(
             @Valid @RequestBody RefreshTokenRequestDto requestDto,
             HttpServletRequest httpRequest
@@ -63,6 +100,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @Operation(
+            summary = "Logout Current Session",
+            description = "Invalidates the current JWT session. The access token's associated refresh token is revoked.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Session logged out successfully"),
+            @ApiResponse(responseCode = "401", description = "No valid authentication token provided")
+    })
     public ResponseEntity<Void> logout(
             Authentication authentication,
             HttpServletRequest httpRequest
@@ -77,6 +123,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout-all")
+    @Operation(
+            summary = "Logout All Active Sessions",
+            description = "Revokes all active refresh token sessions for the authenticated user, forcing re-login on all devices.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "All sessions revoked successfully"),
+            @ApiResponse(responseCode = "401", description = "No valid authentication token provided")
+    })
     public ResponseEntity<Void> logoutAll(
             Authentication authentication,
             HttpServletRequest httpRequest
@@ -90,6 +145,16 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
+    @Operation(
+            summary = "Change Account Password",
+            description = "Changes the password for the authenticated user account. All existing sessions are revoked on success.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid current password or password validation failure"),
+            @ApiResponse(responseCode = "401", description = "No valid authentication token provided")
+    })
     public ResponseEntity<Void> changePassword(
             @Valid @RequestBody ChangePasswordRequestDto requestDto,
             Authentication authentication,
@@ -104,6 +169,15 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @Operation(
+            summary = "Get Current User Profile",
+            description = "Returns the profile of the currently authenticated user.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User profile returned"),
+            @ApiResponse(responseCode = "401", description = "No valid authentication token provided")
+    })
     public ResponseEntity<UserProfileDto> getCurrentUser(Authentication authentication) {
         String userId = resolveUserId(authentication);
         log.info("REST: Request for current user profile: {}", userId);
@@ -112,6 +186,15 @@ public class AuthController {
     }
 
     @GetMapping("/sessions")
+    @Operation(
+            summary = "List Active Sessions",
+            description = "Returns all active authenticated sessions for the current user, showing device and IP information.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Active sessions list returned"),
+            @ApiResponse(responseCode = "401", description = "No valid authentication token provided")
+    })
     public ResponseEntity<List<UserSessionDto>> getActiveSessions(Authentication authentication) {
         String userId = resolveUserId(authentication);
         log.info("REST: Request for active sessions for user: {}", userId);

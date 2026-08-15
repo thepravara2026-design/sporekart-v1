@@ -7,6 +7,11 @@ import com.sporekart.modules.payment.application.dto.PaymentDto;
 import com.sporekart.modules.payment.application.dto.PaymentVerificationCommand;
 import com.sporekart.modules.payment.application.dto.WebhookResponseDto;
 import com.sporekart.modules.payment.domain.PaymentProviderType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,6 +29,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/payments")
+@Tag(name = "Payments", description = "Razorpay-backed payment initiation, HMAC signature verification, and webhook event processing")
+@SecurityRequirement(name = "bearerAuth")
 public class PaymentController {
 
     private final PaymentApplicationService paymentApplicationService;
@@ -33,6 +40,16 @@ public class PaymentController {
     }
 
     @PostMapping
+    @Operation(
+            summary = "Initiate Payment for Order",
+            description = "Creates a Razorpay payment order for the specified customer order. Returns Razorpay order details required to complete the payment on the frontend."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Payment initiation successful — Razorpay order details returned"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Order not payable in current state or missing orderId"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Authentication required"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "503", description = "Payment provider unavailable")
+    })
     public ResponseEntity<ApiResponse<PaymentCheckoutDto>> createPayment(
             @RequestBody Map<String, String> requestBody,
             Authentication authentication
@@ -48,6 +65,15 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
+    @Operation(
+            summary = "Verify Payment Signature",
+            description = "Verifies the Razorpay HMAC payment signature after client-side payment completion. Transitions the payment and order to PAID state on success."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Payment verified and order updated to PAID"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Signature verification failed or invalid payload"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Authentication required")
+    })
     public ResponseEntity<ApiResponse<PaymentDto>> verifyPayment(
             @Valid @RequestBody PaymentVerificationCommand command,
             Authentication authentication
@@ -58,8 +84,17 @@ public class PaymentController {
     }
 
     @GetMapping("/{paymentReference}")
+    @Operation(
+            summary = "Get Payment by Reference",
+            description = "Retrieves payment details by the Razorpay payment reference string. Only accessible by the customer who owns the order."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Payment details retrieved"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Authentication required"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Payment not found")
+    })
     public ResponseEntity<ApiResponse<PaymentDto>> getPaymentByReference(
-            @PathVariable String paymentReference,
+            @Parameter(description = "Razorpay payment reference (e.g. pay_XXXXXXXXXXXXXX)", example = "pay_XXXXXXXXXXXXXX") @PathVariable String paymentReference,
             Authentication authentication
     ) {
         String customerId = resolveCustomerId(authentication);
@@ -68,9 +103,18 @@ public class PaymentController {
     }
 
     @PostMapping("/webhooks/razorpay")
+    @Operation(
+            summary = "Razorpay Webhook — Payment Event Receiver",
+            description = "Receives payment lifecycle events from Razorpay. HMAC SHA256 signature in `X-Razorpay-Signature` header is verified before processing. This endpoint is public (no JWT required) as it is called by Razorpay servers.",
+            security = {} // Public webhook endpoint — no JWT required
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Webhook processed successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid or missing HMAC signature")
+    })
     public ResponseEntity<WebhookResponseDto> processRazorpayWebhook(
             @RequestBody String rawBody,
-            @RequestHeader(value = "X-Razorpay-Signature", required = false) String signatureHeader
+            @Parameter(description = "Razorpay HMAC SHA256 signature") @RequestHeader(value = "X-Razorpay-Signature", required = false) String signatureHeader
     ) {
         WebhookResponseDto response = paymentApplicationService.processWebhook(PaymentProviderType.RAZORPAY, rawBody, signatureHeader);
         return ResponseEntity.ok(response);

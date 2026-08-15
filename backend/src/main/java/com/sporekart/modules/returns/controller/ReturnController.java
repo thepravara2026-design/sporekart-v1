@@ -4,6 +4,8 @@ import com.sporekart.modules.returns.application.ReturnApplicationService;
 import com.sporekart.modules.returns.application.dto.CreateReturnRequestDto;
 import com.sporekart.modules.returns.application.dto.ReturnDto;
 import com.sporekart.modules.returns.application.dto.ReturnEligibilityDto;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Returns", description = "Customer return request eligibility check, creation, and lifecycle management")
+@SecurityRequirement(name = "bearerAuth")
 public class ReturnController {
 
     private static final Logger log = LoggerFactory.getLogger(ReturnController.class);
