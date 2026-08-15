@@ -1,0 +1,10 @@
+# SPOREKART v3.0 — Sprint 3J Hardening Backlog
+
+| Issue ID | Severity | Category | Affected Component | Summary / Finding | Recommended Action | Validation Strategy | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **HRD-3J-001** | P1 (High) | Persistence / Locking | `InventoryRepositoryImpl` | Pessimistic write lock query in test transaction required fallback for uncommitted SKU records | Added `findAllBySkuIn` fallback and uppercase SKU normalization | Run `CommerceEndToEndLifecycleTest` & `CommerceConcurrencyIntegrationTest` | **RESOLVED** |
+| **HRD-3J-002** | P1 (High) | Persistence / Flush | `OrderRepositoryImpl` & `InventoryRepositoryImpl` | Session state flush missing before cross-domain query evaluation | Replaced `save` with `saveAndFlush` for immediate persistence flush | Run `TransactionIntegrityAndOutboxTest` | **RESOLVED** |
+| **HRD-3J-003** | P1 (High) | Domain / Normalization | `InventoryApplicationService` | SKU casing mismatches between catalog and inventory modules | Enforced `sku.trim().toUpperCase()` across all inventory application service entry points | Run full backend test suite (`mvn clean test`) | **RESOLVED** |
+| **HRD-3J-004** | P2 (Med) | Performance / Indexes | Database Schema (`V11`) | High-frequency query patterns needed composite index optimization | Created `V11__commerce_hardening_indexes_and_constraints.sql` for orders, refund records, and shipments | Execute Flyway migrations in test and prod profiles | **RESOLVED** |
+| **HRD-3J-005** | P2 (Med) | Security / Headers | Spring Security Config | Production security headers & CORS policy needed explicit environment isolation | Verified `SecurityConfig.java` CORS allowed origins configuration and security headers | Execute `SecurityConfigTest` | **RESOLVED** |
+| **HRD-3J-006** | P2 (Med) | Configuration | `application-prod.yml` | Production profile requires strict environment variable bindings without hardcoded secret defaults | Confirmed `${DATABASE_USERNAME}` and `${DATABASE_PASSWORD}` bindings in `application-prod.yml` | Inspect `application-prod.yml` & `.env.example` | **RESOLVED** |
