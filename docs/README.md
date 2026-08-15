@@ -93,3 +93,6 @@
 
 ## 8. Sprint 4 Final Consolidation & Approval Gate
 - [Sprint 4 Final Consolidation, Audit & Approval Report](file:///f:/sporekart-v3.0/docs/SPRINT-4-FINAL-CONSOLIDATION-AND-APPROVAL.md)
+
+## 9. Sprint 5A Security & Identity Hardening
+- [Sprint 5A Security & Identity Hardening Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5a-security-identity-hardening.md)

@@ -3,7 +3,9 @@ package com.sporekart.application.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sporekart.application.exception.ApiErrorResponse;
 import com.sporekart.application.web.RequestIdFilter;
+import com.sporekart.modules.security.infrastructure.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -35,10 +39,20 @@ public class SecurityConfig {
     private String allowedOrigins;
 
     private final RequestIdFilter requestIdFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public SecurityConfig(RequestIdFilter requestIdFilter) {
+    public SecurityConfig(
+            RequestIdFilter requestIdFilter,
+            @Autowired(required = false) JwtAuthenticationFilter jwtAuthenticationFilter
+    ) {
         this.requestIdFilter = requestIdFilter;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -55,9 +69,16 @@ public class SecurityConfig {
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(unauthorizedEntryPoint())
                 .accessDeniedHandler(accessDeniedHandler())
-            )
-            .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
-            .authorizeHttpRequests(auth -> auth
+            );
+
+        if (requestIdFilter != null) {
+            http.addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class);
+        }
+        if (jwtAuthenticationFilter != null) {
+            http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        }
+
+        http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/api/v1/health",
                         "/api/v1/version",
@@ -68,12 +89,15 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/api/v1/payments/webhooks/**",
-                        "/api/v1/webhooks/**"
+                        "/api/v1/webhooks/**",
+                        "/api/v1/auth/register",
+                        "/api/v1/auth/login",
+                        "/api/v1/auth/refresh"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
-            );
+        );
 
         return http.build();
     }

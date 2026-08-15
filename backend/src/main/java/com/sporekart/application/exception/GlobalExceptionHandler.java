@@ -312,6 +312,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.security.domain.exception.AuthenticationFailedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationFailed(com.sporekart.modules.security.domain.exception.AuthenticationFailedException ex, HttpServletRequest request) {
+        log.warn("Authentication failed on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("AUTHENTICATION_FAILED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.security.domain.exception.AccountLockedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccountLocked(com.sporekart.modules.security.domain.exception.AccountLockedException ex, HttpServletRequest request) {
+        log.warn("Account locked on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("ACCOUNT_LOCKED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.security.domain.exception.InvalidTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidToken(com.sporekart.modules.security.domain.exception.InvalidTokenException ex, HttpServletRequest request) {
+        log.warn("Invalid token on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_TOKEN", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.security.domain.exception.UserAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleUserAlreadyExists(com.sporekart.modules.security.domain.exception.UserAlreadyExistsException ex, HttpServletRequest request) {
+        log.warn("User registration conflict on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("USER_ALREADY_EXISTS", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.security.domain.exception.SecurityAccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSecurityAccessDenied(com.sporekart.modules.security.domain.exception.SecurityAccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Security access denied on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("ACCESS_DENIED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception on {}: ", request.getRequestURI(), ex);
