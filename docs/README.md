@@ -90,3 +90,6 @@
 - [Database Growth & Archival Strategy](file:///f:/sporekart-v3.0/docs/data/database-growth-strategy.md)
 - [Developer Onboarding & Local Setup Guide](file:///f:/sporekart-v3.0/docs/development/developer-onboarding.md)
 - [Master Technical Debt Register](file:///f:/sporekart-v3.0/docs/engineering/technical-debt-register.md)
+
+## 8. Sprint 4 Final Consolidation & Approval Gate
+- [Sprint 4 Final Consolidation, Audit & Approval Report](file:///f:/sporekart-v3.0/docs/SPRINT-4-FINAL-CONSOLIDATION-AND-APPROVAL.md)
