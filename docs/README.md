@@ -126,3 +126,6 @@
 ## 15. Sprint 5D Notification & Communication Platform
 - [Sprint 5D Notification Platform Architecture](file:///f:/sporekart-v3.0/docs/sprint-5d-notification-platform.md)
 - [Sprint 5D Notification Platform Completion Summary](file:///f:/sporekart-v3.0/docs/sprint-5d-notification-platform-completion.md)
+
+## 16. Pre-Sprint 6 Baseline Verification
+- [Pre-Sprint 6 Baseline Verification Report](file:///f:/sporekart-v3.0/docs/pre-sprint-6-baseline-verification.md)
