@@ -137,6 +137,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.inventory.domain.exception.InsufficientStockException.class)
+    public ResponseEntity<ApiErrorResponse> handleInsufficientStock(com.sporekart.modules.inventory.domain.exception.InsufficientStockException ex, HttpServletRequest request) {
+        log.warn("Insufficient stock on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INSUFFICIENT_STOCK", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.inventory.domain.exception.InventoryItemNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleInventoryItemNotFound(com.sporekart.modules.inventory.domain.exception.InventoryItemNotFoundException ex, HttpServletRequest request) {
+        log.warn("Inventory item not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVENTORY_ITEM_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.inventory.domain.exception.ReservationNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleReservationNotFound(com.sporekart.modules.inventory.domain.exception.ReservationNotFoundException ex, HttpServletRequest request) {
+        log.warn("Reservation not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("RESERVATION_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.inventory.domain.exception.ReservationAlreadyReleasedException.class)
+    public ResponseEntity<ApiErrorResponse> handleReservationAlreadyReleased(com.sporekart.modules.inventory.domain.exception.ReservationAlreadyReleasedException ex, HttpServletRequest request) {
+        log.warn("Reservation already released on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("RESERVATION_ALREADY_RELEASED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.inventory.domain.exception.ReservationExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleReservationExpired(com.sporekart.modules.inventory.domain.exception.ReservationExpiredException ex, HttpServletRequest request) {
+        log.warn("Reservation expired on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("RESERVATION_EXPIRED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex, HttpServletRequest request) {
         log.warn("Category not found on {}: {}", request.getRequestURI(), ex.getMessage());
