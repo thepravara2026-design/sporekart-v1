@@ -115,3 +115,10 @@
 - [Disaster Recovery Plan](file:///f:/sporekart-v3.0/docs/disaster-recovery.md)
 - [Incident Response Runbook](file:///f:/sporekart-v3.0/docs/incident-response-runbook.md)
 - [Release Readiness Checklist](file:///f:/sporekart-v3.0/docs/release-readiness-checklist.md)
+
+## 14. Sprint 5F Release Engineering, CI/CD Verification & Deployment Automation
+- [Sprint 5F Gap Analysis](file:///f:/sporekart-v3.0/docs/sprint-5f-release-engineering-gap-analysis.md)
+- [Sprint 5F Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5f-release-engineering.md)
+- [Immutable Release Manifest Specification](file:///f:/sporekart-v3.0/docs/release-manifest.md)
+- [CI/CD Pipeline & Quality Gate Policy](file:///f:/sporekart-v3.0/docs/ci-cd-runbook.md)
+- [Automated Rollback Verification](file:///f:/sporekart-v3.0/docs/rollback-verification.md)

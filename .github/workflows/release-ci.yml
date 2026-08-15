@@ -1,0 +1,71 @@
+name: Release Quality Gate CI/CD
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*' ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  release-quality-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Backend Build & Test Suite (295+ Tests)
+        run: |
+          cd backend
+          mvn clean test
+
+      - name: Package Backend Artifact
+        run: |
+          cd backend
+          mvn package -DskipTests
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build Frontend Production Bundle
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Verify Database Migrations (V1-V19)
+        run: |
+          bash scripts/verify-migrations.sh
+
+      - name: Verify Container Security & Configurations
+        run: |
+          bash scripts/verify-containers.sh
+
+      - name: Build Docker Container Images
+        run: |
+          docker build -t sporekart-backend:latest -f infrastructure/docker/backend.Dockerfile backend
+          docker build -t sporekart-frontend:latest -f infrastructure/docker/frontend.Dockerfile frontend
+
+      - name: Generate Immutable Release Manifest
+        run: |
+          bash scripts/generate-release-manifest.sh
+
+      - name: Execute Master Release Gate
+        run: |
+          bash scripts/release-gate.sh
