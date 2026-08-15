@@ -132,3 +132,6 @@
 
 ## 17. Sprint 6B Configuration & Environment Hardening
 - [Sprint 6B Configuration & Environment Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6b-configuration-hardening.md)
+
+## 18. Sprint 6C Security Hardening
+- [Sprint 6C Security Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6c-security-hardening.md)
