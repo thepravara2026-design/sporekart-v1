@@ -156,3 +156,9 @@
 ## 24. Sprint 6I Observability & Production Monitoring Hardening
 - [Sprint 6I Observability & Production Monitoring Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6i-observability-monitoring-hardening.md)
 - [Observability Operations Runbook](file:///f:/sporekart-v3.0/docs/operations/observability-runbook.md)
+
+## 25. Sprint 6J Production Release & Deployment Readiness Hardening
+- [Sprint 6J Production Release & Deployment Readiness Report](file:///f:/sporekart-v3.0/docs/sprint-6j-production-release-readiness.md)
+- [Production Release Checklist](file:///f:/sporekart-v3.0/docs/operations/production-release-checklist.md)
+- [Deployment Runbook](file:///f:/sporekart-v3.0/docs/operations/deployment-runbook.md)
+- [Release Runbook](file:///f:/sporekart-v3.0/docs/operations/release-runbook.md)
