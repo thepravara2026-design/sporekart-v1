@@ -149,3 +149,6 @@
 
 ## 22. Sprint 6G Search & Catalog Hardening
 - [Sprint 6G Search & Catalog Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6g-search-catalog-hardening.md)
+
+## 23. Sprint 6H Payment & Shipping Provider Reliability Hardening
+- [Sprint 6H Provider Reliability Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6h-provider-reliability-hardening.md)

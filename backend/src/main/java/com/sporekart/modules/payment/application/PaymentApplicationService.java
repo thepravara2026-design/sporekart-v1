@@ -274,7 +274,13 @@ public class PaymentApplicationService {
             }
         }
 
-        PaymentWebhookEvent webhookEvent = PaymentWebhookEvent.recordEvent(providerType, eventId, eventType, validSig);
+        PaymentWebhookEvent webhookEvent;
+        try {
+            webhookEvent = webhookEventRepository.save(PaymentWebhookEvent.recordEvent(providerType, eventId, eventType, validSig));
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            log.info("Concurrent duplicate webhook event detected for eventId: {}", eventId);
+            return new WebhookResponseDto(WebhookProcessingStatus.DUPLICATE, "Webhook event already being processed or completed");
+        }
 
         if (!validSig) {
             log.warn("Invalid webhook signature for event {}", eventId);
