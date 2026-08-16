@@ -162,3 +162,8 @@
 - [Production Release Checklist](file:///f:/sporekart-v3.0/docs/operations/production-release-checklist.md)
 - [Deployment Runbook](file:///f:/sporekart-v3.0/docs/operations/deployment-runbook.md)
 - [Release Runbook](file:///f:/sporekart-v3.0/docs/operations/release-runbook.md)
+
+## 26. Sprint 6K Production Deployment & Release Execution Hardening
+- [Sprint 6K Production Deployment Execution Report](file:///f:/sporekart-v3.0/docs/sprint-6k-production-deployment-execution.md)
+- [Production Deployment Runbook](file:///f:/sporekart-v3.0/docs/operations/production-deployment-runbook.md)
+- [Production Deployment Checklist](file:///f:/sporekart-v3.0/docs/operations/production-deployment-checklist.md)
