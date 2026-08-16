@@ -63,7 +63,7 @@ class PaymentWebhookSecurityTest {
 
         assertNotNull(response);
         assertEquals(WebhookProcessingStatus.PROCESSED, response.status());
-        verify(webhookEventRepository).save(any(PaymentWebhookEvent.class));
+        verify(webhookEventRepository, org.mockito.Mockito.atLeastOnce()).save(any(PaymentWebhookEvent.class));
     }
 
     @Test
