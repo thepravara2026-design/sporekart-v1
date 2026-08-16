@@ -42,7 +42,9 @@ public class NotificationController {
             @RequestParam(defaultValue = "20") int size) {
 
         String currentUserId = getCurrentUserId();
-        Pageable pageable = PageRequest.of(page, size);
+        int safeSize = Math.min(Math.max(1, size), 50);
+        int safePage = Math.max(0, page);
+        Pageable pageable = PageRequest.of(safePage, safeSize);
         Page<Notification> notifications = notificationService.getUserNotifications(currentUserId, pageable);
         return ResponseEntity.ok(ApiResponse.success(notifications.map(NotificationDto::fromDomain)));
     }
@@ -54,7 +56,9 @@ public class NotificationController {
             @RequestParam(defaultValue = "20") int size) {
 
         String currentUserId = getCurrentUserId();
-        Pageable pageable = PageRequest.of(page, size);
+        int safeSize = Math.min(Math.max(1, size), 50);
+        int safePage = Math.max(0, page);
+        Pageable pageable = PageRequest.of(safePage, safeSize);
         Page<Notification> notifications = notificationService.getUserInAppNotifications(currentUserId, pageable);
         return ResponseEntity.ok(ApiResponse.success(notifications.map(NotificationDto::fromDomain)));
     }

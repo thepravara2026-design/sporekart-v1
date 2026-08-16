@@ -8,6 +8,9 @@ import com.sporekart.modules.catalog.domain.exception.CategoryNotFoundException;
 import com.sporekart.modules.catalog.domain.exception.DuplicateCategoryException;
 import com.sporekart.modules.catalog.infrastructure.persistence.CategoryRepository;
 import com.sporekart.modules.catalog.infrastructure.persistence.ProductRepository;
+import com.sporekart.application.configuration.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +38,7 @@ public class CategoryApplicationService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
     public CategoryDto createCategory(CreateCategoryCommand command) {
         if (command == null || command.name() == null || command.name().isBlank()) {
             throw new IllegalArgumentException("Category name cannot be blank");
@@ -49,6 +53,7 @@ public class CategoryApplicationService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
     public CategoryDto updateCategory(UUID id, UpdateCategoryCommand command) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
@@ -64,12 +69,14 @@ public class CategoryApplicationService {
         return CategoryDto.fromDomain(updated);
     }
 
+    @Cacheable(value = CacheConfig.CACHE_CATEGORIES, key = "#id")
     public CategoryDto getCategoryById(UUID id) {
         return categoryRepository.findById(id)
                 .map(CategoryDto::fromDomain)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 
+    @Cacheable(value = CacheConfig.CACHE_CATEGORIES, key = "#slug")
     public CategoryDto getCategoryBySlug(String slug) {
         return categoryRepository.findBySlug(slug)
                 .map(CategoryDto::fromDomain)
@@ -111,6 +118,7 @@ public class CategoryApplicationService {
         return PageResponse.fromPage(dtoPage);
     }
 
+    @Cacheable(value = CacheConfig.CACHE_CATEGORIES, key = "'allCategories'")
     public List<CategoryDto> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(CategoryDto::fromDomain)
@@ -118,6 +126,7 @@ public class CategoryApplicationService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
     public void deleteCategory(UUID id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
