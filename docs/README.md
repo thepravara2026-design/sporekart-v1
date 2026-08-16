@@ -167,3 +167,8 @@
 - [Sprint 6K Production Deployment Execution Report](file:///f:/sporekart-v3.0/docs/sprint-6k-production-deployment-execution.md)
 - [Production Deployment Runbook](file:///f:/sporekart-v3.0/docs/operations/production-deployment-runbook.md)
 - [Production Deployment Checklist](file:///f:/sporekart-v3.0/docs/operations/production-deployment-checklist.md)
+
+## 27. Sprint 6L Zero-Downtime Database Deployment & Schema Compatibility Hardening
+- [Sprint 6L Zero-Downtime Database Deployment Report](file:///f:/sporekart-v3.0/docs/sprint-6l-zero-downtime-database-hardening.md)
+- [Database Migration Runbook](file:///f:/sporekart-v3.0/docs/operations/database-migration-runbook.md)
+- [Database Change Policy](file:///f:/sporekart-v3.0/docs/architecture/database-change-policy.md)
