@@ -1,0 +1,82 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "HikariCP Connection Pool Connections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "hikaricp_connections_active",
+          "legendFormat": "Active Connections"
+        },
+        {
+          "expr": "hikaricp_connections_idle",
+          "legendFormat": "Idle Connections"
+        },
+        {
+          "expr": "hikaricp_connections_max",
+          "legendFormat": "Max Connections"
+        },
+        {
+          "expr": "hikaricp_connections_min",
+          "legendFormat": "Min Idle Connections"
+        }
+      ]
+    },
+    {
+      "title": "HikariCP Pending Threads & Pool Utilization",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "hikaricp_connections_pending",
+          "legendFormat": "Pending Threads"
+        },
+        {
+          "expr": "(hikaricp_connections_active / hikaricp_connections_max) * 100",
+          "legendFormat": "Pool Utilization %"
+        }
+      ]
+    },
+    {
+      "title": "HikariCP Connection Acquisition & Timeout Rates",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(hikaricp_connections_acquire_seconds_count[1m])",
+          "legendFormat": "Acquisition Rate (conn/sec)"
+        },
+        {
+          "expr": "rate(hikaricp_connections_timeout_total[1m])",
+          "legendFormat": "Timeout Rate (timeouts/sec)"
+        }
+      ]
+    },
+    {
+      "title": "Connection Acquire Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(hikaricp_connections_acquire_seconds_sum[1m]) / rate(hikaricp_connections_acquire_seconds_count[1m]) * 1000",
+          "legendFormat": "Avg Acquire Time (ms)"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sporekart", "database", "hikaricp"],
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Sporekart Database & HikariCP",
+  "uid": "sporekart-database-hikaricp"
+}

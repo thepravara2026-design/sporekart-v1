@@ -1,0 +1,83 @@
+groups:
+  - name: sporekart_alerts
+    rules:
+      - alert: HighHttp5xxErrorRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: CRITICAL
+        annotations:
+          summary: "High HTTP 5xx error rate detected"
+          description: "HTTP 5xx responses represent over 5% of total requests over the last 5 minutes."
+
+      - alert: ExtremeApiLatencyP95
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le)) > 1.0
+        for: 3m
+        labels:
+          severity: WARNING
+        annotations:
+          summary: "API 95th percentile latency exceeds 1 second"
+          description: "p95 API response latency has been > 1.0s for over 3 minutes."
+
+      - alert: HikariCpPoolSaturation
+        expr: hikaricp_connections_active / hikaricp_connections_max > 0.85
+        for: 2m
+        labels:
+          severity: WARNING
+        annotations:
+          summary: "HikariCP database connection pool near saturation"
+          description: "Active connections exceed 85% of maximum pool size for over 2 minutes."
+
+      - alert: HikariCpConnectionAcquisitionTimeout
+        expr: rate(hikaricp_connections_timeout_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: CRITICAL
+        annotations:
+          summary: "HikariCP connection acquisition timeouts occurring"
+          description: "Threads are timing out waiting for database connections."
+
+      - alert: PaymentProviderFailureSpike
+        expr: rate(sporekart_payments_failed_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: CRITICAL
+        annotations:
+          summary: "Elevated payment failure rate"
+          description: "Payment failure rate exceeds 0.1 failures per second over 5 minutes."
+
+      - alert: PaymentProviderTimeoutSpike
+        expr: rate(sporekart_provider_errors_total{type="timeout"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: CRITICAL
+        annotations:
+          summary: "Payment provider timeout spike"
+          description: "Payment provider API timeouts detected over 5 minutes."
+
+      - alert: ShippingProviderFailureSpike
+        expr: rate(sporekart_shipments_failed_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: WARNING
+        annotations:
+          summary: "Elevated shipping provider failure rate"
+          description: "Shipment creation failure rate exceeds threshold over 5 minutes."
+
+      - alert: WebhookProcessingFailureSpike
+        expr: rate(sporekart_webhooks_failed_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: CRITICAL
+        annotations:
+          summary: "Webhook processing failure spike"
+          description: "Webhook callback processing failures exceed threshold over 5 minutes."
+
+      - alert: JvmMemoryPressure
+        expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} > 0.85
+        for: 5m
+        labels:
+          severity: WARNING
+        annotations:
+          summary: "JVM Heap Memory pressure high"
+          description: "JVM Heap usage exceeds 85% of maximum heap size for over 5 minutes."

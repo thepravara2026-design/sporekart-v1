@@ -152,3 +152,7 @@
 
 ## 23. Sprint 6H Payment & Shipping Provider Reliability Hardening
 - [Sprint 6H Provider Reliability Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6h-provider-reliability-hardening.md)
+
+## 24. Sprint 6I Observability & Production Monitoring Hardening
+- [Sprint 6I Observability & Production Monitoring Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6i-observability-monitoring-hardening.md)
+- [Observability Operations Runbook](file:///f:/sporekart-v3.0/docs/operations/observability-runbook.md)

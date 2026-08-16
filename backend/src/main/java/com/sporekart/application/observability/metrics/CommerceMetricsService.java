@@ -194,4 +194,50 @@ public class CommerceMetricsService {
                 .register(meterRegistry)
                 .increment();
     }
+
+    public void recordProviderLatency(String provider, String operation, long durationMs) {
+        io.micrometer.core.instrument.Timer.builder("sporekart.provider.latency")
+                .description("External provider call latency")
+                .tag("provider", provider != null ? provider : "unknown")
+                .tag("operation", operation != null ? operation : "unknown")
+                .register(meterRegistry)
+                .record(durationMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
+
+    public void recordProviderError(String provider, String operation, String errorType) {
+        Counter.builder("sporekart.provider.errors")
+                .description("External provider call errors")
+                .tag("provider", provider != null ? provider : "unknown")
+                .tag("operation", operation != null ? operation : "unknown")
+                .tag("type", errorType != null ? errorType : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordWebhookLatency(String provider, long durationMs) {
+        io.micrometer.core.instrument.Timer.builder("sporekart.webhooks.processing.latency")
+                .description("Webhook event processing duration")
+                .tag("provider", provider != null ? provider : "unknown")
+                .register(meterRegistry)
+                .record(durationMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
+
+    public void recordWebhookFailed(String provider, String reason) {
+        Counter.builder("sporekart.webhooks.failed")
+                .description("Total failed webhook processing attempts")
+                .tag("provider", provider != null ? provider : "unknown")
+                .tag("reason", reason != null ? reason : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordHttpError(String method, String route, int status) {
+        Counter.builder("sporekart.http.errors")
+                .description("HTTP error count by status group")
+                .tag("method", method != null ? method : "UNKNOWN")
+                .tag("route", route != null ? route : "UNKNOWN")
+                .tag("status", String.valueOf(status))
+                .register(meterRegistry)
+                .increment();
+    }
 }

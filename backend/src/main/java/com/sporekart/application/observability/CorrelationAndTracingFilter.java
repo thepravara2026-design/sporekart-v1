@@ -25,10 +25,12 @@ import java.util.UUID;
 public class CorrelationAndTracingFilter extends OncePerRequestFilter {
 
     public static final String REQUEST_ID_HEADER = "X-Request-ID";
+    public static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
     public static final String TRACE_ID_HEADER = "X-Trace-ID";
     public static final String TRACEPARENT_HEADER = "traceparent";
 
     public static final String MDC_REQUEST_ID = "requestId";
+    public static final String MDC_CORRELATION_ID = "correlationId";
     public static final String MDC_TRACE_ID = "traceId";
     public static final String MDC_USER_ID = "userId";
 
@@ -36,9 +38,17 @@ public class CorrelationAndTracingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String correlationId = resolveHeader(request, CORRELATION_ID_HEADER, "X-Correlation-Id");
+        if (!StringUtils.hasText(correlationId)) {
+            correlationId = resolveHeader(request, REQUEST_ID_HEADER, "X-Request-Id");
+        }
+        if (!StringUtils.hasText(correlationId)) {
+            correlationId = UUID.randomUUID().toString();
+        }
+
         String requestId = resolveHeader(request, REQUEST_ID_HEADER, "X-Request-Id");
         if (!StringUtils.hasText(requestId)) {
-            requestId = UUID.randomUUID().toString();
+            requestId = correlationId;
         }
 
         String traceId = resolveHeader(request, TRACE_ID_HEADER, "X-Trace-Id");
@@ -55,6 +65,7 @@ public class CorrelationAndTracingFilter extends OncePerRequestFilter {
             traceId = UUID.randomUUID().toString().replace("-", "");
         }
 
+        MDC.put(MDC_CORRELATION_ID, correlationId);
         MDC.put(MDC_REQUEST_ID, requestId);
         MDC.put(MDC_TRACE_ID, traceId);
 
@@ -63,12 +74,14 @@ public class CorrelationAndTracingFilter extends OncePerRequestFilter {
             MDC.put(MDC_USER_ID, principal.getId());
         }
 
+        response.setHeader(CORRELATION_ID_HEADER, correlationId);
         response.setHeader(REQUEST_ID_HEADER, requestId);
         response.setHeader(TRACE_ID_HEADER, traceId);
 
         try {
             filterChain.doFilter(request, response);
         } finally {
+            MDC.remove(MDC_CORRELATION_ID);
             MDC.remove(MDC_REQUEST_ID);
             MDC.remove(MDC_TRACE_ID);
             MDC.remove(MDC_USER_ID);

@@ -56,13 +56,23 @@ public class RequestPerformanceFilter extends OncePerRequestFilter {
             String uriTemplate = normalizeUri(request.getRequestURI());
             String method = request.getMethod();
 
-            Timer.builder("http.server.requests")
+            Timer.builder("sporekart.http.requests.latency")
                     .description("HTTP Request Execution Duration")
                     .tag("method", method)
                     .tag("status", String.valueOf(status))
                     .tag("uri", uriTemplate)
                     .register(meterRegistry)
                     .record(durationMs, TimeUnit.MILLISECONDS);
+
+            if (status >= 400) {
+                io.micrometer.core.instrument.Counter.builder("sporekart.http.errors")
+                        .description("HTTP Request Error Counter")
+                        .tag("method", method)
+                        .tag("status", String.valueOf(status))
+                        .tag("uri", uriTemplate)
+                        .register(meterRegistry)
+                        .increment();
+            }
 
             if (durationMs > slowRequestThresholdMs) {
                 log.warn("SLOW_REQUEST_DETECTED uri='{}', method='{}', status={}, durationMs={}, thresholdMs={}",

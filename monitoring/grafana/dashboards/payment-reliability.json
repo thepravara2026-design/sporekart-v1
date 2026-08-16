@@ -1,0 +1,82 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Payment Attempts & Outcomes",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(sporekart_payments_attempted_total[1m])) by (provider)",
+          "legendFormat": "Attempts ({{provider}})"
+        },
+        {
+          "expr": "sum(rate(sporekart_payments_succeeded_total[1m])) by (provider)",
+          "legendFormat": "Successes ({{provider}})"
+        },
+        {
+          "expr": "sum(rate(sporekart_payments_failed_total[1m])) by (provider, reason)",
+          "legendFormat": "Failures ({{provider}} - {{reason}})"
+        }
+      ]
+    },
+    {
+      "title": "Payment Gateway Call Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(sporekart_provider_latency_seconds_sum{provider='razorpay'}[1m]) / rate(sporekart_provider_latency_seconds_count{provider='razorpay'}[1m]) * 1000",
+          "legendFormat": "Razorpay Avg Latency (ms)"
+        },
+        {
+          "expr": "rate(sporekart_provider_latency_seconds_sum{provider='mock'}[1m]) / rate(sporekart_provider_latency_seconds_count{provider='mock'}[1m]) * 1000",
+          "legendFormat": "Mock Provider Avg Latency (ms)"
+        }
+      ]
+    },
+    {
+      "title": "Payment Webhook Events Received & Status",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(sporekart_webhooks_received_total[1m])) by (provider, eventType)",
+          "legendFormat": "Received ({{provider}} - {{eventType}})"
+        },
+        {
+          "expr": "sum(rate(sporekart_webhooks_duplicates_total[1m])) by (provider)",
+          "legendFormat": "Duplicates ({{provider}})"
+        },
+        {
+          "expr": "sum(rate(sporekart_webhooks_failed_total[1m])) by (provider, reason)",
+          "legendFormat": "Failures ({{provider}} - {{reason}})"
+        }
+      ]
+    },
+    {
+      "title": "Payment Provider Errors & Timeouts",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(sporekart_provider_errors_total[1m])) by (provider, type)",
+          "legendFormat": "Errors ({{provider}} - {{type}})"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sporekart", "payment", "reliability"],
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Sporekart Payment Reliability",
+  "uid": "sporekart-payment-reliability"
+}

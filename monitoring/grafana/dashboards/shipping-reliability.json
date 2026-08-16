@@ -1,0 +1,74 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Shipment Creation Attempts & Outcomes",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(sporekart_shipments_created_total[1m])) by (provider)",
+          "legendFormat": "Created ({{provider}})"
+        },
+        {
+          "expr": "sum(rate(sporekart_shipments_failed_total[1m])) by (provider)",
+          "legendFormat": "Failed ({{provider}})"
+        },
+        {
+          "expr": "sum(rate(sporekart_shipments_delivered_total[1m])) by (provider)",
+          "legendFormat": "Delivered ({{provider}})"
+        }
+      ]
+    },
+    {
+      "title": "Shipment Provider API Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(sporekart_provider_latency_seconds_sum{provider='shiprocket'}[1m]) / rate(sporekart_provider_latency_seconds_count{provider='shiprocket'}[1m]) * 1000",
+          "legendFormat": "Shiprocket Avg Latency (ms)"
+        }
+      ]
+    },
+    {
+      "title": "Shipping Webhook Events Received & Duplicates",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(sporekart_webhooks_received_total{provider='shiprocket'}[1m]))",
+          "legendFormat": "Shiprocket Webhooks Received"
+        },
+        {
+          "expr": "sum(rate(sporekart_webhooks_duplicates_total{provider='shiprocket'}[1m]))",
+          "legendFormat": "Shiprocket Duplicates"
+        }
+      ]
+    },
+    {
+      "title": "Shipping Provider Errors & Retries",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(sporekart_provider_errors_total{provider='shiprocket'}[1m])) by (type)",
+          "legendFormat": "Shiprocket Error ({{type}})"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sporekart", "shipping", "reliability"],
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Sporekart Shipping Reliability",
+  "uid": "sporekart-shipping-reliability"
+}

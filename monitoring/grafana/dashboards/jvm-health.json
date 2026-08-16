@@ -1,0 +1,86 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "JVM Memory Heap & Non-Heap (MB)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{area='heap'} / 1024 / 1024",
+          "legendFormat": "Heap Used (MB)"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{area='heap'} / 1024 / 1024",
+          "legendFormat": "Heap Max (MB)"
+        },
+        {
+          "expr": "jvm_memory_used_bytes{area='nonheap'} / 1024 / 1024",
+          "legendFormat": "Non-Heap Used (MB)"
+        }
+      ]
+    },
+    {
+      "title": "JVM Garbage Collection Duration & Count",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_pause_seconds_sum[1m]) * 1000",
+          "legendFormat": "GC Pause Time (ms/sec)"
+        },
+        {
+          "expr": "rate(jvm_gc_pause_seconds_count[1m])",
+          "legendFormat": "GC Collections/sec"
+        }
+      ]
+    },
+    {
+      "title": "JVM Thread Count & State Breakdown",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads",
+          "legendFormat": "Live Threads"
+        },
+        {
+          "expr": "jvm_threads_daemon_threads",
+          "legendFormat": "Daemon Threads"
+        },
+        {
+          "expr": "jvm_threads_peak_threads",
+          "legendFormat": "Peak Threads"
+        }
+      ]
+    },
+    {
+      "title": "JVM CPU Usage & Process Uptime",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "process_cpu_usage * 100",
+          "legendFormat": "CPU Usage %"
+        },
+        {
+          "expr": "process_uptime_seconds / 3600",
+          "legendFormat": "Uptime (hours)"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sporekart", "jvm", "health"],
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Sporekart JVM Health",
+  "uid": "sporekart-jvm-health"
+}
