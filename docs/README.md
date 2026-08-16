@@ -172,3 +172,7 @@
 - [Sprint 6L Zero-Downtime Database Deployment Report](file:///f:/sporekart-v3.0/docs/sprint-6l-zero-downtime-database-hardening.md)
 - [Database Migration Runbook](file:///f:/sporekart-v3.0/docs/operations/database-migration-runbook.md)
 - [Database Change Policy](file:///f:/sporekart-v3.0/docs/architecture/database-change-policy.md)
+
+## 28. Sprint 6M Final Production Hardening & System Certification (SPRINT 6 COMPLETE)
+- [Sprint 6M Final Production Hardening & System Certification Report](file:///f:/sporekart-v3.0/docs/sprint-6m-final-production-certification.md)
+- Status: **SPRINT 6 COMPLETE — READY FOR SPRINT 6N (FULL API FUNCTIONAL & INTEGRATION TESTING)**
