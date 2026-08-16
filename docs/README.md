@@ -146,3 +146,6 @@
 ## 21. Sprint 6F Database & Persistence Hardening
 - [Sprint 6F Database & Persistence Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6f-database-persistence-hardening.md)
 - [Sprint 6F Persistence Hardening Summary](file:///f:/sporekart-v3.0/docs/sprint-6f-persistence-hardening.md)
+
+## 22. Sprint 6G Search & Catalog Hardening
+- [Sprint 6G Search & Catalog Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6g-search-catalog-hardening.md)
