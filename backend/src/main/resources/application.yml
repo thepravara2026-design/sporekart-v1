@@ -8,6 +8,10 @@ server:
     threads:
       max: 200
       min-spare: 10
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+    min-response-size: 1024
 
 spring:
   application:
@@ -29,8 +33,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        generate_statistics: false
+        default_batch_fetch_size: 16
         jdbc:
           time_zone: UTC
+          batch_size: 25
+          order_inserts: true
+          order_updates: true
 
 management:
   endpoints:

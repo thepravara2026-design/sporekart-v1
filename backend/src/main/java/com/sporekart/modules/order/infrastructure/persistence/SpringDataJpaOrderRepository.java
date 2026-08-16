@@ -2,6 +2,7 @@ package com.sporekart.modules.order.infrastructure.persistence;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +18,7 @@ public interface SpringDataJpaOrderRepository extends JpaRepository<OrderEntity,
     @Query("SELECT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.orderNumber = :orderNumber AND o.customerId = :customerId")
     Optional<OrderEntity> findByOrderNumberAndCustomerId(@Param("orderNumber") String orderNumber, @Param("customerId") String customerId);
 
+    @EntityGraph(attributePaths = {"items"})
     Page<OrderEntity> findByCustomerIdOrderByCreatedAtDesc(String customerId, Pageable pageable);
 
     Optional<OrderEntity> findByCustomerIdAndIdempotencyKey(String customerId, String idempotencyKey);
@@ -24,7 +26,9 @@ public interface SpringDataJpaOrderRepository extends JpaRepository<OrderEntity,
     @Query("SELECT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.orderNumber = :orderNumber")
     Optional<OrderEntity> findByOrderNumber(@Param("orderNumber") String orderNumber);
 
+    @EntityGraph(attributePaths = {"items"})
     Page<OrderEntity> findByStatusOrderByCreatedAtDesc(com.sporekart.modules.order.domain.OrderStatus status, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"items"})
     java.util.List<OrderEntity> findByStatusIn(java.util.List<com.sporekart.modules.order.domain.OrderStatus> statuses);
 }

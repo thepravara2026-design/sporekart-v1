@@ -138,3 +138,11 @@
 
 ## 19. Sprint 6D API & Contract Hardening
 - [Sprint 6D API & Contract Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6d-api-contract-hardening.md)
+
+## 20. Sprint 6E Performance Hardening
+- [Sprint 6E Performance Baseline](file:///f:/sporekart-v3.0/docs/sprint-6e-performance-baseline.md)
+- [Sprint 6E Performance Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6e-performance-hardening.md)
+
+## 21. Sprint 6F Database & Persistence Hardening
+- [Sprint 6F Database & Persistence Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6f-database-persistence-hardening.md)
+- [Sprint 6F Persistence Hardening Summary](file:///f:/sporekart-v3.0/docs/sprint-6f-persistence-hardening.md)
