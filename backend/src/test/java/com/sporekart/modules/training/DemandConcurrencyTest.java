@@ -68,7 +68,7 @@ public class DemandConcurrencyTest {
         if (count == null || count == 0) {
             jdbcTemplate.update(
                     "INSERT INTO training_programs (id, title, description, status, price_amount, currency, slug, category, duration_hours, created_by, updated_by, created_at, updated_at) " +
-                            "VALUES (?, 'Demand Program', 'Description', 'PUBLISHED', 0.00, 'INR', ?, 'GENERAL', 0, 'SYSTEM', 'SYSTEM', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                            "VALUES (?, 'Demand Program', 'Description', 'ACTIVE', 0.00, 'INR', ?, 'GENERAL', 0, 'SYSTEM', 'SYSTEM', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
                     programId, "demand-program-" + programId);
         }
     }

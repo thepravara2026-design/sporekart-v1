@@ -2,6 +2,7 @@ package com.sporekart.modules.training;
 
 import com.sporekart.application.exception.GlobalExceptionHandler;
 import com.sporekart.modules.security.infrastructure.jwt.JwtTokenProvider;
+import com.sporekart.modules.training.application.AdminTrainingOperationsService;
 import com.sporekart.modules.training.application.DemandApplicationService;
 import com.sporekart.modules.training.controller.AdminDemandController;
 import com.sporekart.modules.training.domain.TrainingDemandRequest;
@@ -36,6 +37,9 @@ class AdminDemandControllerTest {
 
     @MockitoBean
     private DemandApplicationService demandService;
+
+    @MockitoBean
+    private AdminTrainingOperationsService operationsService;
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
