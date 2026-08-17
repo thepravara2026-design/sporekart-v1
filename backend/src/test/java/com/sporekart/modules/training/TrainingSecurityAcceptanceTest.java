@@ -1,17 +1,23 @@
 package com.sporekart.modules.training;
 
-import com.sporekart.modules.training.application.*;
-import com.sporekart.modules.training.controller.*;
-import com.sporekart.modules.training.controller.dto.*;
-import com.sporekart.modules.training.domain.*;
-import com.sporekart.modules.training.domain.exception.*;
+import com.sporekart.modules.training.application.CancellationEligibilityService;
+import com.sporekart.modules.training.application.CapacityApplicationService;
+import com.sporekart.modules.training.application.EnrollmentLifecycleService;
+import com.sporekart.modules.training.application.TrainingCancellationService;
+import com.sporekart.modules.training.domain.Capacity;
+import com.sporekart.modules.training.domain.EnrollmentStatus;
+import com.sporekart.modules.training.domain.TrainingEnrollment;
+import com.sporekart.modules.training.domain.TrainingPaymentStatus;
+import com.sporekart.modules.training.domain.exception.CapacityExceededException;
+import com.sporekart.modules.training.domain.exception.InvalidEnrollmentStateException;
+import com.sporekart.modules.training.domain.exception.UnauthorizedEnrollmentAccessException;
+import com.sporekart.modules.training.domain.port.TrainingBatchRepository;
+import com.sporekart.modules.training.domain.port.TrainingEnrollmentRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -212,10 +218,8 @@ class TrainingSecurityAcceptanceTest {
         }
 
         @Test
-        @DisplayName("CANCELLED enrollment cannot be re-cancelled (idempotent check from service, state machine rejects double-transition)")
-        void cancelledEnrollmentStateMachineRejectsSelf() {
-            // Note: the service handles idempotent cancel, but the domain state machine also rejects
-            // self-transition to non-self states correctly
+        @DisplayName("CANCELLED enrollment cannot be confirmed (terminal state is final)")
+        void cancelledEnrollmentCannotBeConfirmed() {
             TrainingEnrollment cancelled = new TrainingEnrollment(
                     "enr-cancelled", "ENR-2026-CANC",
                     "batch-1", "trainee-A", EnrollmentStatus.CANCELLED,
