@@ -110,7 +110,9 @@ public class SecurityConfig {
                         "/api/v1/auth/refresh",
                         "/api/v1/training/health",
                         "/api/v1/training-programs",
-                        "/api/v1/training-programs/**"
+                        "/api/v1/training-programs/**",
+                        "/api/v1/batches",
+                        "/api/v1/batches/**"
                 ).permitAll()
                 .requestMatchers(
                         "/actuator/prometheus",
