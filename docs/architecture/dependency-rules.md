@@ -27,5 +27,5 @@ Dependencies must strictly flow inward:
 ## Code Rules
 
 - `com.sporekart.common` may be referenced by any domain module.
-- Domain modules MUST NOT import internal classes from other domain modules (e.g. `com.sporekart.order` cannot import `com.sporekart.catalog.infrastructure.*`).
+- Domain modules MUST NOT import internal classes from other domain modules (e.g. `com.sporekart.modules.order` cannot import `com.sporekart.modules.catalog.infrastructure.*`).
 - Circular module dependencies are strictly prohibited and will fail static build checks.
