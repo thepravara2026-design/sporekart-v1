@@ -17,4 +17,7 @@ public interface TrainingEnrollmentRepository {
     List<TrainingEnrollment> findByTraineeId(String traineeId);
     Page<TrainingEnrollment> findByTraineeId(String traineeId, Pageable pageable);
     boolean existsByBatchIdAndTraineeId(String batchId, String traineeId);
+    long countByStatus(com.sporekart.modules.training.domain.EnrollmentStatus status);
+    Page<TrainingEnrollment> searchEnrollments(String batchId, com.sporekart.modules.training.domain.EnrollmentStatus status, String search, Pageable pageable);
 }
+

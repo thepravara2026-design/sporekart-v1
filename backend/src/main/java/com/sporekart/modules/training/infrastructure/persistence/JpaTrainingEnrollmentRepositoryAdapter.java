@@ -72,4 +72,18 @@ public class JpaTrainingEnrollmentRepositoryAdapter implements TrainingEnrollmen
     public boolean existsByBatchIdAndTraineeId(String batchId, String traineeId) {
         return springDataRepository.existsByBatchIdAndTraineeId(batchId, traineeId);
     }
+
+    @Override
+    public long countByStatus(com.sporekart.modules.training.domain.EnrollmentStatus status) {
+        return springDataRepository.countByStatus(status);
+    }
+
+    @Override
+    public Page<TrainingEnrollment> searchEnrollments(String batchId, com.sporekart.modules.training.domain.EnrollmentStatus status, String search, Pageable pageable) {
+        String cleanSearch = (search == null || search.isBlank()) ? null : search.trim();
+        String cleanBatchId = (batchId == null || batchId.isBlank()) ? null : batchId.trim();
+        return springDataRepository.searchEnrollments(cleanBatchId, status, cleanSearch, pageable)
+                .map(TrainingEnrollmentEntity::toDomain);
+    }
 }
+

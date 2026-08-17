@@ -23,4 +23,9 @@ public interface TrainingDemandRepository {
     Page<TrainingDemandRequest> findByBatchIdAndStatus(String batchId, DemandStatus status, Pageable pageable);
 
     long countByBatchIdAndStatus(String batchId, DemandStatus status);
+
+    long countByStatus(DemandStatus status);
+
+    Page<TrainingDemandRequest> searchDemands(String batchId, DemandStatus status, String search, Pageable pageable);
 }
+

@@ -295,6 +295,48 @@ export const triggerEnrollmentRecovery = async (enrollmentId: string): Promise<E
   return response.data.data;
 };
 
+export interface AdminTrainingDashboardDto {
+  activeProgramsCount: number;
+  upcomingBatchesCount: number;
+  totalConfiguredCapacity: number;
+  totalOccupiedSeats: number;
+  totalRemainingSeats: number;
+  activeDemandCount: number;
+  totalEnrollmentsCount: number;
+  paymentPendingEnrollmentsCount: number;
+  paymentFailedEnrollmentsCount: number;
+  paymentVerifiedExceptionsCount: number;
+  batchesApproachingFullCount: number;
+  generatedAt: string;
+}
+
+export const fetchAdminDashboard = async (): Promise<AdminTrainingDashboardDto> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/dashboard');
+  return response.data.data;
+};
+
+export const fetchAdminGlobalEnrollments = async (
+  params?: { batchId?: string; status?: string; search?: string; page?: number; size?: number; sort?: string }
+): Promise<PageResponse<EnrollmentLifecycleDto>> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/enrollments', { params });
+  return response.data.data;
+};
+
+export const fetchAdminPaymentExceptions = async (
+  params?: { page?: number; size?: number }
+): Promise<PageResponse<TrainingPaymentStatusDto>> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/exceptions', { params });
+  return response.data.data;
+};
+
+export const fetchAdminGlobalDemands = async (
+  params?: { batchId?: string; status?: string; search?: string; page?: number; size?: number; sort?: string }
+): Promise<PageResponse<DemandDto>> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/demand', { params });
+  return response.data.data;
+};
+
+
 
 
 

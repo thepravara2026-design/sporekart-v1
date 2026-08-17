@@ -62,4 +62,18 @@ public class JpaTrainingDemandRepositoryAdapter implements TrainingDemandReposit
     public long countByBatchIdAndStatus(String batchId, DemandStatus status) {
         return springDataRepository.countByBatchIdAndStatus(batchId, status);
     }
+
+    @Override
+    public long countByStatus(DemandStatus status) {
+        return springDataRepository.countByStatus(status);
+    }
+
+    @Override
+    public Page<TrainingDemandRequest> searchDemands(String batchId, DemandStatus status, String search, Pageable pageable) {
+        String cleanSearch = (search == null || search.isBlank()) ? null : search.trim();
+        String cleanBatchId = (batchId == null || batchId.isBlank()) ? null : batchId.trim();
+        return springDataRepository.searchDemands(cleanBatchId, status, cleanSearch, pageable)
+                .map(TrainingDemandEntity::toDomain);
+    }
 }
+
