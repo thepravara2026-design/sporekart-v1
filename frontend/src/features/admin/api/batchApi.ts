@@ -151,4 +151,52 @@ export const fetchBatchEnrollmentsForAdmin = async (
   return response.data.data;
 };
 
+export interface DemandDto {
+  id: string;
+  batchId: string;
+  traineeId: string;
+  status: 'ACTIVE' | 'RESOLVED' | 'WITHDRAWN' | 'EXPIRED';
+  requestedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BatchDemandSummaryDto {
+  batchId: string;
+  activeDemandCount: number;
+}
+
+export const requestBatchDemand = async (batchId: string): Promise<DemandDto> => {
+  const response = await axiosInstance.post(`/api/v1/batches/${batchId}/demand`);
+  return response.data.data;
+};
+
+export const fetchMyDemands = async (
+  params?: { page?: number; size?: number; sort?: string }
+): Promise<PageResponse<DemandDto>> => {
+  const response = await axiosInstance.get('/api/v1/me/demands', { params });
+  return response.data.data;
+};
+
+export const fetchBatchDemandForAdmin = async (
+  batchId: string,
+  params?: { page?: number; size?: number }
+): Promise<PageResponse<DemandDto>> => {
+  const response = await axiosInstance.get(`/api/v1/admin/batches/${batchId}/demand`, { params });
+  return response.data.data;
+};
+
+export const fetchBatchDemandSummaryForAdmin = async (
+  batchId: string
+): Promise<BatchDemandSummaryDto> => {
+  const response = await axiosInstance.get(`/api/v1/admin/batches/${batchId}/demand/summary`);
+  return response.data.data;
+};
+
+export const withdrawDemand = async (demandId: string): Promise<DemandDto> => {
+  const response = await axiosInstance.delete(`/api/v1/demands/${demandId}`);
+  return response.data.data;
+};
+
+
 

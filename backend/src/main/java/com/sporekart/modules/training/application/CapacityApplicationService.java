@@ -135,10 +135,10 @@ public class CapacityApplicationService {
         auditService.logEvent(
                 com.sporekart.modules.security.domain.AuditEventType.SECURITY_SYSTEM_ALERT,
                 adminUser != null ? adminUser : "ADMIN",
-                "BATCH_CAPACITY_UPDATED",
-                "TrainingBatch",
                 saved.getId(),
-                null,
+                "127.0.0.1",
+                "TrainingModule",
+                com.sporekart.modules.security.domain.AuditStatus.SUCCESS,
                 "Updated capacity from " + previousCapacity + " to " + newTotalCapacity
         );
 

@@ -31,6 +31,23 @@ public class EnrollmentApplicationService {
     private final CapacityApplicationService capacityService;
     private final ApplicationEventPublisher eventPublisher;
     private final SecurityAuditService auditService;
+    private final com.sporekart.modules.training.domain.port.TrainingDemandRepository demandRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public EnrollmentApplicationService(
+            TrainingEnrollmentRepository enrollmentRepository,
+            TrainingBatchRepository batchRepository,
+            CapacityApplicationService capacityService,
+            ApplicationEventPublisher eventPublisher,
+            SecurityAuditService auditService,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) com.sporekart.modules.training.domain.port.TrainingDemandRepository demandRepository) {
+        this.enrollmentRepository = Objects.requireNonNull(enrollmentRepository, "enrollmentRepository must not be null");
+        this.batchRepository = Objects.requireNonNull(batchRepository, "batchRepository must not be null");
+        this.capacityService = Objects.requireNonNull(capacityService, "capacityService must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
+        this.auditService = Objects.requireNonNull(auditService, "auditService must not be null");
+        this.demandRepository = demandRepository;
+    }
 
     public EnrollmentApplicationService(
             TrainingEnrollmentRepository enrollmentRepository,
@@ -38,11 +55,7 @@ public class EnrollmentApplicationService {
             CapacityApplicationService capacityService,
             ApplicationEventPublisher eventPublisher,
             SecurityAuditService auditService) {
-        this.enrollmentRepository = Objects.requireNonNull(enrollmentRepository, "enrollmentRepository must not be null");
-        this.batchRepository = Objects.requireNonNull(batchRepository, "batchRepository must not be null");
-        this.capacityService = Objects.requireNonNull(capacityService, "capacityService must not be null");
-        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
-        this.auditService = Objects.requireNonNull(auditService, "auditService must not be null");
+        this(enrollmentRepository, batchRepository, capacityService, eventPublisher, auditService, null);
     }
 
     @Transactional
@@ -86,6 +99,16 @@ public class EnrollmentApplicationService {
         // 6. Create enrollment entity
         TrainingEnrollment enrollment = TrainingEnrollment.create(batchId, traineeId, idempotencyKey, traineeId);
         TrainingEnrollment saved = enrollmentRepository.save(enrollment);
+
+        // Resolve active demand if present for this trainee & batch
+        if (demandRepository != null) {
+            demandRepository.findByBatchIdAndTraineeIdAndStatus(batchId, traineeId, com.sporekart.modules.training.domain.DemandStatus.ACTIVE)
+                    .ifPresent(demand -> {
+                        demand.resolve(traineeId);
+                        demandRepository.save(demand);
+                        log.info("Resolved active demand id={} for trainee={} upon successful enrollment in batch={}", demand.getId(), traineeId, batchId);
+                    });
+        }
 
         log.info("Successfully created TrainingEnrollment id={} for trainee={} in batch={}", saved.getId(), traineeId, batchId);
 

@@ -134,6 +134,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.DuplicateDemandException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateDemand(com.sporekart.modules.training.domain.exception.DuplicateDemandException ex, HttpServletRequest request) {
+        log.warn("Duplicate training demand on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("DUPLICATE_DEMAND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.DemandNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleDemandNotFound(com.sporekart.modules.training.domain.exception.DemandNotFoundException ex, HttpServletRequest request) {
+        log.warn("Training demand not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("DEMAND_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.UnauthorizedDemandAccessException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnauthorizedDemandAccess(com.sporekart.modules.training.domain.exception.UnauthorizedDemandAccessException ex, HttpServletRequest request) {
+        log.warn("Unauthorized demand access on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("UNAUTHORIZED_DEMAND_ACCESS", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidDemandStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidDemandState(com.sporekart.modules.training.domain.exception.InvalidDemandStateException ex, HttpServletRequest request) {
+        log.warn("Invalid demand state on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_DEMAND_STATE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidTrainingStateException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidTrainingState(com.sporekart.modules.training.domain.exception.InvalidTrainingStateException ex, HttpServletRequest request) {
         log.warn("Invalid training state on {}: {}", request.getRequestURI(), ex.getMessage());
