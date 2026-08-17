@@ -37,7 +37,14 @@ public class JpaTrainingEnrollmentPaymentRepositoryAdapter implements TrainingEn
 
     @Override
     public Optional<TrainingEnrollmentPayment> findByBatchIdAndTraineeIdAndStatus(String batchId, String traineeId, TrainingPaymentStatus status) {
-        return springDataRepository.findByBatchIdAndTraineeIdAndStatus(batchId, traineeId, status).map(TrainingEnrollmentPaymentEntity::toDomain);
+        return springDataRepository.findByBatchIdAndTraineeIdAndStatus(batchId, traineeId, status)
+                .map(TrainingEnrollmentPaymentEntity::toDomain);
+    }
+
+    @Override
+    public Optional<TrainingEnrollmentPayment> findByBatchIdAndTraineeId(String batchId, String traineeId) {
+        return springDataRepository.findTopByBatchIdAndTraineeIdOrderByCreatedAtDesc(batchId, traineeId)
+                .map(TrainingEnrollmentPaymentEntity::toDomain);
     }
 
     @Override

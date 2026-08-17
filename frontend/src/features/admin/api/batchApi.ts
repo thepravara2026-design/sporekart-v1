@@ -248,5 +248,53 @@ export const fetchTrainingPaymentStatus = async (batchId: string): Promise<Train
   return response.data.data;
 };
 
+export interface EnrollmentLifecycleDto {
+  id: string;
+  enrollmentCode: string;
+  batchId: string;
+  traineeId: string;
+  status: 'PENDING' | 'PAYMENT_PENDING' | 'PAYMENT_VERIFIED' | 'CONFIRMED' | 'ACTIVE' | 'COMPLETED' | 'WAITLISTED' | 'REJECTED' | 'PAYMENT_FAILED' | 'CANCELLED' | 'RESCHEDULED';
+  paymentReference?: string;
+  priceAmount: number;
+  currency: string;
+  enrolledAt?: string;
+  confirmedAt?: string;
+  activatedAt?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EnrollmentHistoryDto {
+  id: string;
+  enrollmentId: string;
+  fromStatus?: string;
+  toStatus: string;
+  reason?: string;
+  actor: string;
+  createdAt: string;
+}
+
+export const fetchMyEnrollmentDetails = async (enrollmentId: string): Promise<EnrollmentLifecycleDto> => {
+  const response = await axiosInstance.get(`/api/v1/training/my-enrollments/${enrollmentId}`);
+  return response.data.data;
+};
+
+export const fetchMyEnrollmentHistory = async (enrollmentId: string): Promise<EnrollmentHistoryDto[]> => {
+  const response = await axiosInstance.get(`/api/v1/training/my-enrollments/${enrollmentId}/history`);
+  return response.data.data;
+};
+
+export const fetchAdminEnrollmentDetails = async (enrollmentId: string): Promise<EnrollmentLifecycleDto> => {
+  const response = await axiosInstance.get(`/api/v1/admin/training/enrollments/${enrollmentId}`);
+  return response.data.data;
+};
+
+export const triggerEnrollmentRecovery = async (enrollmentId: string): Promise<EnrollmentLifecycleDto> => {
+  const response = await axiosInstance.post(`/api/v1/admin/training/enrollments/${enrollmentId}/recover`);
+  return response.data.data;
+};
+
+
 
 

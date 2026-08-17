@@ -2,22 +2,25 @@ package com.sporekart.modules.training.application;
 
 import com.sporekart.modules.security.application.SecurityAuditService;
 import com.sporekart.modules.security.domain.AuditEventType;
-import com.sporekart.modules.training.domain.BatchStatus;
-import com.sporekart.modules.training.domain.TrainingBatch;
-import com.sporekart.modules.training.domain.TrainingEnrollment;
+import com.sporekart.modules.security.domain.AuditStatus;
+import com.sporekart.modules.training.domain.*;
 import com.sporekart.modules.training.domain.event.BatchBecameFullEvent;
 import com.sporekart.modules.training.domain.event.TrainingEnrollmentCreatedEvent;
 import com.sporekart.modules.training.domain.exception.*;
 import com.sporekart.modules.training.domain.port.TrainingBatchRepository;
+import com.sporekart.modules.training.domain.port.TrainingEnrollmentHistoryRepository;
 import com.sporekart.modules.training.domain.port.TrainingEnrollmentRepository;
+import com.sporekart.modules.training.domain.port.TrainingProgramRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -28,21 +31,27 @@ public class EnrollmentApplicationService {
 
     private final TrainingEnrollmentRepository enrollmentRepository;
     private final TrainingBatchRepository batchRepository;
+    private final TrainingProgramRepository programRepository;
+    private final TrainingEnrollmentHistoryRepository historyRepository;
     private final CapacityApplicationService capacityService;
     private final ApplicationEventPublisher eventPublisher;
     private final SecurityAuditService auditService;
     private final com.sporekart.modules.training.domain.port.TrainingDemandRepository demandRepository;
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     public EnrollmentApplicationService(
             TrainingEnrollmentRepository enrollmentRepository,
             TrainingBatchRepository batchRepository,
+            TrainingProgramRepository programRepository,
+            TrainingEnrollmentHistoryRepository historyRepository,
             CapacityApplicationService capacityService,
             ApplicationEventPublisher eventPublisher,
             SecurityAuditService auditService,
-            @org.springframework.beans.factory.annotation.Autowired(required = false) com.sporekart.modules.training.domain.port.TrainingDemandRepository demandRepository) {
+            @Autowired(required = false) com.sporekart.modules.training.domain.port.TrainingDemandRepository demandRepository) {
         this.enrollmentRepository = Objects.requireNonNull(enrollmentRepository, "enrollmentRepository must not be null");
         this.batchRepository = Objects.requireNonNull(batchRepository, "batchRepository must not be null");
+        this.programRepository = Objects.requireNonNull(programRepository, "programRepository must not be null");
+        this.historyRepository = Objects.requireNonNull(historyRepository, "historyRepository must not be null");
         this.capacityService = Objects.requireNonNull(capacityService, "capacityService must not be null");
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
         this.auditService = Objects.requireNonNull(auditService, "auditService must not be null");
@@ -52,10 +61,12 @@ public class EnrollmentApplicationService {
     public EnrollmentApplicationService(
             TrainingEnrollmentRepository enrollmentRepository,
             TrainingBatchRepository batchRepository,
+            TrainingProgramRepository programRepository,
+            TrainingEnrollmentHistoryRepository historyRepository,
             CapacityApplicationService capacityService,
             ApplicationEventPublisher eventPublisher,
             SecurityAuditService auditService) {
-        this(enrollmentRepository, batchRepository, capacityService, eventPublisher, auditService, null);
+        this(enrollmentRepository, batchRepository, programRepository, historyRepository, capacityService, eventPublisher, auditService, null);
     }
 
     @Transactional(noRollbackFor = {BatchFullException.class, InvalidBatchStateException.class, DuplicateEnrollmentException.class})
@@ -93,19 +104,35 @@ public class EnrollmentApplicationService {
             throw new BatchFullException("Cannot enroll trainee: Batch " + batch.getBatchCode() + " is FULL");
         }
 
-        // 5. Execute atomic capacity slot allocation
-        boolean slotAllocated = batchRepository.tryAllocateSeatAtomic(batchId);
-        if (!slotAllocated) {
-            throw new BatchFullException("Capacity allocation failed: Batch " + batch.getBatchCode() + " is FULL");
+        // 5. Look up program for authoritative price snapshot
+        TrainingProgram program = programRepository.findById(batch.getProgramId())
+                .orElseThrow(() -> new TrainingNotFoundException("TrainingProgram not found for id: " + batch.getProgramId()));
+
+        BigDecimal priceAmount = program.getPriceAmount() != null ? program.getPriceAmount() : BigDecimal.ZERO;
+        String currency = program.getCurrency() != null ? program.getCurrency() : "INR";
+
+        // 6. Execute atomic capacity slot allocation if free program, else check capacity without consuming until payment verified
+        boolean isFreeProgram = priceAmount.compareTo(BigDecimal.ZERO) == 0;
+        if (isFreeProgram) {
+            boolean slotAllocated = batchRepository.tryAllocateSeatAtomic(batchId);
+            if (!slotAllocated) {
+                throw new BatchFullException("Capacity allocation failed: Batch " + batch.getBatchCode() + " is FULL");
+            }
         }
 
-        // 6. Create enrollment entity
-        TrainingEnrollment enrollment = TrainingEnrollment.create(batchId, traineeId, idempotencyKey, traineeId);
+        // 7. Create enrollment entity with snapshot attributes
+        TrainingEnrollment enrollment = TrainingEnrollment.create(batchId, traineeId, priceAmount, currency, idempotencyKey, traineeId);
+        if (isFreeProgram) {
+            enrollment.confirm("FREE_PROGRAM");
+        }
         TrainingEnrollment saved = enrollmentRepository.save(enrollment);
 
-        // Resolve active demand if present for this trainee & batch
-        if (demandRepository != null) {
-            demandRepository.findByBatchIdAndTraineeIdAndStatus(batchId, traineeId, com.sporekart.modules.training.domain.DemandStatus.ACTIVE)
+        // Record initial history
+        historyRepository.save(TrainingEnrollmentHistory.record(saved.getId(), null, saved.getStatus(), "ENROLLMENT_CREATED", traineeId));
+
+        // Resolve active demand if present and confirmed
+        if (saved.getStatus() == EnrollmentStatus.CONFIRMED && demandRepository != null) {
+            demandRepository.findByBatchIdAndTraineeIdAndStatus(batchId, traineeId, DemandStatus.ACTIVE)
                     .ifPresent(demand -> {
                         demand.resolve(traineeId);
                         demandRepository.save(demand);
@@ -113,12 +140,11 @@ public class EnrollmentApplicationService {
                     });
         }
 
-        log.info("Successfully created TrainingEnrollment id={} for trainee={} in batch={}", saved.getId(), traineeId, batchId);
+        log.info("Successfully created TrainingEnrollment id={}, code={} for trainee={} in batch={}", saved.getId(), saved.getEnrollmentCode(), traineeId, batchId);
 
-        // 7. Publish domain events & record security audit
+        // 8. Publish domain events & record security audit
         eventPublisher.publishEvent(new TrainingEnrollmentCreatedEvent(saved.getId(), batchId, traineeId));
 
-        // If batch became full after this allocation, publish BatchBecameFullEvent
         TrainingBatch reloaded = batchRepository.findById(batchId).orElse(batch);
         if (reloaded.getStatus() == BatchStatus.FULL) {
             eventPublisher.publishEvent(new BatchBecameFullEvent(reloaded.getId(), reloaded.getBatchCode(), reloaded.getCapacity().getTotalCapacity()));
@@ -130,7 +156,7 @@ public class EnrollmentApplicationService {
                 saved.getId(),
                 "127.0.0.1",
                 "SYSTEM",
-                com.sporekart.modules.security.domain.AuditStatus.SUCCESS,
+                AuditStatus.SUCCESS,
                 "Enrolled trainee " + traineeId + " into batch " + batch.getBatchCode()
         );
 

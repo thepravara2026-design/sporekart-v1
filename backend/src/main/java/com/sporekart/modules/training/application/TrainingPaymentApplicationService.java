@@ -87,9 +87,10 @@ public class TrainingPaymentApplicationService {
     public TrainingPaymentOrderResponse initiatePaymentOrder(String batchId, String traineeId) {
         log.info("Initiating training payment order for batchId={} and traineeId={}", batchId, traineeId);
 
-        // 1. Validate batch exists and status
-        TrainingBatch batch = batchRepository.findById(batchId)
-                .orElseThrow(() -> new BatchNotFoundException("TrainingBatch not found for id: " + batchId));
+        synchronized ((batchId + ":" + traineeId).intern()) {
+            // 1. Validate batch exists and status
+            TrainingBatch batch = batchRepository.findById(batchId)
+                    .orElseThrow(() -> new BatchNotFoundException("TrainingBatch not found for id: " + batchId));
 
         if (batch.getStatus() == BatchStatus.FULL || batch.getCapacity().isFull()) {
             throw new BatchFullException("Cannot initiate payment: Batch " + batch.getBatchCode() + " is FULL");
@@ -99,10 +100,11 @@ public class TrainingPaymentApplicationService {
             throw new InvalidBatchStateException("Batch " + batch.getBatchCode() + " is in state " + batch.getStatus());
         }
 
-        // 2. Validate trainee is not already enrolled
-        if (enrollmentRepository.existsByBatchIdAndTraineeId(batchId, traineeId)) {
-            throw new DuplicateEnrollmentException("Trainee " + traineeId + " is already enrolled in batch " + batchId);
-        }
+            // 2. Validate trainee is not already confirmed/enrolled
+            Optional<TrainingEnrollment> existingEnrCheck = enrollmentRepository.findByBatchIdAndTraineeId(batchId, traineeId);
+            if (existingEnrCheck.isPresent() && existingEnrCheck.get().getStatus().isCapacityConsuming()) {
+                throw new DuplicateEnrollmentException("Trainee " + traineeId + " is already confirmed/enrolled in batch " + batchId);
+            }
 
         // 3. Fetch authoritative program price
         TrainingProgram program = programRepository.findById(batch.getProgramId())
@@ -169,7 +171,20 @@ public class TrainingPaymentApplicationService {
         attempt.updateProviderDetails(providerResult.providerOrderId(), providerResult.providerPaymentId(), null);
         paymentRepository.save(savedPayment);
 
-        // 6. Save TrainingEnrollmentPayment record
+        // 6. Save TrainingEnrollmentPayment record & set enrollment status to PAYMENT_PENDING
+        Optional<TrainingEnrollment> existingEnrollmentOpt = enrollmentRepository.findByBatchIdAndTraineeId(batchId, traineeId);
+        if (existingEnrollmentOpt.isPresent()) {
+            TrainingEnrollment existingEnr = existingEnrollmentOpt.get();
+            if (existingEnr.getStatus() == com.sporekart.modules.training.domain.EnrollmentStatus.PENDING) {
+                existingEnr.markPaymentPending();
+                enrollmentRepository.save(existingEnr);
+            }
+        } else {
+            TrainingEnrollment newEnr = TrainingEnrollment.create(batchId, traineeId, priceAmount, currency, null, traineeId);
+            newEnr.markPaymentPending();
+            enrollmentRepository.save(newEnr);
+        }
+
         TrainingEnrollmentPayment trnPayment = TrainingEnrollmentPayment.create(
                 savedPayment.getId().toString(),
                 batchId,
@@ -247,6 +262,7 @@ public class TrainingPaymentApplicationService {
                 providerResult.providerOrderId(),
                 keyId
         );
+        }
     }
 
     @Transactional(noRollbackFor = {BatchFullException.class, InvalidBatchStateException.class})

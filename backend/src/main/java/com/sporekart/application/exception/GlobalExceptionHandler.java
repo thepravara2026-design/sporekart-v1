@@ -134,6 +134,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidEnrollmentStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidEnrollmentState(com.sporekart.modules.training.domain.exception.InvalidEnrollmentStateException ex, HttpServletRequest request) {
+        log.warn("Invalid enrollment state on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_ENROLLMENT_STATE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.PaymentEnrollmentMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handlePaymentEnrollmentMismatch(com.sporekart.modules.training.domain.exception.PaymentEnrollmentMismatchException ex, HttpServletRequest request) {
+        log.warn("Payment enrollment mismatch on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("PAYMENT_ENROLLMENT_MISMATCH", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.training.domain.exception.DuplicateDemandException.class)
     public ResponseEntity<ApiErrorResponse> handleDuplicateDemand(com.sporekart.modules.training.domain.exception.DuplicateDemandException ex, HttpServletRequest request) {
         log.warn("Duplicate training demand on {}: {}", request.getRequestURI(), ex.getMessage());

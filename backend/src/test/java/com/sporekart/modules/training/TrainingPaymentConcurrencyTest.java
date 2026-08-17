@@ -40,6 +40,9 @@ public class TrainingPaymentConcurrencyTest {
     private EnrollmentApplicationService enrollmentService;
 
     @Autowired
+    private com.sporekart.modules.training.application.EnrollmentLifecycleService lifecycleService;
+
+    @Autowired
     private TrainingBatchRepository batchRepository;
 
     @Autowired
@@ -119,6 +122,9 @@ public class TrainingPaymentConcurrencyTest {
         // 2. Trainee B enrolls directly into the single seat (occupies 1/1 seat, batch becomes FULL)
         TrainingEnrollment enrollmentB = enrollmentService.enrollTrainee(batch.getId(), traineeB, "key-B-race");
         assertNotNull(enrollmentB);
+        lifecycleService.transitionStatus(enrollmentB.getId(), EnrollmentStatus.PAYMENT_PENDING, "INITIATED", traineeB);
+        lifecycleService.transitionStatus(enrollmentB.getId(), EnrollmentStatus.PAYMENT_VERIFIED, "VERIFIED", traineeB);
+        lifecycleService.transitionStatus(enrollmentB.getId(), EnrollmentStatus.CONFIRMED, "CONFIRMED", traineeB);
 
         // Verify batch is FULL
         TrainingBatch reloaded = batchRepository.findById(batch.getId()).orElseThrow();

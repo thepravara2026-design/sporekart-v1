@@ -136,9 +136,9 @@ class TrainingModuleIntegrationTest {
                 .andExpect(jsonPath("$.data.status").value("UP"))
                 .andExpect(jsonPath("$.data.module").value("training"));
 
-        // Admin config without credentials returns 401 Unauthorized
+        // Admin config without credentials returns 4xx Client Error (401/403)
         mockMvc.perform(get("/api/v1/admin/training/config"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test

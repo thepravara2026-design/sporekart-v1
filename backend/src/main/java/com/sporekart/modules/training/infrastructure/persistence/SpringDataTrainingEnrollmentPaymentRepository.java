@@ -14,5 +14,7 @@ public interface SpringDataTrainingEnrollmentPaymentRepository extends JpaReposi
 
     Optional<TrainingEnrollmentPaymentEntity> findByBatchIdAndTraineeIdAndStatus(String batchId, String traineeId, TrainingPaymentStatus status);
 
+    Optional<TrainingEnrollmentPaymentEntity> findTopByBatchIdAndTraineeIdOrderByCreatedAtDesc(String batchId, String traineeId);
+
     List<TrainingEnrollmentPaymentEntity> findByTraineeId(String traineeId);
 }

@@ -33,19 +33,21 @@ class TrainingEnrollmentDomainTest {
     }
 
     @Test
-    @DisplayName("Status transitions confirm(), cancel(), complete(), waitlist() update status and timestamp")
+    @DisplayName("Status transitions confirm(), activate(), complete(), cancel() update status and timestamp")
     void testStatusTransitions() {
         TrainingEnrollment enrollment = TrainingEnrollment.create("batch-1", "trainee-1");
 
+        enrollment.markPaymentPending();
+        enrollment.markPaymentVerified("PAY-998877");
         enrollment.confirm("PAY-998877");
         assertEquals(EnrollmentStatus.CONFIRMED, enrollment.getStatus());
         assertEquals("PAY-998877", enrollment.getPaymentReference());
 
+        enrollment.activate();
+        assertEquals(EnrollmentStatus.ACTIVE, enrollment.getStatus());
+
         enrollment.complete();
         assertEquals(EnrollmentStatus.COMPLETED, enrollment.getStatus());
-
-        enrollment.cancel();
-        assertEquals(EnrollmentStatus.CANCELLED, enrollment.getStatus());
     }
 
     @Test
