@@ -62,6 +62,7 @@ public class NotificationPreference {
             case EMAIL -> emailEnabled;
             case SMS -> smsEnabled;
             case WHATSAPP -> whatsappEnabled;
+            case PUSH -> true;
             case IN_APP -> inAppEnabled;
         };
     }

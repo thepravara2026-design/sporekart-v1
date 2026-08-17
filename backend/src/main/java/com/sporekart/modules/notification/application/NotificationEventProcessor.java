@@ -42,7 +42,7 @@ public class NotificationEventProcessor {
         vars.put("status", event.newStatus().name());
         vars.put("reason", event.reason() != null ? event.reason() : "");
 
-        String eventId = UUID.randomUUID().toString();
+        String eventId = event.eventId() != null ? event.eventId().toString() : UUID.randomUUID().toString();
         String eventType = "ORDER_" + event.newStatus().name();
         String recipient = event.actorId() != null ? event.actorId() : "customer@sporekart.com";
 

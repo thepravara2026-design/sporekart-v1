@@ -9,9 +9,9 @@ import java.util.regex.Pattern;
 @Component
 public class TemplatePlaceholderSubstitutor {
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{([a-zA-Z0-9_.-]+)\\}");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{?([a-zA-Z0-9_.-]+)\\}\\}?");
 
-    public String substitute(String templateContent, Map<String, Object> variables) {
+    public String substitute(String templateContent, Map<String, ?> variables) {
         if (templateContent == null) {
             return "";
         }

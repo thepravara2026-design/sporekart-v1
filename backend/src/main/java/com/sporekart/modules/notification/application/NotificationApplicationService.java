@@ -45,6 +45,17 @@ public class NotificationApplicationService {
     }
 
     @Transactional
+    public Notification sendNotification(String eventId, String eventType, String userId, String recipient,
+                                         NotificationChannel channel, String templateCode,
+                                         Map<String, Object> variables) {
+        return sendNotification(
+                eventId, eventType, userId, userId, channel, templateCode,
+                NotificationCategory.ORDER_UPDATES, recipient, variables,
+                NotificationPriority.NORMAL, eventId + ":" + channel + ":" + recipient, null, null
+        ).orElse(null);
+    }
+
+    @Transactional
     public Optional<Notification> sendNotification(String eventId, String eventType, String userId, String customerId,
                                                    NotificationChannel channel, String templateCode,
                                                    NotificationCategory category, String recipient,
