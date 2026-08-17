@@ -121,6 +121,20 @@ public class OutboxEvent {
         }
     }
 
+    public void markReplayed(String requestedBy, String reason) {
+        this.status = OutboxStatus.PENDING;
+        this.retryCount = 0;
+        this.scheduledAt = OffsetDateTime.now();
+        this.processedAt = null;
+        this.lastError = "Replayed by " + (requestedBy != null ? requestedBy : "OPERATOR") + ": " + (reason != null ? reason : "Operational recovery request");
+    }
+
+    public void markStaleReset() {
+        this.status = OutboxStatus.PENDING;
+        this.scheduledAt = OffsetDateTime.now();
+        this.lastError = "Reset stale processing claim at " + OffsetDateTime.now();
+    }
+
     // Getters
     public String getId() { return id; }
     public String getAggregateType() { return aggregateType; }
