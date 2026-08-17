@@ -220,4 +220,34 @@ public class TrainingNotificationEventProcessor {
                 idempotencyBase + "-INAPP", null, null
         );
     }
+
+    @EventListener
+    @Async
+    public void handleEnrollmentCompleted(TrainingEnrollmentCompletedEvent event) {
+        log.info("Processing notification for TrainingEnrollmentCompletedEvent: enrollmentId={}, batchId={}, traineeId={}",
+                event.getEnrollmentId(), event.getBatchId(), event.getTraineeId());
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("enrollmentId", event.getEnrollmentId());
+        vars.put("batchId", event.getBatchId());
+        vars.put("traineeId", event.getTraineeId());
+        vars.put("certificateId", event.getCertificateId() != null ? event.getCertificateId() : "N/A");
+        vars.put("message", "Congratulations! You have successfully completed training batch " + event.getBatchId() + " and earned your certificate.");
+
+        String idempotencyBase = "ENR-COMP-" + event.getEnrollmentId();
+
+        notificationService.sendNotification(
+                event.getEventId(), "TRAINING_ENROLLMENT_COMPLETED", event.getTraineeId(), event.getTraineeId(),
+                NotificationChannel.EMAIL, "TRAINING_ENROLLMENT_COMPLETED", NotificationCategory.TRAINING,
+                event.getTraineeId(), vars, NotificationPriority.HIGH,
+                idempotencyBase + "-EMAIL", null, null
+        );
+
+        notificationService.sendNotification(
+                event.getEventId(), "TRAINING_ENROLLMENT_COMPLETED", event.getTraineeId(), event.getTraineeId(),
+                NotificationChannel.IN_APP, "TRAINING_ENROLLMENT_COMPLETED", NotificationCategory.TRAINING,
+                event.getTraineeId(), vars, NotificationPriority.HIGH,
+                idempotencyBase + "-INAPP", null, null
+        );
+    }
 }

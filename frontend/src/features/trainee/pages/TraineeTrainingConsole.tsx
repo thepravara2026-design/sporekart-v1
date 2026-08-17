@@ -6,6 +6,7 @@ import {
   DemandDto,
   EnrollmentHistoryDto,
   NotificationDto,
+  CertificateDto,
   fetchTraineeDashboard,
   fetchTraineeUpcomingTraining,
   fetchTraineeEnrollmentDetail,
@@ -18,11 +19,12 @@ import {
   fetchTraineeNotifications,
   fetchUnreadNotificationCount,
   markNotificationRead,
-  markAllNotificationsRead
+  markAllNotificationsRead,
+  fetchMyCertificates
 } from '../../admin/api/batchApi';
 
 export const TraineeTrainingConsole: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'enrollments' | 'demands' | 'notifications'>('upcoming');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'enrollments' | 'demands' | 'notifications' | 'certificates'>('upcoming');
 
   // Dashboard state
   const [dashboard, setDashboard] = useState<TraineeDashboardDto | null>(null);
@@ -61,6 +63,11 @@ export const TraineeTrainingConsole: React.FC = () => {
   const [rescheduleReason, setRescheduleReason] = useState<string>('');
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState<boolean>(false);
 
+  // Certificates state
+  const [certificates, setCertificates] = useState<CertificateDto[]>([]);
+  const [certificatesLoading, setCertificatesLoading] = useState<boolean>(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<CertificateDto | null>(null);
+
   // Messages
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -70,16 +77,7 @@ export const TraineeTrainingConsole: React.FC = () => {
       const data = await fetchTraineeDashboard();
       setDashboard(data);
     } catch (err: any) {
-      // Quiet fail if guest
-    }
-  };
-
-  const loadUnreadCount = async () => {
-    try {
-      const count = await fetchUnreadNotificationCount();
-      setUnreadCount(count);
-    } catch (err: any) {
-      // Quiet fail
+      console.error('Failed to load trainee dashboard:', err);
     }
   };
 
@@ -120,6 +118,15 @@ export const TraineeTrainingConsole: React.FC = () => {
     }
   };
 
+  const loadUnreadCount = async () => {
+    try {
+      const count = await fetchUnreadNotificationCount();
+      setUnreadCount(count);
+    } catch (err: any) {
+      console.error('Failed to fetch unread count', err);
+    }
+  };
+
   const loadNotifications = async () => {
     setNotificationsLoading(true);
     try {
@@ -130,6 +137,18 @@ export const TraineeTrainingConsole: React.FC = () => {
       setActionError(err?.response?.data?.message || 'Failed to load notifications');
     } finally {
       setNotificationsLoading(false);
+    }
+  };
+
+  const loadCertificates = async () => {
+    setCertificatesLoading(true);
+    try {
+      const data = await fetchMyCertificates();
+      setCertificates(data);
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || 'Failed to load earned certificates');
+    } finally {
+      setCertificatesLoading(false);
     }
   };
 
@@ -146,6 +165,8 @@ export const TraineeTrainingConsole: React.FC = () => {
       loadDemands();
     } else if (activeTab === 'notifications') {
       loadNotifications();
+    } else if (activeTab === 'certificates') {
+      loadCertificates();
     }
   }, [activeTab, enrollmentPage]);
 
@@ -354,6 +375,12 @@ export const TraineeTrainingConsole: React.FC = () => {
           style={{ padding: '12px 4px', border: 'none', background: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', borderBottom: activeTab === 'notifications' ? '2px solid #2563eb' : 'none', color: activeTab === 'notifications' ? '#2563eb' : '#64748b' }}
         >
           Notifications {unreadCount > 0 && `(${unreadCount})`}
+        </button>
+        <button
+          onClick={() => setActiveTab('certificates')}
+          style={{ padding: '12px 4px', border: 'none', background: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', borderBottom: activeTab === 'certificates' ? '2px solid #2563eb' : 'none', color: activeTab === 'certificates' ? '#2563eb' : '#64748b' }}
+        >
+          Certificates & Achievements 🎓
         </button>
       </div>
 
@@ -566,6 +593,80 @@ export const TraineeTrainingConsole: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'certificates' && (
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>Earned Digital Certificates 🎓</h2>
+          {certificatesLoading ? (
+            <div style={{ padding: '20px', color: '#64748b' }}>Loading digital certificates...</div>
+          ) : certificates.length === 0 ? (
+            <div style={{ padding: '32px', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '8px', color: '#64748b' }}>
+              No earned certificates yet. Complete a training program with 80%+ attendance to receive your verified digital certificate.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+              {certificates.map(cert => (
+                <div key={cert.id} style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '16px', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#2563eb', textTransform: 'uppercase', marginBottom: '4px' }}>VERIFIED CERTIFICATE</div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 8px 0' }}>{cert.programTitle}</h3>
+                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>Batch: <strong>{cert.batchCode}</strong></div>
+                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>Cert #: <code style={{ backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>{cert.certificateNumber}</code></div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>Issued: {new Date(cert.issuedAt).toLocaleDateString()}</div>
+                  <button
+                    onClick={() => setSelectedCertificate(cert)}
+                    style={{ width: '100%', padding: '8px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                  >
+                    View Digital Certificate 📜
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Certificate Viewer Modal */}
+      {selectedCertificate && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', maxWidth: '650px', width: '100%', border: '4px double #2563eb', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <div style={{ textAlign: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '16px', marginBottom: '20px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 4px 0', letterSpacing: '1px' }}>CERTIFICATE OF COMPLETION</h1>
+              <div style={{ fontSize: '13px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px' }}>SPOREKART ACADEMY & TRAINING AUTHORITY</div>
+            </div>
+
+            <div style={{ textAlign: 'center', margin: '24px 0' }}>
+              <div style={{ fontSize: '14px', color: '#475569', marginBottom: '8px' }}>This is to certify that</div>
+              <h2 style={{ fontSize: '26px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 12px 0', textDecoration: 'underline' }}>{selectedCertificate.traineeName}</h2>
+              <div style={{ fontSize: '14px', color: '#475569', marginBottom: '8px' }}>has successfully completed the training program</div>
+              <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#2563eb', margin: '0 0 16px 0' }}>{selectedCertificate.programTitle}</h3>
+              <div style={{ fontSize: '13px', color: '#64748b' }}>Batch: <strong>{selectedCertificate.batchCode}</strong> | Date: <strong>{new Date(selectedCertificate.completionDate).toLocaleDateString()}</strong></div>
+            </div>
+
+            <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginTop: '24px', fontSize: '12px', color: '#475569' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span>Certificate Number: <strong>{selectedCertificate.certificateNumber}</strong></span>
+                <span>Status: <strong style={{ color: selectedCertificate.revoked ? '#dc2626' : '#16a34a' }}>{selectedCertificate.revoked ? 'REVOKED' : 'VERIFIED VALID'}</strong></span>
+              </div>
+              <div style={{ marginBottom: '8px' }}>Verification Hash: <code style={{ backgroundColor: '#e2e8f0', padding: '2px 4px', borderRadius: '3px' }}>{selectedCertificate.verificationCode}</code></div>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>
+                Public verification URL: <a href={`/api/v1/certificates/verify/${selectedCertificate.verificationCode}`} target="_blank" rel="noreferrer" style={{ color: '#2563eb' }}>/api/v1/certificates/verify/{selectedCertificate.verificationCode}</a>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px' }}>
+              <div style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>
+                Issued by: {selectedCertificate.issuerSignature}
+              </div>
+              <button
+                onClick={() => setSelectedCertificate(null)}
+                style={{ padding: '8px 24px', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Close Certificate
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

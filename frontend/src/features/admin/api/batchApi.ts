@@ -478,6 +478,104 @@ export const markAllNotificationsRead = async (): Promise<void> => {
   await axiosInstance.post('/api/v1/notifications/mark-all-read');
 };
 
+export interface AttendanceDto {
+  id: string;
+  enrollmentId: string;
+  scheduleId: string;
+  batchId: string;
+  traineeId: string;
+  status: 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE';
+  notes?: string;
+  markedBy: string;
+  markedAt: string;
+}
+
+export interface AttendanceSummaryDto {
+  enrollmentId: string;
+  batchId: string;
+  traineeId: string;
+  totalSessions: number;
+  attendedSessions: number;
+  attendancePercentage: number;
+  sessionRecords: AttendanceDto[];
+}
+
+export interface CertificateDto {
+  id: string;
+  certificateNumber: string;
+  verificationCode: string;
+  enrollmentId: string;
+  traineeId: string;
+  traineeName: string;
+  programId: string;
+  programTitle: string;
+  batchId: string;
+  batchCode: string;
+  issuedAt: string;
+  completionDate: string;
+  issuerSignature: string;
+  revoked: boolean;
+}
+
+export interface VerificationResultDto {
+  valid: boolean;
+  verificationCode: string;
+  certificateNumber?: string;
+  traineeName?: string;
+  programTitle?: string;
+  batchCode?: string;
+  completionDate?: string;
+  issuerSignature?: string;
+  statusMessage: string;
+}
+
+export const fetchSessionAttendanceRoster = async (
+  batchId: string,
+  scheduleId: string
+): Promise<AttendanceDto[]> => {
+  const response = await axiosInstance.get(`/api/v1/admin/batches/${batchId}/schedules/${scheduleId}/attendance`);
+  return response.data.data;
+};
+
+export const bulkMarkAttendance = async (
+  batchId: string,
+  scheduleId: string,
+  items: { enrollmentId: string; status: 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE'; notes?: string }[]
+): Promise<AttendanceDto[]> => {
+  const response = await axiosInstance.post(`/api/v1/admin/batches/${batchId}/schedules/${scheduleId}/attendance`, { items });
+  return response.data.data;
+};
+
+export const evaluateBatchCompletion = async (
+  batchId: string,
+  minAttendancePercentage?: number
+): Promise<any> => {
+  const response = await axiosInstance.post(`/api/v1/admin/batches/${batchId}/evaluate-completion`, { minAttendancePercentage });
+  return response.data.data;
+};
+
+export const fetchMyAttendanceSummary = async (
+  enrollmentId: string
+): Promise<AttendanceSummaryDto> => {
+  const response = await axiosInstance.get(`/api/v1/trainee/training/enrollments/${enrollmentId}/attendance`);
+  return response.data.data;
+};
+
+export const fetchMyCertificates = async (): Promise<CertificateDto[]> => {
+  const response = await axiosInstance.get('/api/v1/trainee/training/certificates');
+  return response.data.data;
+};
+
+export const fetchMyCertificateDetail = async (certificateId: string): Promise<CertificateDto> => {
+  const response = await axiosInstance.get(`/api/v1/trainee/training/certificates/${certificateId}`);
+  return response.data.data;
+};
+
+export const verifyCertificatePublic = async (verificationCode: string): Promise<VerificationResultDto> => {
+  const response = await axiosInstance.get(`/api/v1/certificates/verify/${verificationCode}`);
+  return response.data.data;
+};
+
 
 
 
