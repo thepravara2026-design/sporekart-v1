@@ -45,4 +45,29 @@ public interface SpringDataJpaNotificationRepository extends JpaRepository<Notif
     Page<Notification> findStaleSentNotifications(@Param("cutoff") Instant cutoff, Pageable pageable);
 
     Page<Notification> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("SELECT n FROM Notification n WHERE " +
+           "(:status IS NULL OR n.status = :status) AND " +
+           "(:channel IS NULL OR n.channel = :channel) AND " +
+           "(:providerName IS NULL OR UPPER(n.providerName) = UPPER(:providerName)) AND " +
+           "(:fromDate IS NULL OR n.createdAt >= :fromDate) AND " +
+           "(:toDate IS NULL OR n.createdAt <= :toDate) " +
+           "ORDER BY n.createdAt DESC")
+    Page<Notification> findFilteredNotifications(
+            @Param("status") NotificationStatus status,
+            @Param("channel") NotificationChannel channel,
+            @Param("providerName") String providerName,
+            @Param("fromDate") Instant fromDate,
+            @Param("toDate") Instant toDate,
+            Pageable pageable
+    );
+
+    @Query("SELECT MIN(n.createdAt) FROM Notification n WHERE n.status IN (com.sporekart.modules.notification.domain.NotificationStatus.CREATED, com.sporekart.modules.notification.domain.NotificationStatus.QUEUED)")
+    Optional<Instant> findOldestPendingCreatedAt();
+
+    @Query("SELECT MIN(n.createdAt) FROM Notification n WHERE n.status = com.sporekart.modules.notification.domain.NotificationStatus.RETRY_SCHEDULED")
+    Optional<Instant> findOldestRetryCreatedAt();
+
+    @Query("SELECT MIN(n.createdAt) FROM Notification n WHERE n.status = com.sporekart.modules.notification.domain.NotificationStatus.SENT AND (n.lastProviderUpdateAt IS NULL OR n.lastProviderUpdateAt <= :cutoff)")
+    Optional<Instant> findOldestReconciliationCandidateCreatedAt(@Param("cutoff") Instant cutoff);
 }
