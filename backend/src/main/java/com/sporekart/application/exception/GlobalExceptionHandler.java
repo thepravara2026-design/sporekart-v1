@@ -64,6 +64,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.TrainingProgramAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleTrainingProgramAlreadyExists(com.sporekart.modules.training.domain.exception.TrainingProgramAlreadyExistsException ex, HttpServletRequest request) {
+        log.warn("Training program conflict on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("TRAINING_PROGRAM_ALREADY_EXISTS", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidTrainingProgramDataException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidTrainingProgramData(com.sporekart.modules.training.domain.exception.InvalidTrainingProgramDataException ex, HttpServletRequest request) {
+        log.warn("Invalid training program data on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_TRAINING_PROGRAM_DATA", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.training.domain.exception.BatchNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleBatchNotFound(com.sporekart.modules.training.domain.exception.BatchNotFoundException ex, HttpServletRequest request) {
         log.warn("Training batch not found on {}: {}", request.getRequestURI(), ex.getMessage());
