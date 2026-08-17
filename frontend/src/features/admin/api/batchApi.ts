@@ -336,6 +336,65 @@ export const fetchAdminGlobalDemands = async (
   return response.data.data;
 };
 
+export interface TraineeDashboardDto {
+  upcomingEnrollmentsCount: number;
+  activeEnrollmentsCount: number;
+  completedEnrollmentsCount: number;
+  pendingEnrollmentsCount: number;
+  activeDemandRequestsCount: number;
+  nextUpcomingSessionTitle?: string;
+  nextUpcomingBatchCode?: string;
+  nextUpcomingStartDate?: string;
+  nextUpcomingDeliveryMode?: string;
+  nextUpcomingVenueOrMeeting?: string;
+  generatedAt: string;
+}
+
+export interface TraineeEnrollmentDetailDto {
+  id: string;
+  enrollmentCode: string;
+  batchId: string;
+  programId: string;
+  programTitle: string;
+  programCategory: string;
+  batchCode: string;
+  deliveryMode: string;
+  venueInfo?: string;
+  meetingUrl?: string;
+  timezone: string;
+  schedules: ScheduleDto[];
+  enrollmentStatus: string;
+  paymentStatusSummary: string;
+  priceAmount: number;
+  currency: string;
+  paymentReference?: string;
+  enrolledAt?: string;
+  confirmedAt?: string;
+  activatedAt?: string;
+  completedAt?: string;
+  createdAt: string;
+}
+
+export const fetchTraineeDashboard = async (): Promise<TraineeDashboardDto> => {
+  const response = await axiosInstance.get('/api/v1/trainee/training/dashboard');
+  return response.data.data;
+};
+
+export const fetchTraineeUpcomingTraining = async (
+  params?: { page?: number; size?: number }
+): Promise<PageResponse<EnrollmentDto>> => {
+  const response = await axiosInstance.get('/api/v1/trainee/training/upcoming', { params });
+  return response.data.data;
+};
+
+export const fetchTraineeEnrollmentDetail = async (
+  enrollmentId: string
+): Promise<TraineeEnrollmentDetailDto> => {
+  const response = await axiosInstance.get(`/api/v1/trainee/training/enrollments/${enrollmentId}`);
+  return response.data.data;
+};
+
+
 
 
 
