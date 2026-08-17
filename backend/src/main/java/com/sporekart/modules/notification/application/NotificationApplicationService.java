@@ -1,6 +1,7 @@
 package com.sporekart.modules.notification.application;
 
 import com.sporekart.modules.notification.domain.*;
+import com.sporekart.modules.notification.infrastructure.config.NotificationProperties;
 import com.sporekart.modules.notification.infrastructure.persistence.SpringDataJpaNotificationDeliveryAttemptRepository;
 import com.sporekart.modules.notification.infrastructure.persistence.SpringDataJpaNotificationRepository;
 import com.sporekart.modules.security.application.SecurityAuditService;
@@ -30,19 +31,22 @@ public class NotificationApplicationService {
     private final NotificationPreferenceService preferenceService;
     private final NotificationOrchestrator orchestrator;
     private final SecurityAuditService auditService;
+    private final NotificationProperties properties;
 
     public NotificationApplicationService(SpringDataJpaNotificationRepository notificationRepository,
                                         SpringDataJpaNotificationDeliveryAttemptRepository attemptRepository,
                                         NotificationTemplateService templateService,
                                         NotificationPreferenceService preferenceService,
                                         NotificationOrchestrator orchestrator,
-                                        @Autowired(required = false) SecurityAuditService auditService) {
+                                        @Autowired(required = false) SecurityAuditService auditService,
+                                        @Autowired(required = false) NotificationProperties properties) {
         this.notificationRepository = notificationRepository;
         this.attemptRepository = attemptRepository;
         this.templateService = templateService;
         this.preferenceService = preferenceService;
         this.orchestrator = orchestrator;
         this.auditService = auditService;
+        this.properties = properties;
     }
 
     @Transactional
@@ -169,6 +173,16 @@ public class NotificationApplicationService {
         metrics.put("cancelledCount", notificationRepository.countByStatus(NotificationStatus.CANCELLED));
         metrics.put("suppressedCount", notificationRepository.countByStatus(NotificationStatus.SUPPRESSED));
         metrics.put("totalCount", notificationRepository.count());
+
+        if (properties != null) {
+            metrics.put("providers", Map.of(
+                    "email", Map.of("mode", properties.getEmail().getMode(), "provider", properties.getEmail().getProvider(), "configured", properties.getEmail().getApiKey() != null),
+                    "sms", Map.of("mode", properties.getSms().getMode(), "provider", properties.getSms().getProvider(), "configured", properties.getSms().getAccountSid() != null),
+                    "whatsapp", Map.of("mode", properties.getWhatsapp().getMode(), "provider", properties.getWhatsapp().getProvider(), "configured", properties.getWhatsapp().getPhoneNumberId() != null),
+                    "push", Map.of("mode", properties.getPush().getMode(), "provider", properties.getPush().getProvider(), "configured", true)
+            ));
+        }
+
         return metrics;
     }
 

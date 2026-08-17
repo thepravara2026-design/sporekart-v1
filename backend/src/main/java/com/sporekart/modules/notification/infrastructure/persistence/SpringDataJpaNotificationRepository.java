@@ -25,6 +25,12 @@ public interface SpringDataJpaNotificationRepository extends JpaRepository<Notif
 
     Optional<Notification> findByEventIdAndChannelAndRecipientAndTemplateVersion(String eventId, NotificationChannel channel, String recipient, int templateVersion);
 
+    Optional<Notification> findByProviderMessageId(String providerMessageId);
+
+    Optional<Notification> findByProviderEventId(String providerEventId);
+
+    Optional<Notification> findByProviderNameAndProviderEventId(String providerName, String providerEventId);
+
     List<Notification> findByStatus(NotificationStatus status);
 
     long countByStatus(NotificationStatus status);

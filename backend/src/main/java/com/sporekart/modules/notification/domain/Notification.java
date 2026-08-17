@@ -56,6 +56,15 @@ public class Notification {
     @Column(name = "provider_message_id")
     private String providerMessageId;
 
+    @Column(name = "provider_event_id")
+    private String providerEventId;
+
+    @Column(name = "provider_status")
+    private String providerStatus;
+
+    @Column(name = "last_provider_update_at")
+    private Instant lastProviderUpdateAt;
+
     @Column(name = "idempotency_key", unique = true)
     private String idempotencyKey;
 
@@ -187,6 +196,22 @@ public class Notification {
         }
     }
 
+    public void updateProviderReconciliation(String providerEventId, String providerStatus, NotificationStatus targetStatus) {
+        this.providerEventId = providerEventId;
+        this.providerStatus = providerStatus;
+        this.lastProviderUpdateAt = Instant.now();
+        if (targetStatus != null && this.status != targetStatus) {
+            if (targetStatus == NotificationStatus.DELIVERED) {
+                markDelivered(this.providerMessageId);
+            } else if (targetStatus == NotificationStatus.FAILED_PERMANENTLY) {
+                markFailed("Failed per provider reconciliation: " + providerStatus, true);
+            } else if (this.status.canTransitionTo(targetStatus)) {
+                transitionTo(targetStatus);
+            }
+        }
+        this.updatedAt = Instant.now();
+    }
+
     // Getters
     public String getId() { return id; }
     public String getEventId() { return eventId; }
@@ -203,6 +228,9 @@ public class Notification {
     public NotificationPriority getPriority() { return priority; }
     public String getProviderName() { return providerName; }
     public String getProviderMessageId() { return providerMessageId; }
+    public String getProviderEventId() { return providerEventId; }
+    public String getProviderStatus() { return providerStatus; }
+    public Instant getLastProviderUpdateAt() { return lastProviderUpdateAt; }
     public String getIdempotencyKey() { return idempotencyKey; }
     public String getCorrelationId() { return correlationId; }
     public String getTraceId() { return traceId; }
