@@ -3,17 +3,24 @@ package com.sporekart.modules.training.controller;
 import com.sporekart.application.exception.ApiResponse;
 import com.sporekart.modules.training.application.AdminTrainingOperationsService;
 import com.sporekart.modules.training.application.EnrollmentApplicationService;
+import com.sporekart.modules.training.application.TrainingCancellationService;
+import com.sporekart.modules.training.application.TrainingRescheduleService;
+import com.sporekart.modules.training.controller.dto.CancelEnrollmentRequest;
 import com.sporekart.modules.training.controller.dto.EnrollmentResponse;
+import com.sporekart.modules.training.controller.dto.RescheduleEnrollmentRequest;
 import com.sporekart.modules.training.controller.dto.TrainingPaymentStatusResponse;
 import com.sporekart.modules.training.domain.EnrollmentStatus;
 import com.sporekart.modules.training.domain.TrainingEnrollment;
 import com.sporekart.modules.training.domain.TrainingEnrollmentPayment;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,10 +30,18 @@ public class AdminEnrollmentController {
 
     private final EnrollmentApplicationService enrollmentService;
     private final AdminTrainingOperationsService operationsService;
+    private final TrainingCancellationService cancellationService;
+    private final TrainingRescheduleService rescheduleService;
 
-    public AdminEnrollmentController(EnrollmentApplicationService enrollmentService, AdminTrainingOperationsService operationsService) {
+    public AdminEnrollmentController(
+            EnrollmentApplicationService enrollmentService,
+            AdminTrainingOperationsService operationsService,
+            TrainingCancellationService cancellationService,
+            TrainingRescheduleService rescheduleService) {
         this.enrollmentService = enrollmentService;
         this.operationsService = operationsService;
+        this.cancellationService = cancellationService;
+        this.rescheduleService = rescheduleService;
     }
 
     @GetMapping("/api/v1/admin/batches/{batchId}/enrollments")
@@ -75,6 +90,36 @@ public class AdminEnrollmentController {
         ));
         return ResponseEntity.ok(ApiResponse.success(responsePage));
     }
+
+    @PostMapping("/api/v1/admin/training/enrollments/{enrollmentId}/cancel")
+    public ResponseEntity<ApiResponse<EnrollmentResponse>> cancelEnrollmentByAdmin(
+            @PathVariable("enrollmentId") String enrollmentId,
+            @RequestBody(required = false) CancelEnrollmentRequest request) {
+
+        String adminUser = getAuthenticatedAdminUser();
+        String reason = request != null ? request.getReason() : null;
+
+        TrainingEnrollment cancelled = cancellationService.cancelEnrollmentByAdmin(enrollmentId, reason, adminUser);
+        return ResponseEntity.ok(ApiResponse.success(EnrollmentResponse.fromDomain(cancelled)));
+    }
+
+    @PostMapping("/api/v1/admin/training/enrollments/{enrollmentId}/reschedule")
+    public ResponseEntity<ApiResponse<EnrollmentResponse>> rescheduleEnrollmentByAdmin(
+            @PathVariable("enrollmentId") String enrollmentId,
+            @Valid @RequestBody RescheduleEnrollmentRequest request) {
+
+        String adminUser = getAuthenticatedAdminUser();
+        TrainingEnrollment rescheduled = rescheduleService.rescheduleEnrollmentByAdmin(
+                enrollmentId, request.getTargetBatchId(), request.getReason(), adminUser
+        );
+        return ResponseEntity.ok(ApiResponse.success(EnrollmentResponse.fromDomain(rescheduled)));
+    }
+
+    private String getAuthenticatedAdminUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            return auth.getName();
+        }
+        return "ADMIN";
+    }
 }
-
-

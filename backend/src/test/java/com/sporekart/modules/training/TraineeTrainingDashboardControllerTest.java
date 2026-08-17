@@ -39,6 +39,12 @@ class TraineeTrainingDashboardControllerTest {
     @MockBean
     private TraineeTrainingOperationsService operationsService;
 
+    @MockBean
+    private com.sporekart.modules.training.application.TrainingCancellationService cancellationService;
+
+    @MockBean
+    private com.sporekart.modules.training.application.TrainingRescheduleService rescheduleService;
+
     @Test
     @WithMockUser(username = "trainee-123", roles = {"TRAINEE"})
     @DisplayName("GET /api/v1/trainee/training/dashboard should return HTTP 200 with metrics")

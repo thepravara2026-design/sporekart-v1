@@ -11,7 +11,7 @@ public class TrainingEnrollment {
 
     private final String id;
     private final String enrollmentCode;
-    private final String batchId;
+    private String batchId;
     private final String traineeId;
     private EnrollmentStatus status;
     private String paymentReference;
@@ -123,6 +123,13 @@ public class TrainingEnrollment {
         if (this.completedAt == null) {
             this.completedAt = Instant.now();
         }
+        this.updatedAt = Instant.now();
+    }
+
+    public void rescheduleToBatch(String newBatchId) {
+        validateTransition(EnrollmentStatus.RESCHEDULED);
+        this.batchId = Objects.requireNonNull(newBatchId, "newBatchId must not be null");
+        this.status = EnrollmentStatus.CONFIRMED;
         this.updatedAt = Instant.now();
     }
 

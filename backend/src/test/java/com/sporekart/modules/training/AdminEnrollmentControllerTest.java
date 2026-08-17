@@ -39,6 +39,15 @@ class AdminEnrollmentControllerTest {
     private EnrollmentApplicationService enrollmentService;
 
     @MockitoBean
+    private com.sporekart.modules.training.application.AdminTrainingOperationsService operationsService;
+
+    @MockitoBean
+    private com.sporekart.modules.training.application.TrainingCancellationService cancellationService;
+
+    @MockitoBean
+    private com.sporekart.modules.training.application.TrainingRescheduleService rescheduleService;
+
+    @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
 
     private TrainingEnrollment mockEnrollment;

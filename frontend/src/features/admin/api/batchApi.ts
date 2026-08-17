@@ -394,6 +394,46 @@ export const fetchTraineeEnrollmentDetail = async (
   return response.data.data;
 };
 
+export const cancelMyEnrollment = async (
+  enrollmentId: string,
+  reason?: string
+): Promise<EnrollmentDto> => {
+  const response = await axiosInstance.post(`/api/v1/trainee/training/enrollments/${enrollmentId}/cancel`, { reason });
+  return response.data.data;
+};
+
+export const rescheduleMyEnrollment = async (
+  enrollmentId: string,
+  targetBatchId: string,
+  reason?: string
+): Promise<EnrollmentDto> => {
+  const response = await axiosInstance.post(`/api/v1/trainee/training/enrollments/${enrollmentId}/reschedule`, {
+    targetBatchId,
+    reason,
+  });
+  return response.data.data;
+};
+
+export const cancelAdminEnrollment = async (
+  enrollmentId: string,
+  reason?: string
+): Promise<EnrollmentDto> => {
+  const response = await axiosInstance.post(`/api/v1/admin/training/enrollments/${enrollmentId}/cancel`, { reason });
+  return response.data.data;
+};
+
+export const rescheduleAdminEnrollment = async (
+  enrollmentId: string,
+  targetBatchId: string,
+  reason?: string
+): Promise<EnrollmentDto> => {
+  const response = await axiosInstance.post(`/api/v1/admin/training/enrollments/${enrollmentId}/reschedule`, {
+    targetBatchId,
+    reason,
+  });
+  return response.data.data;
+};
+
 
 
 
