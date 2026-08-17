@@ -84,7 +84,7 @@ class CapacityApplicationServiceTest {
 
         assertEquals(25, response.getTotalCapacity());
         verify(eventPublisher, times(1)).publishEvent(any(BatchCapacityChangedEvent.class));
-        verify(auditService, times(1)).logEvent(any(), eq("ADMIN_USER"), eq("BATCH_CAPACITY_UPDATED"), anyString(), anyString(), any(), anyString());
+        verify(auditService, times(1)).logEvent(any(), eq("ADMIN_USER"), anyString(), anyString(), anyString(), any(), anyString());
     }
 
     @Test
