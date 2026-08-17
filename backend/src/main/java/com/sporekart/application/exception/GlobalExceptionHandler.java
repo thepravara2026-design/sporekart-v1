@@ -155,6 +155,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InsufficientCapacityException.class)
+    public ResponseEntity<ApiErrorResponse> handleInsufficientCapacity(com.sporekart.modules.training.domain.exception.InsufficientCapacityException ex, HttpServletRequest request) {
+        log.warn("Insufficient capacity on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INSUFFICIENT_CAPACITY", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.CapacityBelowOccupancyException.class)
+    public ResponseEntity<ApiErrorResponse> handleCapacityBelowOccupancy(com.sporekart.modules.training.domain.exception.CapacityBelowOccupancyException ex, HttpServletRequest request) {
+        log.warn("Capacity below occupancy on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CAPACITY_BELOW_OCCUPANCY", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.training.domain.exception.CancellationWindowExpiredException.class)
     public ResponseEntity<ApiErrorResponse> handleCancellationWindowExpired(com.sporekart.modules.training.domain.exception.CancellationWindowExpiredException ex, HttpServletRequest request) {
         log.warn("Cancellation window expired on {}: {}", request.getRequestURI(), ex.getMessage());
