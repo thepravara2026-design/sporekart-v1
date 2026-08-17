@@ -101,6 +101,11 @@ export const deactivateBatch = async (id: string): Promise<BatchDto> => {
   return response.data.data;
 };
 
+export const cancelBatch = async (id: string, reason?: string): Promise<BatchDto> => {
+  const response = await axiosInstance.post(`/api/v1/admin/batches/${id}/cancel`, { reason });
+  return response.data.data;
+};
+
 export interface CapacityDto {
   batchId: string;
   batchCode: string;
@@ -118,9 +123,13 @@ export const updateBatchCapacity = async (id: string, capacity: number): Promise
 
 export interface EnrollmentDto {
   id: string;
+  enrollmentCode?: string;
   batchId: string;
+  batchCode?: string;
   traineeId: string;
   status: 'PENDING' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED' | 'COMPLETED';
+  priceAmount?: number;
+  currency?: string;
   paymentReference?: string;
   enrolledAt: string;
   createdAt: string;
@@ -154,6 +163,7 @@ export const fetchBatchEnrollmentsForAdmin = async (
 export interface DemandDto {
   id: string;
   batchId: string;
+  batchCode?: string;
   traineeId: string;
   status: 'ACTIVE' | 'RESOLVED' | 'WITHDRAWN' | 'EXPIRED';
   requestedAt: string;

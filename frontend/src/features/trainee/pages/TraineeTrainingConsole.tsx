@@ -26,7 +26,6 @@ export const TraineeTrainingConsole: React.FC = () => {
 
   // Dashboard state
   const [dashboard, setDashboard] = useState<TraineeDashboardDto | null>(null);
-  const [dashboardLoading, setDashboardLoading] = useState<boolean>(true);
 
   // Upcoming enrollments state
   const [upcoming, setUpcoming] = useState<EnrollmentDto[]>([]);
@@ -67,14 +66,11 @@ export const TraineeTrainingConsole: React.FC = () => {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const loadDashboard = async () => {
-    setDashboardLoading(true);
     try {
       const data = await fetchTraineeDashboard();
       setDashboard(data);
     } catch (err: any) {
       // Quiet fail if guest
-    } finally {
-      setDashboardLoading(false);
     }
   };
 
@@ -165,7 +161,7 @@ export const TraineeTrainingConsole: React.FC = () => {
       const detail = await fetchTraineeEnrollmentDetail(enrollmentId);
       setSelectedDetail(detail);
       const history = await fetchMyEnrollmentHistory(enrollmentId);
-      setHistoryList(history);
+      setHistoryList(history || []);
     } catch (err: any) {
       setActionError(err?.response?.data?.message || 'Failed to fetch enrollment details');
     } finally {
@@ -180,7 +176,7 @@ export const TraineeTrainingConsole: React.FC = () => {
     setActionError(null);
     setActionSuccess(null);
     try {
-      await withdrawDemand(demandId, 'Withdrawn by trainee');
+      await withdrawDemand(demandId);
       setActionSuccess('Demand request successfully withdrawn');
       loadDemands();
       loadDashboard();
@@ -317,12 +313,12 @@ export const TraineeTrainingConsole: React.FC = () => {
             <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: '#818cf8', letterSpacing: '0.05em' }}>Your Next Class Session</div>
             <div style={{ fontSize: '20px', fontWeight: 'bold', marginTop: '4px' }}>{dashboard.nextUpcomingSessionTitle}</div>
             <div style={{ fontSize: '14px', color: '#c7d2fe', marginTop: '4px' }}>
-              Batch: {dashboard.nextUpcomingBatchCode} • Start: {dashboard.nextUpcomingSessionStartDate ? new Date(dashboard.nextUpcomingSessionStartDate).toLocaleString() : 'TBD'}
+              Batch: {dashboard.nextUpcomingBatchCode} • Start: {dashboard.nextUpcomingStartDate ? new Date(dashboard.nextUpcomingStartDate).toLocaleString() : 'TBD'}
             </div>
           </div>
-          {dashboard.nextUpcomingMeetingUrl && (
+          {dashboard.nextUpcomingVenueOrMeeting && (
             <a
-              href={dashboard.nextUpcomingMeetingUrl}
+              href={dashboard.nextUpcomingVenueOrMeeting}
               target="_blank"
               rel="noreferrer"
               style={{ backgroundColor: '#4f46e5', color: '#ffffff', textDecoration: 'none', padding: '10px 20px', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', display: 'inline-block' }}
@@ -422,7 +418,7 @@ export const TraineeTrainingConsole: React.FC = () => {
                           {e.status}
                         </span>
                       </td>
-                      <td style={{ padding: '12px 16px' }}>{e.currency} {e.priceAmount}</td>
+                      <td style={{ padding: '12px 16px' }}>{e.currency || 'USD'} {e.priceAmount || 0}</td>
                       <td style={{ padding: '12px 16px', color: '#64748b' }}>{new Date(e.enrolledAt).toLocaleDateString()}</td>
                       <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                         <button
@@ -542,7 +538,7 @@ export const TraineeTrainingConsole: React.FC = () => {
                     borderRadius: '8px',
                     padding: '16px',
                     display: 'flex',
-                    justify: 'space-between',
+                    justifyContent: 'space-between',
                     alignItems: 'flex-start'
                   }}
                 >
@@ -626,6 +622,19 @@ export const TraineeTrainingConsole: React.FC = () => {
                   </ul>
                 ) : (
                   <div style={{ color: '#64748b', fontSize: '14px', marginBottom: '16px' }}>No specific schedule sessions declared for this batch.</div>
+                )}
+
+                {historyList && historyList.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>Enrollment History Trail</h3>
+                    <ul style={{ listStyle: 'none', padding: 0, fontSize: '13px', color: '#475569' }}>
+                      {historyList.map(h => (
+                        <li key={h.id} style={{ padding: '4px 0', borderBottom: '1px dashed #e2e8f0' }}>
+                          [{new Date(h.createdAt).toLocaleTimeString()}] Status changed to <strong>{h.toStatus}</strong> by {h.actor} {h.reason ? `(${h.reason})` : ''}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
 
                 {/* Cancel & Reschedule Action Forms */}
