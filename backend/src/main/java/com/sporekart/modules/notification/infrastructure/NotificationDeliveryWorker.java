@@ -3,9 +3,11 @@ package com.sporekart.modules.notification.infrastructure;
 import com.sporekart.modules.notification.application.NotificationOrchestrator;
 import com.sporekart.modules.notification.domain.Notification;
 import com.sporekart.modules.notification.domain.NotificationStatus;
+import com.sporekart.modules.notification.infrastructure.config.NotificationProperties;
 import com.sporekart.modules.notification.infrastructure.persistence.SpringDataJpaNotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,11 +24,14 @@ public class NotificationDeliveryWorker {
 
     private final SpringDataJpaNotificationRepository notificationRepository;
     private final NotificationOrchestrator orchestrator;
+    private final NotificationProperties properties;
 
     public NotificationDeliveryWorker(SpringDataJpaNotificationRepository notificationRepository,
-                                      NotificationOrchestrator orchestrator) {
+                                      NotificationOrchestrator orchestrator,
+                                      @Autowired(required = false) NotificationProperties properties) {
         this.notificationRepository = notificationRepository;
         this.orchestrator = orchestrator;
+        this.properties = properties;
     }
 
     @Scheduled(fixedDelay = 2000)
@@ -47,6 +52,45 @@ public class NotificationDeliveryWorker {
                 log.error("Error delivering notification '{}': {}", notification.getId(), ex.getMessage());
             }
         }
+    }
+
+    @Scheduled(fixedDelay = 30000)
+    public void recoverStaleProcessingNotifications() {
+        if (properties != null && !properties.getResilience().isStaleProcessingEnabled()) {
+            return;
+        }
+
+        long thresholdSeconds = properties != null ? properties.getResilience().getStaleProcessingThresholdSeconds() : 300;
+        Instant cutoff = Instant.now().minusSeconds(thresholdSeconds);
+
+        List<Notification> staleList = notificationRepository.findStaleProcessingNotifications(cutoff, PageRequest.of(0, 50)).getContent();
+        if (staleList.isEmpty()) {
+            return;
+        }
+
+        log.info("NotificationDeliveryWorker: found {} stale PROCESSING notifications older than {}s", staleList.size(), thresholdSeconds);
+
+        for (Notification notification : staleList) {
+            try {
+                recoverSingleStaleNotification(notification.getId());
+            } catch (ObjectOptimisticLockingFailureException ex) {
+                log.info("Concurrent claim during stale processing recovery for notification '{}'", notification.getId());
+            } catch (Exception ex) {
+                log.error("Error recovering stale processing notification '{}': {}", notification.getId(), ex.getMessage());
+            }
+        }
+    }
+
+    @Transactional
+    public void recoverSingleStaleNotification(String notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).orElse(null);
+        if (notification == null || notification.getStatus() != NotificationStatus.PROCESSING) {
+            return;
+        }
+
+        log.warn("Recovering notification '{}' stuck in PROCESSING status since {}", notification.getId(), notification.getUpdatedAt());
+        notification.recoverStaleProcessing("Stale PROCESSING status recovered by worker", Instant.now());
+        notificationRepository.save(notification);
     }
 
     @Transactional

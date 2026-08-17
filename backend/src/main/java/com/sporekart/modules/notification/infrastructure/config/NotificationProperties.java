@@ -11,6 +11,7 @@ public class NotificationProperties {
     private ChannelProperties sms = new ChannelProperties("mock", "twilio");
     private ChannelProperties whatsapp = new ChannelProperties("mock", "meta");
     private ChannelProperties push = new ChannelProperties("mock", "mock");
+    private ResilienceProperties resilience = new ResilienceProperties();
 
     public ChannelProperties getEmail() { return email; }
     public void setEmail(ChannelProperties email) { this.email = email; }
@@ -23,6 +24,9 @@ public class NotificationProperties {
 
     public ChannelProperties getPush() { return push; }
     public void setPush(ChannelProperties push) { this.push = push; }
+
+    public ResilienceProperties getResilience() { return resilience; }
+    public void setResilience(ResilienceProperties resilience) { this.resilience = resilience; }
 
     public static class ChannelProperties {
         private String mode = "mock"; // mock | real
@@ -88,5 +92,52 @@ public class NotificationProperties {
 
         public int getReadTimeoutMs() { return readTimeoutMs; }
         public void setReadTimeoutMs(int readTimeoutMs) { this.readTimeoutMs = readTimeoutMs; }
+    }
+
+    public static class ResilienceProperties {
+        private boolean circuitBreakerEnabled = true;
+        private int failureThreshold = 3;
+        private long openDurationMs = 10000;
+        private int halfOpenProbes = 1;
+        private long baseRetryDelayMs = 2000;
+        private long maxRetryDelayMs = 300000;
+        private long jitterMaxMs = 1000;
+        private boolean staleProcessingEnabled = true;
+        private long staleProcessingThresholdSeconds = 300;
+        private boolean reconciliationEnabled = true;
+        private long reconciliationStaleSentSeconds = 600;
+
+        public boolean isCircuitBreakerEnabled() { return circuitBreakerEnabled; }
+        public void setCircuitBreakerEnabled(boolean circuitBreakerEnabled) { this.circuitBreakerEnabled = circuitBreakerEnabled; }
+
+        public int getFailureThreshold() { return failureThreshold; }
+        public void setFailureThreshold(int failureThreshold) { this.failureThreshold = failureThreshold; }
+
+        public long getOpenDurationMs() { return openDurationMs; }
+        public void setOpenDurationMs(long openDurationMs) { this.openDurationMs = openDurationMs; }
+
+        public int getHalfOpenProbes() { return halfOpenProbes; }
+        public void setHalfOpenProbes(int halfOpenProbes) { this.halfOpenProbes = halfOpenProbes; }
+
+        public long getBaseRetryDelayMs() { return baseRetryDelayMs; }
+        public void setBaseRetryDelayMs(long baseRetryDelayMs) { this.baseRetryDelayMs = baseRetryDelayMs; }
+
+        public long getMaxRetryDelayMs() { return maxRetryDelayMs; }
+        public void setMaxRetryDelayMs(long maxRetryDelayMs) { this.maxRetryDelayMs = maxRetryDelayMs; }
+
+        public long getJitterMaxMs() { return jitterMaxMs; }
+        public void setJitterMaxMs(long jitterMaxMs) { this.jitterMaxMs = jitterMaxMs; }
+
+        public boolean isStaleProcessingEnabled() { return staleProcessingEnabled; }
+        public void setStaleProcessingEnabled(boolean staleProcessingEnabled) { this.staleProcessingEnabled = staleProcessingEnabled; }
+
+        public long getStaleProcessingThresholdSeconds() { return staleProcessingThresholdSeconds; }
+        public void setStaleProcessingThresholdSeconds(long staleProcessingThresholdSeconds) { this.staleProcessingThresholdSeconds = staleProcessingThresholdSeconds; }
+
+        public boolean isReconciliationEnabled() { return reconciliationEnabled; }
+        public void setReconciliationEnabled(boolean reconciliationEnabled) { this.reconciliationEnabled = reconciliationEnabled; }
+
+        public long getReconciliationStaleSentSeconds() { return reconciliationStaleSentSeconds; }
+        public void setReconciliationStaleSentSeconds(long reconciliationStaleSentSeconds) { this.reconciliationStaleSentSeconds = reconciliationStaleSentSeconds; }
     }
 }

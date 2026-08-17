@@ -32,6 +32,7 @@ public class NotificationApplicationService {
     private final NotificationOrchestrator orchestrator;
     private final SecurityAuditService auditService;
     private final NotificationProperties properties;
+    private final NotificationResilienceService resilienceService;
 
     public NotificationApplicationService(SpringDataJpaNotificationRepository notificationRepository,
                                         SpringDataJpaNotificationDeliveryAttemptRepository attemptRepository,
@@ -39,7 +40,8 @@ public class NotificationApplicationService {
                                         NotificationPreferenceService preferenceService,
                                         NotificationOrchestrator orchestrator,
                                         @Autowired(required = false) SecurityAuditService auditService,
-                                        @Autowired(required = false) NotificationProperties properties) {
+                                        @Autowired(required = false) NotificationProperties properties,
+                                        @Autowired(required = false) NotificationResilienceService resilienceService) {
         this.notificationRepository = notificationRepository;
         this.attemptRepository = attemptRepository;
         this.templateService = templateService;
@@ -47,6 +49,7 @@ public class NotificationApplicationService {
         this.orchestrator = orchestrator;
         this.auditService = auditService;
         this.properties = properties;
+        this.resilienceService = resilienceService;
     }
 
     @Transactional
@@ -181,6 +184,10 @@ public class NotificationApplicationService {
                     "whatsapp", Map.of("mode", properties.getWhatsapp().getMode(), "provider", properties.getWhatsapp().getProvider(), "configured", properties.getWhatsapp().getPhoneNumberId() != null),
                     "push", Map.of("mode", properties.getPush().getMode(), "provider", properties.getPush().getProvider(), "configured", true)
             ));
+        }
+
+        if (resilienceService != null) {
+            metrics.put("resilience", resilienceService.getHealthTracker().getHealthSummary(resilienceService.getCircuitBreaker()));
         }
 
         return metrics;

@@ -38,5 +38,11 @@ public interface SpringDataJpaNotificationRepository extends JpaRepository<Notif
     @Query("SELECT n FROM Notification n WHERE n.status IN (com.sporekart.modules.notification.domain.NotificationStatus.CREATED, com.sporekart.modules.notification.domain.NotificationStatus.QUEUED, com.sporekart.modules.notification.domain.NotificationStatus.RETRY_SCHEDULED) AND (n.scheduledAt IS NULL OR n.scheduledAt <= :now) ORDER BY n.createdAt ASC")
     Page<Notification> findEligibleForDelivery(@Param("now") Instant now, Pageable pageable);
 
+    @Query("SELECT n FROM Notification n WHERE n.status = com.sporekart.modules.notification.domain.NotificationStatus.PROCESSING AND n.updatedAt <= :cutoff ORDER BY n.updatedAt ASC")
+    Page<Notification> findStaleProcessingNotifications(@Param("cutoff") Instant cutoff, Pageable pageable);
+
+    @Query("SELECT n FROM Notification n WHERE n.status = com.sporekart.modules.notification.domain.NotificationStatus.SENT AND (n.lastProviderUpdateAt IS NULL OR n.lastProviderUpdateAt <= :cutoff) AND n.createdAt <= :cutoff ORDER BY n.createdAt ASC")
+    Page<Notification> findStaleSentNotifications(@Param("cutoff") Instant cutoff, Pageable pageable);
+
     Page<Notification> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

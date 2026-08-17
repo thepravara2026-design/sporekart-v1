@@ -107,6 +107,18 @@ public class Notification {
     @Column(name = "failure_reason", columnDefinition = "TEXT")
     private String failureReason;
 
+    @Column(name = "last_attempt_at")
+    private Instant lastAttemptAt;
+
+    @Column(name = "next_retry_at")
+    private Instant nextRetryAt;
+
+    @Column(name = "reconciliation_attempt_count")
+    private Integer reconciliationAttemptCount = 0;
+
+    @Column(name = "last_reconciliation_at")
+    private Instant lastReconciliationAt;
+
     protected Notification() {}
 
     public Notification(String eventId, String eventType, String userId, String customerId,
@@ -146,6 +158,7 @@ public class Notification {
         transitionTo(NotificationStatus.PROCESSING);
         this.providerName = providerName;
         this.attemptCount++;
+        this.lastAttemptAt = Instant.now();
     }
 
     public void markSent(String providerMessageId) {
@@ -187,6 +200,25 @@ public class Notification {
         this.failedAt = Instant.now();
         this.failureReason = reason;
         this.scheduledAt = nextScheduledAt;
+        this.nextRetryAt = nextScheduledAt;
+    }
+
+    public void recoverStaleProcessing(String reason, Instant nextScheduledAt) {
+        if (this.status == NotificationStatus.PROCESSING) {
+            transitionTo(NotificationStatus.RETRY_SCHEDULED);
+            this.failureReason = reason;
+            this.scheduledAt = nextScheduledAt;
+            this.nextRetryAt = nextScheduledAt;
+        }
+    }
+
+    public void recordReconciliationAttempt() {
+        if (this.reconciliationAttemptCount == null) {
+            this.reconciliationAttemptCount = 0;
+        }
+        this.reconciliationAttemptCount++;
+        this.lastReconciliationAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
     public void markRead() {
@@ -245,6 +277,11 @@ public class Notification {
     public Instant getDeliveredAt() { return deliveredAt; }
     public Instant getFailedAt() { return failedAt; }
     public String getFailureReason() { return failureReason; }
+
+    public Instant getLastAttemptAt() { return lastAttemptAt; }
+    public Instant getNextRetryAt() { return nextRetryAt; }
+    public Integer getReconciliationAttemptCount() { return reconciliationAttemptCount != null ? reconciliationAttemptCount : 0; }
+    public Instant getLastReconciliationAt() { return lastReconciliationAt; }
 
     @Override
     public boolean equals(Object o) {
