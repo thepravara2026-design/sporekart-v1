@@ -19,8 +19,8 @@ export const AdminReturnListPage: React.FC = () => {
     try {
       const data = await returnApi.listAdminReturns(undefined, orderRefFilter.trim() || undefined, statusFilter || undefined);
       setReturns(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch return requests.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch return requests.');
     } finally {
       setLoading(false);
     }
@@ -31,8 +31,8 @@ export const AdminReturnListPage: React.FC = () => {
     try {
       await returnApi.approveReturn(returnRef, 'admin-1', 'Approved via admin dashboard');
       await fetchAdminReturns();
-    } catch (err: any) {
-      alert('Approval failed: ' + (err.message || 'Error'));
+    } catch (err: unknown) {
+      alert('Approval failed: ' + (err instanceof Error ? err.message : 'Error'));
     } finally {
       setActionLoading(null);
     }
@@ -45,8 +45,8 @@ export const AdminReturnListPage: React.FC = () => {
     try {
       await returnApi.rejectReturn(returnRef, 'admin-1', reason);
       await fetchAdminReturns();
-    } catch (err: any) {
-      alert('Rejection failed: ' + (err.message || 'Error'));
+    } catch (err: unknown) {
+      alert('Rejection failed: ' + (err instanceof Error ? err.message : 'Error'));
     } finally {
       setActionLoading(null);
     }
@@ -61,8 +61,8 @@ export const AdminReturnListPage: React.FC = () => {
         notes: 'Passed warehouse QA'
       }, 'inspector-1');
       await fetchAdminReturns();
-    } catch (err: any) {
-      alert('Inspection processing failed: ' + (err.message || 'Error'));
+    } catch (err: unknown) {
+      alert('Inspection processing failed: ' + (err instanceof Error ? err.message : 'Error'));
     } finally {
       setActionLoading(null);
     }

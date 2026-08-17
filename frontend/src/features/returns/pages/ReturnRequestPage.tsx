@@ -38,8 +38,8 @@ export const ReturnRequestPage: React.FC<Props> = ({
         }
       });
       setSelectedQuantities(initialQty);
-    } catch (err: any) {
-      setError(err.message || 'Failed to evaluate return eligibility.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to evaluate return eligibility.');
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export const ReturnRequestPage: React.FC<Props> = ({
     if (!eligibility || !eligibility.eligible) return;
 
     const returnItems = Object.entries(selectedQuantities)
-      .filter(([_, qty]) => qty > 0)
+      .filter(([, qty]) => qty > 0)
       .map(([orderItemId, qty]) => ({
         orderItemId,
         quantity: qty
@@ -81,8 +81,8 @@ export const ReturnRequestPage: React.FC<Props> = ({
       if (onReturnSubmitted) {
         onReturnSubmitted(result.returnReference);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit return request.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit return request.');
     } finally {
       setSubmitting(false);
     }
