@@ -1,30 +1,23 @@
 package com.sporekart.modules.training.domain.event;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-public class TrainingProgramCreatedEvent implements TrainingEvent {
+public class TrainingProgramUpdatedEvent implements TrainingEvent {
 
     private final String eventId;
     private final String programId;
     private final String slug;
     private final String title;
-    private final BigDecimal priceAmount;
-    private final String currency;
+    private final String actorId;
     private final Instant occurredAt;
 
-    public TrainingProgramCreatedEvent(String programId, String title) {
-        this(programId, null, title, BigDecimal.ZERO, "INR");
-    }
-
-    public TrainingProgramCreatedEvent(String programId, String slug, String title, BigDecimal priceAmount, String currency) {
+    public TrainingProgramUpdatedEvent(String programId, String slug, String title, String actorId) {
         this.eventId = UUID.randomUUID().toString();
         this.programId = programId;
         this.slug = slug;
         this.title = title;
-        this.priceAmount = priceAmount;
-        this.currency = currency;
+        this.actorId = actorId;
         this.occurredAt = Instant.now();
     }
 
@@ -35,7 +28,7 @@ public class TrainingProgramCreatedEvent implements TrainingEvent {
 
     @Override
     public String getEventType() {
-        return "TRAINING_PROGRAM_CREATED";
+        return "TRAINING_PROGRAM_UPDATED";
     }
 
     @Override
@@ -46,6 +39,5 @@ public class TrainingProgramCreatedEvent implements TrainingEvent {
     public String getProgramId() { return programId; }
     public String getSlug() { return slug; }
     public String getTitle() { return title; }
-    public BigDecimal getPriceAmount() { return priceAmount; }
-    public String getCurrency() { return currency; }
+    public String getActorId() { return actorId; }
 }
