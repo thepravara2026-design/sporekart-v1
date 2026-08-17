@@ -19,4 +19,6 @@ public interface TrainingEnrollmentPaymentRepository {
     Optional<TrainingEnrollmentPayment> findByBatchIdAndTraineeId(String batchId, String traineeId);
 
     List<TrainingEnrollmentPayment> findByTraineeId(String traineeId);
+
+    List<TrainingEnrollmentPayment> findAll();
 }

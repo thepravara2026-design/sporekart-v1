@@ -79,6 +79,13 @@ public class JpaTrainingEnrollmentRepositoryAdapter implements TrainingEnrollmen
     }
 
     @Override
+    public List<TrainingEnrollment> findAll() {
+        return springDataRepository.findAll().stream()
+                .map(TrainingEnrollmentEntity::toDomain)
+                .toList();
+    }
+
+    @Override
     public Page<TrainingEnrollment> searchEnrollments(String batchId, com.sporekart.modules.training.domain.EnrollmentStatus status, String search, Pageable pageable) {
         String cleanSearch = (search == null || search.isBlank()) ? null : search.trim();
         String cleanBatchId = (batchId == null || batchId.isBlank()) ? null : batchId.trim();

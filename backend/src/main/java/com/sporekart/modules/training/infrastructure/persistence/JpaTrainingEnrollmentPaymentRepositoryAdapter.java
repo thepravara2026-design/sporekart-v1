@@ -53,4 +53,11 @@ public class JpaTrainingEnrollmentPaymentRepositoryAdapter implements TrainingEn
                 .map(TrainingEnrollmentPaymentEntity::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<TrainingEnrollmentPayment> findAll() {
+        return springDataRepository.findAll().stream()
+                .map(TrainingEnrollmentPaymentEntity::toDomain)
+                .collect(Collectors.toList());
+    }
 }

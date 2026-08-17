@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface SpringDataTrainingEnrollmentHistoryRepository extends JpaRepository<TrainingEnrollmentHistoryEntity, String> {
     List<TrainingEnrollmentHistoryEntity> findByEnrollmentIdOrderByCreatedAtAsc(String enrollmentId);
+    List<TrainingEnrollmentHistoryEntity> findAllByOrderByCreatedAtDesc();
 }

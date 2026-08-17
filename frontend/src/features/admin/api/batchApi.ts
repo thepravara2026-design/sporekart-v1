@@ -576,6 +576,108 @@ export const verifyCertificatePublic = async (verificationCode: string): Promise
   return response.data.data;
 };
 
+export interface ExecutiveOverviewDto {
+  activeProgramsCount: number;
+  totalBatches: number;
+  activeBatches: number;
+  fullBatches: number;
+  totalCapacitySeats: number;
+  totalOccupiedSeats: number;
+  totalAvailableSeats: number;
+  seatUtilizationPercentage: number;
+  totalEnrollments: number;
+  confirmedEnrollments: number;
+  pendingPaymentEnrollments: number;
+  cancelledEnrollments: number;
+  completedEnrollments: number;
+  grossRevenue: number;
+  totalRefunds: number;
+  netRevenue: number;
+  certificatesIssuedCount: number;
+}
+
+export interface BatchUtilizationReportItemDto {
+  batchId: string;
+  programId: string;
+  batchCode: string;
+  status: string;
+  totalSeats: number;
+  occupiedSeats: number;
+  availableSeats: number;
+  utilizationPercentage: number;
+}
+
+export interface FailedNotificationItemDto {
+  id: string;
+  eventType: string;
+  channel: string;
+  recipient: string;
+  errorMessage?: string;
+  createdAt: string;
+}
+
+export interface NotificationOperationalReportDto {
+  totalNotifications: number;
+  delivered: number;
+  failed: number;
+  pending: number;
+  failedItems: FailedNotificationItemDto[];
+}
+
+export interface AuditLogItemDto {
+  id: string;
+  enrollmentId: string;
+  fromStatus: string;
+  toStatus: string;
+  reason?: string;
+  actor: string;
+  timestamp: string;
+}
+
+export interface OperationalExceptionItemDto {
+  exceptionId: string;
+  type: string;
+  description: string;
+  severity: string;
+  resourceId: string;
+  resourceType: string;
+}
+
+export const fetchExecutiveOverview = async (): Promise<ExecutiveOverviewDto> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/reports/overview');
+  return response.data.data;
+};
+
+export const fetchBatchUtilizationReport = async (programId?: string): Promise<BatchUtilizationReportItemDto[]> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/reports/batches', { params: { programId } });
+  return response.data.data;
+};
+
+export const fetchNotificationReport = async (): Promise<NotificationOperationalReportDto> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/reports/notifications');
+  return response.data.data;
+};
+
+export const fetchAuditHistory = async (params?: { actor?: string; enrollmentId?: string }): Promise<AuditLogItemDto[]> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/reports/audit', { params });
+  return response.data.data;
+};
+
+export const fetchOperationalExceptions = async (): Promise<OperationalExceptionItemDto[]> => {
+  const response = await axiosInstance.get('/api/v1/admin/training/reports/exceptions');
+  return response.data.data;
+};
+
+export const retryFailedNotificationControl = async (notificationId: string): Promise<any> => {
+  const response = await axiosInstance.post(`/api/v1/admin/training/reports/controls/retry-notification/${notificationId}`);
+  return response.data.data;
+};
+
+export const retryCertificateGenerationControl = async (enrollmentId: string): Promise<any> => {
+  const response = await axiosInstance.post(`/api/v1/admin/training/reports/controls/retry-certificate/${enrollmentId}`);
+  return response.data.data;
+};
+
 
 
 
