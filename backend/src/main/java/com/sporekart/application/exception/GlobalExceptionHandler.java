@@ -57,6 +57,83 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.TrainingNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleTrainingNotFound(com.sporekart.modules.training.domain.exception.TrainingNotFoundException ex, HttpServletRequest request) {
+        log.warn("Training program not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("TRAINING_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.BatchNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleBatchNotFound(com.sporekart.modules.training.domain.exception.BatchNotFoundException ex, HttpServletRequest request) {
+        log.warn("Training batch not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("BATCH_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.BatchFullException.class)
+    public ResponseEntity<ApiErrorResponse> handleBatchFull(com.sporekart.modules.training.domain.exception.BatchFullException ex, HttpServletRequest request) {
+        log.warn("Training batch full on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("BATCH_FULL", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.EnrollmentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleEnrollmentNotFound(com.sporekart.modules.training.domain.exception.EnrollmentNotFoundException ex, HttpServletRequest request) {
+        log.warn("Training enrollment not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("ENROLLMENT_NOT_FOUND", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.DuplicateEnrollmentException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateEnrollment(com.sporekart.modules.training.domain.exception.DuplicateEnrollmentException ex, HttpServletRequest request) {
+        log.warn("Duplicate training enrollment on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("DUPLICATE_ENROLLMENT", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidTrainingStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidTrainingState(com.sporekart.modules.training.domain.exception.InvalidTrainingStateException ex, HttpServletRequest request) {
+        log.warn("Invalid training state on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_TRAINING_STATE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidBatchStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidBatchState(com.sporekart.modules.training.domain.exception.InvalidBatchStateException ex, HttpServletRequest request) {
+        log.warn("Invalid batch state on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_BATCH_STATE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.CapacityExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleCapacityExceeded(com.sporekart.modules.training.domain.exception.CapacityExceededException ex, HttpServletRequest request) {
+        log.warn("Training capacity exceeded on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CAPACITY_EXCEEDED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.CancellationWindowExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleCancellationWindowExpired(com.sporekart.modules.training.domain.exception.CancellationWindowExpiredException ex, HttpServletRequest request) {
+        log.warn("Cancellation window expired on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("CANCELLATION_WINDOW_EXPIRED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.RescheduleWindowExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleRescheduleWindowExpired(com.sporekart.modules.training.domain.exception.RescheduleWindowExpiredException ex, HttpServletRequest request) {
+        log.warn("Reschedule window expired on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("RESCHEDULE_WINDOW_EXPIRED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.UnauthorizedTrainingOperationException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnauthorizedTrainingOperation(com.sporekart.modules.training.domain.exception.UnauthorizedTrainingOperationException ex, HttpServletRequest request) {
+        log.warn("Unauthorized training operation on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("UNAUTHORIZED_TRAINING_OPERATION", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.cart.domain.exception.CartNotModifiableException.class)
     public ResponseEntity<ApiErrorResponse> handleCartNotModifiable(com.sporekart.modules.cart.domain.exception.CartNotModifiableException ex, HttpServletRequest request) {
         log.warn("Cart not modifiable on {}: {}", request.getRequestURI(), ex.getMessage());
