@@ -78,6 +78,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.BatchAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleBatchAlreadyExists(com.sporekart.modules.training.domain.exception.BatchAlreadyExistsException ex, HttpServletRequest request) {
+        log.warn("Batch conflict on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("BATCH_ALREADY_EXISTS", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidScheduleException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSchedule(com.sporekart.modules.training.domain.exception.InvalidScheduleException ex, HttpServletRequest request) {
+        log.warn("Invalid batch schedule on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_SCHEDULE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.TrainingProgramNotEligibleException.class)
+    public ResponseEntity<ApiErrorResponse> handleTrainingProgramNotEligible(com.sporekart.modules.training.domain.exception.TrainingProgramNotEligibleException ex, HttpServletRequest request) {
+        log.warn("Training program not eligible for batch creation on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("TRAINING_PROGRAM_NOT_ELIGIBLE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.BatchReassignmentNotAllowedException.class)
+    public ResponseEntity<ApiErrorResponse> handleBatchReassignmentNotAllowed(com.sporekart.modules.training.domain.exception.BatchReassignmentNotAllowedException ex, HttpServletRequest request) {
+        log.warn("Batch reassignment prohibited on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("BATCH_REASSIGNMENT_NOT_ALLOWED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.training.domain.exception.BatchNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleBatchNotFound(com.sporekart.modules.training.domain.exception.BatchNotFoundException ex, HttpServletRequest request) {
         log.warn("Training batch not found on {}: {}", request.getRequestURI(), ex.getMessage());
