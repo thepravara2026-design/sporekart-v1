@@ -2,6 +2,8 @@ package com.sporekart.modules.training.infrastructure.persistence;
 
 import com.sporekart.modules.training.domain.TrainingEnrollment;
 import com.sporekart.modules.training.domain.port.TrainingEnrollmentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,6 +37,14 @@ public class JpaTrainingEnrollmentRepositoryAdapter implements TrainingEnrollmen
     }
 
     @Override
+    public Optional<TrainingEnrollment> findByIdempotencyKey(String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            return Optional.empty();
+        }
+        return springDataRepository.findByIdempotencyKey(idempotencyKey).map(TrainingEnrollmentEntity::toDomain);
+    }
+
+    @Override
     public List<TrainingEnrollment> findByBatchId(String batchId) {
         return springDataRepository.findByBatchId(batchId).stream()
                 .map(TrainingEnrollmentEntity::toDomain)
@@ -42,10 +52,20 @@ public class JpaTrainingEnrollmentRepositoryAdapter implements TrainingEnrollmen
     }
 
     @Override
+    public Page<TrainingEnrollment> findByBatchId(String batchId, Pageable pageable) {
+        return springDataRepository.findByBatchId(batchId, pageable).map(TrainingEnrollmentEntity::toDomain);
+    }
+
+    @Override
     public List<TrainingEnrollment> findByTraineeId(String traineeId) {
         return springDataRepository.findByTraineeId(traineeId).stream()
                 .map(TrainingEnrollmentEntity::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<TrainingEnrollment> findByTraineeId(String traineeId, Pageable pageable) {
+        return springDataRepository.findByTraineeId(traineeId, pageable).map(TrainingEnrollmentEntity::toDomain);
     }
 
     @Override
