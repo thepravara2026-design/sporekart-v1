@@ -9,6 +9,7 @@ import {
   activateBatch,
   deactivateBatch,
   cancelBatch,
+  updateBatchCapacity,
 } from '../api/batchApi';
 
 export const BatchManagementConsole: React.FC = () => {
@@ -24,6 +25,8 @@ export const BatchManagementConsole: React.FC = () => {
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [editingBatch, setEditingBatch] = useState<BatchDto | null>(null);
+  const [capacityBatch, setCapacityBatch] = useState<BatchDto | null>(null);
+  const [capacityInput, setCapacityInput] = useState<number>(20);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   // Form states
@@ -88,6 +91,29 @@ export const BatchManagementConsole: React.FC = () => {
     setFormMeetingUrl(batch.meetingUrl || '');
     setFormTimezone(batch.timezone);
     setFormError(null);
+  };
+
+  const handleOpenCapacity = (batch: BatchDto) => {
+    setCapacityBatch(batch);
+    setCapacityInput(batch.totalCapacity);
+    setFormError(null);
+  };
+
+  const handleCapacitySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!capacityBatch) return;
+    if (capacityInput < capacityBatch.occupiedSeats) {
+      setFormError(`New capacity (${capacityInput}) cannot be less than occupied seats (${capacityBatch.occupiedSeats})`);
+      return;
+    }
+    try {
+      await updateBatchCapacity(capacityBatch.id, capacityInput);
+      setCapacityBatch(null);
+      setActionSuccess(`Capacity updated for batch ${capacityBatch.batchCode}`);
+      loadBatches();
+    } catch (err: any) {
+      setFormError(err?.response?.data?.message || 'Failed to update capacity');
+    }
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
@@ -331,6 +357,12 @@ export const BatchManagementConsole: React.FC = () => {
                           className="px-3 py-1 text-xs rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
                         >
                           Edit
+                        </button>
+                        <button
+                          onClick={() => handleOpenCapacity(batch)}
+                          className="px-3 py-1 text-xs rounded bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-800/60"
+                        >
+                          Capacity
                         </button>
                         <button
                           onClick={() => handleToggleActivate(batch)}
@@ -607,6 +639,58 @@ export const BatchManagementConsole: React.FC = () => {
                   className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-md"
                 >
                   Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Adjust Capacity */}
+      {capacityBatch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <h2 className="text-xl font-bold text-white">Adjust Batch Capacity — {capacityBatch.batchCode}</h2>
+
+            {formError && (
+              <div className="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-xs">
+                {formError}
+              </div>
+            )}
+
+            <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-xs space-y-1">
+              <div><span className="text-zinc-500">Currently Occupied:</span> <span className="font-mono text-emerald-400">{capacityBatch.occupiedSeats}</span></div>
+              <div><span className="text-zinc-500">Current Total:</span> <span className="font-mono text-zinc-300">{capacityBatch.totalCapacity}</span></div>
+              <div><span className="text-zinc-500">Available:</span> <span className="font-mono text-amber-400">{capacityBatch.totalCapacity - capacityBatch.occupiedSeats}</span></div>
+            </div>
+
+            <form onSubmit={handleCapacitySubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-zinc-400 mb-1">New Total Capacity *</label>
+                <input
+                  type="number"
+                  required
+                  min={capacityBatch.occupiedSeats}
+                  value={capacityInput}
+                  onChange={(e) => setCapacityInput(parseInt(e.target.value) || 0)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 focus:outline-none focus:border-emerald-500 font-mono"
+                />
+                <p className="text-[11px] text-zinc-500 mt-1">Must be greater than or equal to current occupied seats ({capacityBatch.occupiedSeats}).</p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setCapacityBatch(null)}
+                  className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-md"
+                >
+                  Update Capacity
                 </button>
               </div>
             </form>

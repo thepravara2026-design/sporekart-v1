@@ -101,12 +101,18 @@ export const deactivateBatch = async (id: string): Promise<BatchDto> => {
   return response.data.data;
 };
 
-export const cancelBatch = async (id: string): Promise<BatchDto> => {
-  const response = await axiosInstance.post(`/api/v1/admin/batches/${id}/cancel`);
+export interface CapacityDto {
+  batchId: string;
+  batchCode: string;
+  totalCapacity: number;
+  occupiedSeats: number;
+  availableSeats: number;
+  full: boolean;
+  status: BatchStatusType;
+}
+
+export const updateBatchCapacity = async (id: string, capacity: number): Promise<CapacityDto> => {
+  const response = await axiosInstance.patch(`/api/v1/admin/batches/${id}/capacity`, { capacity });
   return response.data.data;
 };
 
-export const addBatchSchedule = async (id: string, payload: AddSchedulePayload): Promise<ScheduleDto> => {
-  const response = await axiosInstance.post(`/api/v1/admin/batches/${id}/schedules`, payload);
-  return response.data.data;
-};
