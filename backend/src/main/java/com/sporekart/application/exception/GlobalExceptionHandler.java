@@ -162,6 +162,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.PaymentVerificationException.class)
+    public ResponseEntity<ApiErrorResponse> handlePaymentVerification(com.sporekart.modules.training.domain.exception.PaymentVerificationException ex, HttpServletRequest request) {
+        log.warn("Training payment verification failed on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("PAYMENT_VERIFICATION_FAILED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidPaymentStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPaymentState(com.sporekart.modules.training.domain.exception.InvalidPaymentStateException ex, HttpServletRequest request) {
+        log.warn("Invalid training payment state on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("INVALID_PAYMENT_STATE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.TrainingPaymentException.class)
+    public ResponseEntity<ApiErrorResponse> handleTrainingPayment(com.sporekart.modules.training.domain.exception.TrainingPaymentException ex, HttpServletRequest request) {
+        log.warn("Training payment error on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("TRAINING_PAYMENT_ERROR", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(com.sporekart.modules.training.domain.exception.InvalidTrainingStateException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidTrainingState(com.sporekart.modules.training.domain.exception.InvalidTrainingStateException ex, HttpServletRequest request) {
         log.warn("Invalid training state on {}: {}", request.getRequestURI(), ex.getMessage());

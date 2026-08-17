@@ -198,5 +198,55 @@ export const withdrawDemand = async (demandId: string): Promise<DemandDto> => {
   return response.data.data;
 };
 
+export interface TrainingPaymentOrderDto {
+  trainingPaymentId: string;
+  paymentId: string;
+  paymentReference: string;
+  batchId: string;
+  amount: number;
+  currency: string;
+  provider: 'RAZORPAY' | 'MOCK';
+  providerOrderId: string;
+  keyId: string;
+}
+
+export interface TrainingPaymentStatusDto {
+  trainingPaymentId: string;
+  paymentId: string;
+  batchId: string;
+  traineeId: string;
+  enrollmentId?: string;
+  amount: number;
+  currency: string;
+  status: 'PENDING' | 'VERIFIED' | 'ENROLLMENT_CONFIRMED' | 'ENROLLMENT_PENDING' | 'FAILED' | 'EXPIRED';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VerifyTrainingPaymentPayload {
+  paymentReference: string;
+  providerOrderId: string;
+  providerPaymentId: string;
+  providerSignature: string;
+}
+
+export const initiateTrainingPaymentOrder = async (batchId: string): Promise<TrainingPaymentOrderDto> => {
+  const response = await axiosInstance.post(`/api/v1/batches/${batchId}/enrollment/payment-order`);
+  return response.data.data;
+};
+
+export const verifyTrainingPayment = async (
+  batchId: string,
+  payload: VerifyTrainingPaymentPayload
+): Promise<TrainingPaymentStatusDto> => {
+  const response = await axiosInstance.post(`/api/v1/batches/${batchId}/enrollment/payment-verify`, payload);
+  return response.data.data;
+};
+
+export const fetchTrainingPaymentStatus = async (batchId: string): Promise<TrainingPaymentStatusDto> => {
+  const response = await axiosInstance.get(`/api/v1/batches/${batchId}/enrollment/payment-status`);
+  return response.data.data;
+};
+
 
 
