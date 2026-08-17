@@ -7,7 +7,8 @@ public enum NotificationCategory {
     SHIPPING(false),
     RETURN_REFUND(false),
     SECURITY(true),
-    SYSTEM_ALERT(true);
+    SYSTEM_ALERT(true),
+    TRAINING(true);
 
     private final boolean mandatory;
 

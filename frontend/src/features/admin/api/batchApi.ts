@@ -434,6 +434,40 @@ export const rescheduleAdminEnrollment = async (
   return response.data.data;
 };
 
+export interface NotificationDto {
+  id: string;
+  eventType: string;
+  channel: string;
+  subject: string;
+  body: string;
+  status: string;
+  priority: string;
+  read: boolean;
+  createdAt: string;
+  deliveredAt?: string;
+}
+
+export const fetchTraineeNotifications = async (
+  params?: { page?: number; size?: number }
+): Promise<PageResponse<NotificationDto>> => {
+  const response = await axiosInstance.get('/api/v1/notifications/in-app', { params });
+  return response.data.data;
+};
+
+export const fetchUnreadNotificationCount = async (): Promise<number> => {
+  const response = await axiosInstance.get('/api/v1/notifications/unread-count');
+  return response.data.data?.unreadCount || 0;
+};
+
+export const markNotificationRead = async (notificationId: string): Promise<NotificationDto> => {
+  const response = await axiosInstance.post(`/api/v1/notifications/${notificationId}/read`);
+  return response.data.data;
+};
+
+export const markAllNotificationsRead = async (): Promise<void> => {
+  await axiosInstance.post('/api/v1/notifications/mark-all-read');
+};
+
 
 
 

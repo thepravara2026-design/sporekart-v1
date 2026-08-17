@@ -4,6 +4,7 @@ import com.sporekart.modules.security.application.SecurityAuditService;
 import com.sporekart.modules.security.domain.AuditEventType;
 import com.sporekart.modules.security.domain.AuditStatus;
 import com.sporekart.modules.training.domain.*;
+import com.sporekart.modules.training.domain.event.TrainingEnrollmentRescheduledEvent;
 import com.sporekart.modules.training.domain.exception.BatchNotFoundException;
 import com.sporekart.modules.training.domain.exception.EnrollmentNotFoundException;
 import com.sporekart.modules.training.domain.exception.InvalidBatchStateException;
@@ -13,6 +14,7 @@ import com.sporekart.modules.training.domain.port.TrainingEnrollmentHistoryRepos
 import com.sporekart.modules.training.domain.port.TrainingEnrollmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ public class TrainingRescheduleService {
     private final CapacityApplicationService capacityService;
     private final CancellationEligibilityService eligibilityService;
     private final SecurityAuditService auditService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TrainingRescheduleService(
             TrainingEnrollmentRepository enrollmentRepository,
@@ -36,13 +39,15 @@ public class TrainingRescheduleService {
             TrainingEnrollmentHistoryRepository historyRepository,
             CapacityApplicationService capacityService,
             CancellationEligibilityService eligibilityService,
-            SecurityAuditService auditService) {
+            SecurityAuditService auditService,
+            ApplicationEventPublisher eventPublisher) {
         this.enrollmentRepository = Objects.requireNonNull(enrollmentRepository, "enrollmentRepository must not be null");
         this.batchRepository = Objects.requireNonNull(batchRepository, "batchRepository must not be null");
         this.historyRepository = Objects.requireNonNull(historyRepository, "historyRepository must not be null");
         this.capacityService = Objects.requireNonNull(capacityService, "capacityService must not be null");
         this.eligibilityService = Objects.requireNonNull(eligibilityService, "eligibilityService must not be null");
         this.auditService = Objects.requireNonNull(auditService, "auditService must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     @Transactional
@@ -140,6 +145,9 @@ public class TrainingRescheduleService {
                 AuditStatus.SUCCESS,
                 "Rescheduled enrollment " + saved.getId() + " from batch " + sourceBatch.getBatchCode() + " to " + targetBatch.getBatchCode()
         );
+
+        // 6. Event Publisher
+        eventPublisher.publishEvent(new TrainingEnrollmentRescheduledEvent(saved.getId(), sourceBatch.getId(), targetBatch.getId(), saved.getTraineeId()));
 
         return saved;
     }

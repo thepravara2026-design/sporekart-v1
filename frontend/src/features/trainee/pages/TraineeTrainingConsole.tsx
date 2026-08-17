@@ -5,6 +5,7 @@ import {
   EnrollmentDto,
   DemandDto,
   EnrollmentHistoryDto,
+  NotificationDto,
   fetchTraineeDashboard,
   fetchTraineeUpcomingTraining,
   fetchTraineeEnrollmentDetail,
@@ -13,11 +14,15 @@ import {
   fetchMyEnrollmentHistory,
   withdrawDemand,
   cancelMyEnrollment,
-  rescheduleMyEnrollment
+  rescheduleMyEnrollment,
+  fetchTraineeNotifications,
+  fetchUnreadNotificationCount,
+  markNotificationRead,
+  markAllNotificationsRead
 } from '../../admin/api/batchApi';
 
 export const TraineeTrainingConsole: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'enrollments' | 'demands'>('upcoming');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'enrollments' | 'demands' | 'notifications'>('upcoming');
 
   // Dashboard state
   const [dashboard, setDashboard] = useState<TraineeDashboardDto | null>(null);
@@ -36,6 +41,11 @@ export const TraineeTrainingConsole: React.FC = () => {
   // My demands state
   const [demands, setDemands] = useState<DemandDto[]>([]);
   const [demandsLoading, setDemandsLoading] = useState<boolean>(false);
+
+  // Notifications state
+  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState<boolean>(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
   // Detail Modal state
   const [selectedDetail, setSelectedDetail] = useState<TraineeEnrollmentDetailDto | null>(null);
@@ -62,9 +72,18 @@ export const TraineeTrainingConsole: React.FC = () => {
       const data = await fetchTraineeDashboard();
       setDashboard(data);
     } catch (err: any) {
-      // Quiet fail if guest or error
+      // Quiet fail if guest
     } finally {
       setDashboardLoading(false);
+    }
+  };
+
+  const loadUnreadCount = async () => {
+    try {
+      const count = await fetchUnreadNotificationCount();
+      setUnreadCount(count);
+    } catch (err: any) {
+      // Quiet fail
     }
   };
 
@@ -105,9 +124,23 @@ export const TraineeTrainingConsole: React.FC = () => {
     }
   };
 
+  const loadNotifications = async () => {
+    setNotificationsLoading(true);
+    try {
+      const data = await fetchTraineeNotifications();
+      setNotifications(data.content || []);
+      loadUnreadCount();
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || 'Failed to load notifications');
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadDashboard();
     loadUpcoming();
+    loadUnreadCount();
   }, []);
 
   useEffect(() => {
@@ -115,6 +148,8 @@ export const TraineeTrainingConsole: React.FC = () => {
       loadEnrollments();
     } else if (activeTab === 'demands') {
       loadDemands();
+    } else if (activeTab === 'notifications') {
+      loadNotifications();
     }
   }, [activeTab, enrollmentPage]);
 
@@ -167,6 +202,7 @@ export const TraineeTrainingConsole: React.FC = () => {
       setSelectedDetail(null);
       loadDashboard();
       loadUpcoming();
+      loadUnreadCount();
       if (activeTab === 'enrollments') loadEnrollments();
     } catch (err: any) {
       setActionError(err?.response?.data?.message || 'Failed to cancel enrollment. Note: Trainees may only cancel up to 2 days before training starts.');
@@ -188,6 +224,7 @@ export const TraineeTrainingConsole: React.FC = () => {
       setSelectedDetail(null);
       loadDashboard();
       loadUpcoming();
+      loadUnreadCount();
       if (activeTab === 'enrollments') loadEnrollments();
     } catch (err: any) {
       setActionError(err?.response?.data?.message || 'Failed to reschedule enrollment. Note: Trainees may only reschedule up to 2 days before training starts.');
@@ -196,16 +233,47 @@ export const TraineeTrainingConsole: React.FC = () => {
     }
   };
 
+  const handleMarkNotificationRead = async (notificationId: string) => {
+    try {
+      await markNotificationRead(notificationId);
+      loadNotifications();
+    } catch (err: any) {
+      // Quiet fail
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      loadNotifications();
+    } catch (err: any) {
+      // Quiet fail
+    }
+  };
+
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 8px 0' }}>
-          My Training Portal
-        </h1>
-        <p style={{ color: '#64748b', margin: 0 }}>
-          Manage your enrolled training programs, upcoming live sessions, demand requests, and schedules.
-        </p>
+      {/* Header with Notification Bell */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 8px 0' }}>
+            My Training Portal
+          </h1>
+          <p style={{ color: '#64748b', margin: 0 }}>
+            Manage your enrolled training programs, upcoming live sessions, demand requests, and notifications.
+          </p>
+        </div>
+        <button
+          onClick={() => setActiveTab('notifications')}
+          style={{ position: 'relative', padding: '8px 16px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', fontSize: '14px' }}
+        >
+          🔔 Notifications
+          {unreadCount > 0 && (
+            <span style={{ backgroundColor: '#dc2626', color: '#ffffff', fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', borderRadius: '10px' }}>
+              {unreadCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Global Alerts */}
@@ -284,6 +352,12 @@ export const TraineeTrainingConsole: React.FC = () => {
           style={{ padding: '12px 4px', border: 'none', background: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', borderBottom: activeTab === 'demands' ? '2px solid #2563eb' : 'none', color: activeTab === 'demands' ? '#2563eb' : '#64748b' }}
         >
           My Demand Requests
+        </button>
+        <button
+          onClick={() => setActiveTab('notifications')}
+          style={{ padding: '12px 4px', border: 'none', background: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', borderBottom: activeTab === 'notifications' ? '2px solid #2563eb' : 'none', color: activeTab === 'notifications' ? '#2563eb' : '#64748b' }}
+        >
+          Notifications {unreadCount > 0 && `(${unreadCount})`}
         </button>
       </div>
 
@@ -432,6 +506,69 @@ export const TraineeTrainingConsole: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'notifications' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', margin: 0 }}>In-App Notifications</h2>
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllRead}
+                style={{ padding: '6px 12px', backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+              >
+                Mark All as Read
+              </button>
+            )}
+          </div>
+
+          {notificationsLoading ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>Loading notifications...</div>
+          ) : notifications.length === 0 ? (
+            <div style={{ padding: '32px', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', color: '#64748b' }}>
+              No notifications found in your inbox.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '12px' }}>
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  style={{
+                    backgroundColor: n.read ? '#ffffff' : '#f0f9ff',
+                    border: '1px solid #e2e8f0',
+                    borderLeft: n.read ? '1px solid #e2e8f0' : '4px solid #0284c7',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    display: 'flex',
+                    justify: 'space-between',
+                    alignItems: 'flex-start'
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#0f172a' }}>{n.subject}</span>
+                      <span style={{ fontSize: '11px', fontWeight: 'bold', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#e2e8f0', color: '#475569' }}>
+                        {n.eventType}
+                      </span>
+                    </div>
+                    <p style={{ margin: '4px 0 8px 0', fontSize: '14px', color: '#334155' }}>{n.body}</p>
+                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                      Received: {new Date(n.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                  {!n.read && (
+                    <button
+                      onClick={() => handleMarkNotificationRead(n.id)}
+                      style={{ padding: '4px 10px', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}
+                    >
+                      Mark Read
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

@@ -3,6 +3,7 @@ package com.sporekart.modules.training.application;
 import com.sporekart.modules.training.domain.EnrollmentStatus;
 import com.sporekart.modules.training.domain.TrainingBatch;
 import com.sporekart.modules.training.domain.TrainingEnrollment;
+import com.sporekart.modules.training.domain.event.TrainingEnrollmentCancelledEvent;
 import com.sporekart.modules.training.domain.exception.BatchNotFoundException;
 import com.sporekart.modules.training.domain.exception.EnrollmentNotFoundException;
 import com.sporekart.modules.training.domain.exception.UnauthorizedEnrollmentAccessException;
@@ -10,6 +11,7 @@ import com.sporekart.modules.training.domain.port.TrainingBatchRepository;
 import com.sporekart.modules.training.domain.port.TrainingEnrollmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +27,21 @@ public class TrainingCancellationService {
     private final EnrollmentLifecycleService lifecycleService;
     private final CapacityApplicationService capacityService;
     private final CancellationEligibilityService eligibilityService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TrainingCancellationService(
             TrainingEnrollmentRepository enrollmentRepository,
             TrainingBatchRepository batchRepository,
             EnrollmentLifecycleService lifecycleService,
             CapacityApplicationService capacityService,
-            CancellationEligibilityService eligibilityService) {
+            CancellationEligibilityService eligibilityService,
+            ApplicationEventPublisher eventPublisher) {
         this.enrollmentRepository = Objects.requireNonNull(enrollmentRepository, "enrollmentRepository must not be null");
         this.batchRepository = Objects.requireNonNull(batchRepository, "batchRepository must not be null");
         this.lifecycleService = Objects.requireNonNull(lifecycleService, "lifecycleService must not be null");
         this.capacityService = Objects.requireNonNull(capacityService, "capacityService must not be null");
         this.eligibilityService = Objects.requireNonNull(eligibilityService, "eligibilityService must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     @Transactional
@@ -71,6 +76,8 @@ public class TrainingCancellationService {
             capacityService.releaseSlot(batch.getId());
         }
 
+        eventPublisher.publishEvent(new TrainingEnrollmentCancelledEvent(cancelled.getId(), cancelled.getBatchId(), cancelled.getTraineeId(), "TRAINEE"));
+
         return cancelled;
     }
 
@@ -97,6 +104,8 @@ public class TrainingCancellationService {
         if (wasCapacityConsuming) {
             capacityService.releaseSlot(batch.getId());
         }
+
+        eventPublisher.publishEvent(new TrainingEnrollmentCancelledEvent(cancelled.getId(), cancelled.getBatchId(), cancelled.getTraineeId(), "ADMIN"));
 
         return cancelled;
     }

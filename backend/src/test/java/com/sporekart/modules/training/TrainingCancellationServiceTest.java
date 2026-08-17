@@ -61,7 +61,7 @@ class TrainingCancellationServiceTest {
                 enrollmentRepository, historyRepository, batchRepository, paymentRepository, null, eventPublisher, auditService
         );
         cancellationService = new TrainingCancellationService(
-                enrollmentRepository, batchRepository, lifecycleService, capacityService, eligibilityService
+                enrollmentRepository, batchRepository, lifecycleService, capacityService, eligibilityService, eventPublisher
         );
     }
 

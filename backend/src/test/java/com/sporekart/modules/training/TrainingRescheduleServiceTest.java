@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -38,6 +39,7 @@ class TrainingRescheduleServiceTest {
     @Mock private TrainingEnrollmentHistoryRepository historyRepository;
     @Mock private CapacityApplicationService capacityService;
     @Mock private SecurityAuditService auditService;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     private CancellationEligibilityService eligibilityService;
     private TrainingRescheduleService rescheduleService;
@@ -54,7 +56,7 @@ class TrainingRescheduleServiceTest {
     void setUp() {
         eligibilityService = new CancellationEligibilityService();
         rescheduleService = new TrainingRescheduleService(
-                enrollmentRepository, batchRepository, historyRepository, capacityService, eligibilityService, auditService
+                enrollmentRepository, batchRepository, historyRepository, capacityService, eligibilityService, auditService, eventPublisher
         );
     }
 
