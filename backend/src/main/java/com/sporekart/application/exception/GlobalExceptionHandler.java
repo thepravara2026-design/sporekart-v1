@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleBatchFull(com.sporekart.modules.training.domain.exception.BatchFullException ex, HttpServletRequest request) {
         log.warn("Training batch full on {}: {}", request.getRequestURI(), ex.getMessage());
         ApiErrorResponse response = ApiErrorResponse.of("BATCH_FULL", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(com.sporekart.modules.training.domain.exception.EnrollmentNotFoundException.class)
@@ -527,6 +527,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleSecurityAccessDenied(com.sporekart.modules.security.domain.exception.SecurityAccessDeniedException ex, HttpServletRequest request) {
         log.warn("Security access denied on {}: {}", request.getRequestURI(), ex.getMessage());
         ApiErrorResponse response = ApiErrorResponse.of("ACCESS_DENIED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(com.sporekart.modules.training.domain.exception.UnauthorizedEnrollmentAccessException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnauthorizedEnrollmentAccess(com.sporekart.modules.training.domain.exception.UnauthorizedEnrollmentAccessException ex, HttpServletRequest request) {
+        log.warn("Unauthorized enrollment access on {}: {}", request.getRequestURI(), ex.getMessage());
+        ApiErrorResponse response = ApiErrorResponse.of("UNAUTHORIZED_ENROLLMENT_ACCESS", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 

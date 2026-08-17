@@ -116,3 +116,39 @@ export const updateBatchCapacity = async (id: string, capacity: number): Promise
   return response.data.data;
 };
 
+export interface EnrollmentDto {
+  id: string;
+  batchId: string;
+  traineeId: string;
+  status: 'PENDING' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED' | 'COMPLETED';
+  paymentReference?: string;
+  enrolledAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const enrollInBatch = async (batchId: string, idempotencyKey?: string): Promise<EnrollmentDto> => {
+  const headers: Record<string, string> = {};
+  if (idempotencyKey) {
+    headers['X-Idempotency-Key'] = idempotencyKey;
+  }
+  const response = await axiosInstance.post(`/api/v1/batches/${batchId}/enrollments`, { idempotencyKey }, { headers });
+  return response.data.data;
+};
+
+export const fetchMyEnrollments = async (
+  params?: { page?: number; size?: number; sort?: string }
+): Promise<PageResponse<EnrollmentDto>> => {
+  const response = await axiosInstance.get('/api/v1/me/enrollments', { params });
+  return response.data.data;
+};
+
+export const fetchBatchEnrollmentsForAdmin = async (
+  batchId: string,
+  params?: { page?: number; size?: number }
+): Promise<PageResponse<EnrollmentDto>> => {
+  const response = await axiosInstance.get(`/api/v1/admin/batches/${batchId}/enrollments`, { params });
+  return response.data.data;
+};
+
+
