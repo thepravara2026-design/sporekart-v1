@@ -58,7 +58,7 @@ public class EnrollmentApplicationService {
         this(enrollmentRepository, batchRepository, capacityService, eventPublisher, auditService, null);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = {BatchFullException.class, InvalidBatchStateException.class, DuplicateEnrollmentException.class})
     public TrainingEnrollment enrollTrainee(String batchId, String traineeId, String idempotencyKey) {
         Objects.requireNonNull(batchId, "batchId must not be null");
         Objects.requireNonNull(traineeId, "traineeId must not be null");
@@ -76,7 +76,10 @@ public class EnrollmentApplicationService {
         TrainingBatch batch = batchRepository.findById(batchId)
                 .orElseThrow(() -> new BatchNotFoundException("TrainingBatch not found for id: " + batchId));
 
-        if (batch.getStatus() == BatchStatus.FULL || batch.getStatus() == BatchStatus.CANCELLED || batch.getStatus() == BatchStatus.COMPLETED) {
+        if (batch.getStatus() == BatchStatus.FULL) {
+            throw new BatchFullException("Cannot enroll trainee: Batch " + batch.getBatchCode() + " is FULL");
+        }
+        if (batch.getStatus() == BatchStatus.CANCELLED || batch.getStatus() == BatchStatus.COMPLETED) {
             throw new InvalidBatchStateException("Batch " + batch.getBatchCode() + " is not accepting enrollments (Status: " + batch.getStatus() + ")");
         }
 
