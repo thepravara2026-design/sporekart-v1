@@ -1,5 +1,6 @@
 package com.sporekart.modules.support.controller;
 
+import com.sporekart.modules.security.infrastructure.jwt.UserPrincipal;
 import com.sporekart.modules.support.application.SupportApplicationService;
 import com.sporekart.modules.support.application.dto.*;
 import com.sporekart.modules.support.domain.TicketCategory;
@@ -9,6 +10,9 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin/support")
+@PreAuthorize("hasAnyRole('ADMIN', 'ROLE_ADMIN')")
 public class AdminSupportController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminSupportController.class);
@@ -24,6 +29,14 @@ public class AdminSupportController {
 
     public AdminSupportController(SupportApplicationService supportApplicationService) {
         this.supportApplicationService = supportApplicationService;
+    }
+
+    private String resolveAdminId(String headerAdminId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+            return principal.getId();
+        }
+        return headerAdminId != null ? headerAdminId : "admin-1";
     }
 
     @GetMapping("/tickets")
@@ -51,10 +64,11 @@ public class AdminSupportController {
     public ResponseEntity<SupportTicketDto> addAgentMessage(
             @PathVariable String ticketNumber,
             @Valid @RequestBody AddMessageRequestDto requestDto,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
-        log.info("REST Admin: Agent reply to ticket: {}", ticketNumber);
-        SupportTicketDto result = supportApplicationService.addAgentMessage(ticketNumber, requestDto, adminId);
+        String resolvedId = resolveAdminId(adminId);
+        log.info("REST Admin: Agent reply to ticket: {} by admin {}", ticketNumber, resolvedId);
+        SupportTicketDto result = supportApplicationService.addAgentMessage(ticketNumber, requestDto, resolvedId);
         return ResponseEntity.ok(result);
     }
 
@@ -62,10 +76,11 @@ public class AdminSupportController {
     public ResponseEntity<SupportTicketDto> assignTicket(
             @PathVariable String ticketNumber,
             @Valid @RequestBody AssignTicketRequestDto requestDto,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
-        log.info("REST Admin: Assign ticket {} to agent {}", ticketNumber, requestDto.agentId());
-        SupportTicketDto result = supportApplicationService.assignTicket(ticketNumber, requestDto.agentId(), adminId);
+        String resolvedId = resolveAdminId(adminId);
+        log.info("REST Admin: Assign ticket {} to agent {} by admin {}", ticketNumber, requestDto.agentId(), resolvedId);
+        SupportTicketDto result = supportApplicationService.assignTicket(ticketNumber, requestDto.agentId(), resolvedId);
         return ResponseEntity.ok(result);
     }
 
@@ -73,12 +88,13 @@ public class AdminSupportController {
     public ResponseEntity<SupportTicketDto> updatePriority(
             @PathVariable String ticketNumber,
             @RequestBody Map<String, String> body,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
         String priorityStr = body.get("priority");
         TicketPriority priority = TicketPriority.valueOf(priorityStr);
-        log.info("REST Admin: Update priority for ticket {} to {}", ticketNumber, priority);
-        SupportTicketDto result = supportApplicationService.updatePriority(ticketNumber, priority, adminId);
+        String resolvedId = resolveAdminId(adminId);
+        log.info("REST Admin: Update priority for ticket {} to {} by admin {}", ticketNumber, priority, resolvedId);
+        SupportTicketDto result = supportApplicationService.updatePriority(ticketNumber, priority, resolvedId);
         return ResponseEntity.ok(result);
     }
 
@@ -86,11 +102,12 @@ public class AdminSupportController {
     public ResponseEntity<SupportTicketDto> escalateTicket(
             @PathVariable String ticketNumber,
             @RequestBody Map<String, String> body,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
         String reason = body != null ? body.getOrDefault("reason", "Escalated by admin") : "Escalated by admin";
-        log.info("REST Admin: Escalate ticket: {}", ticketNumber);
-        SupportTicketDto result = supportApplicationService.escalateTicket(ticketNumber, reason, adminId);
+        String resolvedId = resolveAdminId(adminId);
+        log.info("REST Admin: Escalate ticket: {} by admin {}", ticketNumber, resolvedId);
+        SupportTicketDto result = supportApplicationService.escalateTicket(ticketNumber, reason, resolvedId);
         return ResponseEntity.ok(result);
     }
 
@@ -98,21 +115,23 @@ public class AdminSupportController {
     public ResponseEntity<SupportTicketDto> resolveTicket(
             @PathVariable String ticketNumber,
             @RequestBody Map<String, String> body,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
         String notes = body != null ? body.get("notes") : null;
-        log.info("REST Admin: Resolve ticket: {}", ticketNumber);
-        SupportTicketDto result = supportApplicationService.resolveTicket(ticketNumber, notes, adminId);
+        String resolvedId = resolveAdminId(adminId);
+        log.info("REST Admin: Resolve ticket: {} by admin {}", ticketNumber, resolvedId);
+        SupportTicketDto result = supportApplicationService.resolveTicket(ticketNumber, notes, resolvedId);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/tickets/{ticketNumber}/close")
     public ResponseEntity<SupportTicketDto> closeTicket(
             @PathVariable String ticketNumber,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
-        log.info("REST Admin: Close ticket: {}", ticketNumber);
-        SupportTicketDto result = supportApplicationService.closeTicket(ticketNumber, adminId);
+        String resolvedId = resolveAdminId(adminId);
+        log.info("REST Admin: Close ticket: {} by admin {}", ticketNumber, resolvedId);
+        SupportTicketDto result = supportApplicationService.closeTicket(ticketNumber, resolvedId);
         return ResponseEntity.ok(result);
     }
 
@@ -120,11 +139,12 @@ public class AdminSupportController {
     public ResponseEntity<ReplacementRequestDto> approveReplacement(
             @PathVariable String replacementRef,
             @RequestBody(required = false) Map<String, String> body,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
         String notes = body != null ? body.get("notes") : "Approved by admin";
-        log.info("REST Admin: Approve replacement: {}", replacementRef);
-        ReplacementRequestDto result = supportApplicationService.approveReplacement(replacementRef, notes, adminId);
+        String resolvedId = resolveAdminId(adminId);
+        log.info("REST Admin: Approve replacement: {} by admin {}", replacementRef, resolvedId);
+        ReplacementRequestDto result = supportApplicationService.approveReplacement(replacementRef, notes, resolvedId);
         return ResponseEntity.ok(result);
     }
 

@@ -3,6 +3,7 @@ package com.sporekart.application.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sporekart.application.exception.ApiErrorResponse;
 import com.sporekart.application.web.RequestIdFilter;
+import com.sporekart.application.web.RateLimitingFilter;
 import com.sporekart.modules.security.infrastructure.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,14 +42,17 @@ public class SecurityConfig {
 
     private final RequestIdFilter requestIdFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public SecurityConfig(
             RequestIdFilter requestIdFilter,
-            @Autowired(required = false) JwtAuthenticationFilter jwtAuthenticationFilter
+            @Autowired(required = false) JwtAuthenticationFilter jwtAuthenticationFilter,
+            @Autowired(required = false) RateLimitingFilter rateLimitingFilter
     ) {
         this.requestIdFilter = requestIdFilter;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
     }
 
     @Bean
@@ -61,11 +66,13 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .headers(headers -> headers
-                .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
-                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-                .frameOptions(frame -> frame.sameOrigin())
-            )
+            .headers(headers -> {
+                headers.contentTypeOptions(Customizer.withDefaults());
+                headers.xssProtection(Customizer.withDefaults());
+                headers.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"));
+                headers.referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN));
+                headers.frameOptions(frame -> frame.sameOrigin());
+            })
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(unauthorizedEntryPoint())
                 .accessDeniedHandler(accessDeniedHandler())
@@ -77,6 +84,13 @@ public class SecurityConfig {
         if (jwtAuthenticationFilter != null) {
             http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         }
+        if (rateLimitingFilter != null) {
+            if (jwtAuthenticationFilter != null) {
+                http.addFilterAfter(rateLimitingFilter, JwtAuthenticationFilter.class);
+            } else {
+                http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
+            }
+        }
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(
@@ -85,9 +99,6 @@ public class SecurityConfig {
                         "/actuator/health",
                         "/actuator/health/**",
                         "/actuator/info",
-                        "/actuator/prometheus",
-                        "/actuator/metrics",
-                        "/actuator/metrics/**",
                         "/h2-console/**",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
@@ -98,8 +109,13 @@ public class SecurityConfig {
                         "/api/v1/auth/login",
                         "/api/v1/auth/refresh"
                 ).permitAll()
+                .requestMatchers(
+                        "/actuator/prometheus",
+                        "/actuator/metrics",
+                        "/actuator/metrics/**"
+                ).hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**").permitAll()
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .anyRequest().authenticated()
         );
 
