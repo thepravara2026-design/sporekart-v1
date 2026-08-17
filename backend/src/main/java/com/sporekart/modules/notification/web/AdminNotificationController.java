@@ -12,10 +12,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin")
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'ROLE_ADMIN')")
 public class AdminNotificationController {
 
     private final NotificationApplicationService notificationService;
@@ -34,6 +35,27 @@ public class AdminNotificationController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Notification> notifications = notificationService.getAllNotificationsAdmin(pageable);
         return ResponseEntity.ok(ApiResponse.success(notifications));
+    }
+
+    @GetMapping("/notifications/health")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getNotificationHealth() {
+        Map<String, Object> health = notificationService.getNotificationHealthMetrics();
+        return ResponseEntity.ok(ApiResponse.success(health));
+    }
+
+    @PostMapping("/notifications/{id}/retry")
+    public ResponseEntity<ApiResponse<Notification>> retryNotification(@PathVariable String id) {
+        Notification notification = notificationService.retryNotificationAdmin(id);
+        return ResponseEntity.ok(ApiResponse.success(notification));
+    }
+
+    @PostMapping("/notifications/{id}/cancel")
+    public ResponseEntity<ApiResponse<Notification>> cancelNotification(
+            @PathVariable String id,
+            @RequestBody(required = false) Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : "Cancelled by admin";
+        Notification notification = notificationService.cancelNotification(null, id, reason);
+        return ResponseEntity.ok(ApiResponse.success(notification));
     }
 
     @GetMapping("/notifications/{id}/attempts")

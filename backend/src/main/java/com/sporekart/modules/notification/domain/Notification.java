@@ -71,6 +71,15 @@ public class Notification {
     @Column(name = "read_at")
     private Instant readAt;
 
+    @Column(name = "scheduled_at")
+    private Instant scheduledAt;
+
+    @Column(name = "cancelled_at")
+    private Instant cancelledAt;
+
+    @Column(name = "suppressed_at")
+    private Instant suppressedAt;
+
     @Version
     private Long version;
 
@@ -152,6 +161,25 @@ public class Notification {
         this.failureReason = reason;
     }
 
+    public void markCancelled(String reason) {
+        transitionTo(NotificationStatus.CANCELLED);
+        this.cancelledAt = Instant.now();
+        this.failureReason = reason;
+    }
+
+    public void markSuppressed(String reason) {
+        transitionTo(NotificationStatus.SUPPRESSED);
+        this.suppressedAt = Instant.now();
+        this.failureReason = reason;
+    }
+
+    public void scheduleRetry(String reason, Instant nextScheduledAt) {
+        transitionTo(NotificationStatus.RETRY_SCHEDULED);
+        this.failedAt = Instant.now();
+        this.failureReason = reason;
+        this.scheduledAt = nextScheduledAt;
+    }
+
     public void markRead() {
         if (this.readAt == null) {
             this.readAt = Instant.now();
@@ -180,6 +208,9 @@ public class Notification {
     public String getTraceId() { return traceId; }
     public int getAttemptCount() { return attemptCount; }
     public Instant getReadAt() { return readAt; }
+    public Instant getScheduledAt() { return scheduledAt; }
+    public Instant getCancelledAt() { return cancelledAt; }
+    public Instant getSuppressedAt() { return suppressedAt; }
     public Long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
