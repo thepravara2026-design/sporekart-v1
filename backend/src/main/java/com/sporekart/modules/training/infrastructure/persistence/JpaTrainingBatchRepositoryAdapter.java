@@ -1,7 +1,11 @@
 package com.sporekart.modules.training.infrastructure.persistence;
 
+import com.sporekart.modules.training.domain.BatchStatus;
+import com.sporekart.modules.training.domain.DeliveryMode;
 import com.sporekart.modules.training.domain.TrainingBatch;
 import com.sporekart.modules.training.domain.port.TrainingBatchRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -47,6 +51,22 @@ public class JpaTrainingBatchRepositoryAdapter implements TrainingBatchRepositor
         return springDataRepository.findAll().stream()
                 .map(TrainingBatchEntity::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<TrainingBatch> findAll(Pageable pageable) {
+        return springDataRepository.findAll(pageable).map(TrainingBatchEntity::toDomain);
+    }
+
+    @Override
+    public Page<TrainingBatch> searchBatches(String programId, BatchStatus status, DeliveryMode deliveryMode, Instant fromDate, Instant toDate, Pageable pageable) {
+        return springDataRepository.searchBatches(programId, status, deliveryMode, fromDate, toDate, pageable)
+                .map(TrainingBatchEntity::toDomain);
+    }
+
+    @Override
+    public Page<TrainingBatch> findPublicActiveBatches(Pageable pageable) {
+        return springDataRepository.findPublicActiveBatches(pageable).map(TrainingBatchEntity::toDomain);
     }
 
     @Override

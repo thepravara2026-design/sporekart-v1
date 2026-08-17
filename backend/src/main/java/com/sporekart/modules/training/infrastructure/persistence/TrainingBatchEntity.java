@@ -3,6 +3,7 @@ package com.sporekart.modules.training.infrastructure.persistence;
 import com.sporekart.modules.training.domain.BatchSchedule;
 import com.sporekart.modules.training.domain.BatchStatus;
 import com.sporekart.modules.training.domain.Capacity;
+import com.sporekart.modules.training.domain.DeliveryMode;
 import com.sporekart.modules.training.domain.TrainingBatch;
 import jakarta.persistence.*;
 
@@ -40,6 +41,25 @@ public class TrainingBatchEntity {
     @Column(nullable = false)
     private BatchStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_mode", nullable = false)
+    private DeliveryMode deliveryMode = DeliveryMode.ONLINE;
+
+    @Column(name = "venue_info", length = 500)
+    private String venueInfo;
+
+    @Column(name = "meeting_url", length = 500)
+    private String meetingUrl;
+
+    @Column(name = "timezone", nullable = false)
+    private String timezone = "Asia/Kolkata";
+
+    @Column(name = "created_by", length = 64)
+    private String createdBy;
+
+    @Column(name = "updated_by", length = 64)
+    private String updatedBy;
+
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<BatchScheduleEntity> schedules = new ArrayList<>();
 
@@ -51,7 +71,7 @@ public class TrainingBatchEntity {
 
     protected TrainingBatchEntity() {}
 
-    public TrainingBatchEntity(String id, String programId, String batchCode, Instant startDate, Instant endDate, int totalCapacity, int occupiedSeats, BatchStatus status, List<BatchScheduleEntity> schedules, Instant createdAt, Instant updatedAt) {
+    public TrainingBatchEntity(String id, String programId, String batchCode, Instant startDate, Instant endDate, int totalCapacity, int occupiedSeats, BatchStatus status, DeliveryMode deliveryMode, String venueInfo, String meetingUrl, String timezone, String createdBy, String updatedBy, List<BatchScheduleEntity> schedules, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.programId = programId;
         this.batchCode = batchCode;
@@ -60,6 +80,12 @@ public class TrainingBatchEntity {
         this.totalCapacity = totalCapacity;
         this.occupiedSeats = occupiedSeats;
         this.status = status;
+        this.deliveryMode = deliveryMode != null ? deliveryMode : DeliveryMode.ONLINE;
+        this.venueInfo = venueInfo;
+        this.meetingUrl = meetingUrl;
+        this.timezone = (timezone != null && !timezone.isBlank()) ? timezone : "Asia/Kolkata";
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         if (schedules != null) {
@@ -78,6 +104,12 @@ public class TrainingBatchEntity {
                 domain.getCapacity().getTotalCapacity(),
                 domain.getCapacity().getOccupiedSeats(),
                 domain.getStatus(),
+                domain.getDeliveryMode(),
+                domain.getVenueInfo(),
+                domain.getMeetingUrl(),
+                domain.getTimezone(),
+                domain.getCreatedBy(),
+                domain.getUpdatedBy(),
                 null,
                 domain.getCreatedAt(),
                 domain.getUpdatedAt()
@@ -94,7 +126,24 @@ public class TrainingBatchEntity {
         List<BatchSchedule> domainSchedules = schedules.stream()
                 .map(BatchScheduleEntity::toDomain)
                 .collect(Collectors.toList());
-        return new TrainingBatch(id, programId, batchCode, startDate, endDate, capacity, status, domainSchedules, createdAt, updatedAt);
+        return new TrainingBatch(
+                id,
+                programId,
+                batchCode,
+                startDate,
+                endDate,
+                capacity,
+                status,
+                deliveryMode,
+                venueInfo,
+                meetingUrl,
+                timezone,
+                createdBy,
+                updatedBy,
+                domainSchedules,
+                createdAt,
+                updatedAt
+        );
     }
 
     // Getters and setters
@@ -106,6 +155,12 @@ public class TrainingBatchEntity {
     public int getTotalCapacity() { return totalCapacity; }
     public int getOccupiedSeats() { return occupiedSeats; }
     public BatchStatus getStatus() { return status; }
+    public DeliveryMode getDeliveryMode() { return deliveryMode; }
+    public String getVenueInfo() { return venueInfo; }
+    public String getMeetingUrl() { return meetingUrl; }
+    public String getTimezone() { return timezone; }
+    public String getCreatedBy() { return createdBy; }
+    public String getUpdatedBy() { return updatedBy; }
     public List<BatchScheduleEntity> getSchedules() { return schedules; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
