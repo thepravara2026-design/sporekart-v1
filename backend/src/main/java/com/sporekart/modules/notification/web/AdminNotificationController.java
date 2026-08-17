@@ -28,13 +28,16 @@ public class AdminNotificationController {
     private final NotificationApplicationService notificationService;
     private final NotificationOperationsService operationsService;
     private final NotificationTemplateService templateService;
+    private final com.sporekart.modules.notification.application.NotificationRetentionService retentionService;
 
     public AdminNotificationController(NotificationApplicationService notificationService,
                                        NotificationOperationsService operationsService,
-                                       NotificationTemplateService templateService) {
+                                       NotificationTemplateService templateService,
+                                       @org.springframework.beans.factory.annotation.Autowired(required = false) com.sporekart.modules.notification.application.NotificationRetentionService retentionService) {
         this.notificationService = notificationService;
         this.operationsService = operationsService;
         this.templateService = templateService;
+        this.retentionService = retentionService;
     }
 
     @GetMapping("/notifications")
@@ -137,6 +140,46 @@ public class AdminNotificationController {
         String reason = body != null ? body.get("reason") : "Cancelled by admin request";
         NotificationOperationsService.NotificationDetailDto detail = operationsService.adminCancel(adminUser, id, reason);
         return ResponseEntity.ok(ApiResponse.success(detail));
+    }
+
+    @GetMapping("/notifications/retention/health")
+    public ResponseEntity<ApiResponse<com.sporekart.modules.notification.application.NotificationRetentionService.RetentionHealthDto>> getRetentionHealth() {
+        if (retentionService != null) {
+            return ResponseEntity.ok(ApiResponse.success(retentionService.getRetentionHealth()));
+        }
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @GetMapping("/notifications/retention/preview")
+    public ResponseEntity<ApiResponse<com.sporekart.modules.notification.application.NotificationRetentionService.RetentionPreviewDto>> getRetentionPreview() {
+        if (retentionService != null) {
+            return ResponseEntity.ok(ApiResponse.success(retentionService.getRetentionPreview()));
+        }
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping("/notifications/retention/run")
+    public ResponseEntity<ApiResponse<com.sporekart.modules.notification.application.NotificationRetentionService.RetentionExecutionResultDto>> runRetention(
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestParam(required = false, defaultValue = "false") boolean dryRun) {
+        String adminUser = principal != null ? principal.getUsername() : "ADMIN";
+        if (retentionService != null) {
+            var result = retentionService.executeRetentionJob(dryRun, adminUser);
+            return ResponseEntity.ok(ApiResponse.success(result));
+        }
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @GetMapping("/notifications/intelligence")
+    public ResponseEntity<ApiResponse<com.sporekart.modules.notification.application.NotificationRetentionService.OperationalIntelligenceDto>> getOperationalIntelligence(
+            @RequestParam(required = false, defaultValue = "24h") String timeWindow,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant toDate) {
+        if (retentionService != null) {
+            var intel = retentionService.getOperationalIntelligence(timeWindow, fromDate, toDate);
+            return ResponseEntity.ok(ApiResponse.success(intel));
+        }
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @PostMapping("/notifications/stale-recover")

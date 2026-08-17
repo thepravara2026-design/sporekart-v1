@@ -70,4 +70,25 @@ public interface SpringDataJpaNotificationRepository extends JpaRepository<Notif
 
     @Query("SELECT MIN(n.createdAt) FROM Notification n WHERE n.status = com.sporekart.modules.notification.domain.NotificationStatus.SENT AND (n.lastProviderUpdateAt IS NULL OR n.lastProviderUpdateAt <= :cutoff)")
     Optional<Instant> findOldestReconciliationCandidateCreatedAt(@Param("cutoff") Instant cutoff);
+
+    @Query("SELECT n FROM Notification n WHERE n.status IN (com.sporekart.modules.notification.domain.NotificationStatus.DELIVERED, com.sporekart.modules.notification.domain.NotificationStatus.FAILED_PERMANENTLY, com.sporekart.modules.notification.domain.NotificationStatus.CANCELLED, com.sporekart.modules.notification.domain.NotificationStatus.SUPPRESSED) AND n.createdAt <= :cutoff ORDER BY n.createdAt ASC")
+    Page<Notification> findEligibleForDeletion(@Param("cutoff") Instant cutoff, Pageable pageable);
+
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.status IN (com.sporekart.modules.notification.domain.NotificationStatus.DELIVERED, com.sporekart.modules.notification.domain.NotificationStatus.FAILED_PERMANENTLY, com.sporekart.modules.notification.domain.NotificationStatus.CANCELLED, com.sporekart.modules.notification.domain.NotificationStatus.SUPPRESSED) AND n.createdAt <= :cutoff")
+    long countEligibleForDeletion(@Param("cutoff") Instant cutoff);
+
+    @Query("SELECT n FROM Notification n WHERE n.status IN (com.sporekart.modules.notification.domain.NotificationStatus.DELIVERED, com.sporekart.modules.notification.domain.NotificationStatus.FAILED_PERMANENTLY, com.sporekart.modules.notification.domain.NotificationStatus.CANCELLED, com.sporekart.modules.notification.domain.NotificationStatus.SUPPRESSED) AND n.createdAt <= :cutoff AND (n.body <> '[REDACTED_PAYLOAD]' OR n.body IS NULL) ORDER BY n.createdAt ASC")
+    Page<Notification> findEligibleForPayloadMinimization(@Param("cutoff") Instant cutoff, Pageable pageable);
+
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.status IN (com.sporekart.modules.notification.domain.NotificationStatus.DELIVERED, com.sporekart.modules.notification.domain.NotificationStatus.FAILED_PERMANENTLY, com.sporekart.modules.notification.domain.NotificationStatus.CANCELLED, com.sporekart.modules.notification.domain.NotificationStatus.SUPPRESSED) AND n.createdAt <= :cutoff AND (n.body <> '[REDACTED_PAYLOAD]' OR n.body IS NULL)")
+    long countEligibleForPayloadMinimization(@Param("cutoff") Instant cutoff);
+
+    @Query("SELECT MIN(n.createdAt) FROM Notification n WHERE n.status IN (com.sporekart.modules.notification.domain.NotificationStatus.DELIVERED, com.sporekart.modules.notification.domain.NotificationStatus.FAILED_PERMANENTLY, com.sporekart.modules.notification.domain.NotificationStatus.CANCELLED, com.sporekart.modules.notification.domain.NotificationStatus.SUPPRESSED)")
+    Optional<Instant> findOldestTerminalCreatedAt();
+
+    long countByCreatedAtBetween(Instant fromDate, Instant toDate);
+
+    long countByStatusAndCreatedAtBetween(NotificationStatus status, Instant fromDate, Instant toDate);
+
+    List<Notification> findByCreatedAtBetween(Instant fromDate, Instant toDate);
 }

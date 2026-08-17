@@ -31,4 +31,10 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, String
 
     @Query("SELECT e FROM OutboxEvent e WHERE e.status = 'PROCESSING' AND e.scheduledAt <= :threshold ORDER BY e.createdAt ASC")
     List<OutboxEvent> findStaleProcessingEvents(@Param("threshold") OffsetDateTime threshold, Pageable pageable);
+
+    @Query("SELECT e FROM OutboxEvent e WHERE e.status = 'PROCESSED' AND e.processedAt <= :cutoff ORDER BY e.createdAt ASC")
+    Page<OutboxEvent> findProcessedEventsBefore(@Param("cutoff") OffsetDateTime cutoff, Pageable pageable);
+
+    @Query("SELECT COUNT(e) FROM OutboxEvent e WHERE e.status = 'PROCESSED' AND e.processedAt <= :cutoff")
+    long countProcessedEventsBefore(@Param("cutoff") OffsetDateTime cutoff);
 }

@@ -89,6 +89,7 @@ public class NotificationFoundationIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        outboxWorker.setEnabled(true);
         notificationRepository.deleteAll();
         outboxEventRepository.deleteAll();
         mockEmailProvider.clearOverrides();

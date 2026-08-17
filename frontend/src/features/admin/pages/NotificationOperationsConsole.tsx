@@ -77,6 +77,55 @@ export interface TimelineEvent {
   description: string;
 }
 
+export interface RetentionHealth {
+  status: string;
+  enabled: boolean;
+  dryRun: boolean;
+  notificationRetentionDays: number;
+  payloadRetentionDays: number;
+  auditRetentionDays: number;
+  outboxRetentionDays: number;
+  lastExecutionTime?: string;
+  lastSuccessTime?: string;
+  eligibleNotificationsForDeletion: number;
+  eligibleNotificationsForPayloadMinimization: number;
+  eligibleOutboxEventsForDeletion: number;
+  totalRecordsDeleted: number;
+  totalPayloadsMinimized: number;
+  totalOutboxCleaned: number;
+  totalFailures: number;
+}
+
+export interface OperationalIntelligence {
+  timeWindow: string;
+  totalNotifications: number;
+  deliveredNotifications: number;
+  failedNotifications: number;
+  cancelledNotifications: number;
+  suppressedNotifications: number;
+  retriedNotifications: number;
+  successRatePercent: number;
+  failureRatePercent: number;
+  cancellationRatePercent: number;
+  suppressionRatePercent: number;
+  retryRatePercent: number;
+  providerAggregates: Array<{
+    providerName: string;
+    channel: string;
+    sentCount: number;
+    deliveredCount: number;
+    failedCount: number;
+    successRatePercent: number;
+    averageDeliveryLatencyMs: number;
+  }>;
+  backlogAging: {
+    under1mCount: number;
+    between1mAnd5mCount: number;
+    between5mAnd15mCount: number;
+    over15mCount: number;
+  };
+}
+
 export const NotificationOperationsConsole: React.FC = () => {
   const [overallStatus, setOverallStatus] = useState<string>('HEALTHY');
   const [providers, setProviders] = useState<ProviderHealth[]>([]);
@@ -85,6 +134,8 @@ export const NotificationOperationsConsole: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationDetail[]>([]);
   const [selectedNotification, setSelectedNotification] = useState<NotificationDetail | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
+  const [retention, setRetention] = useState<RetentionHealth | null>(null);
+  const [intelligence, setIntelligence] = useState<OperationalIntelligence | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,15 +150,26 @@ export const NotificationOperationsConsole: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axiosInstance.get('/api/v1/admin/notifications/health');
-      if (res.data && res.data.data) {
-        const data = res.data.data;
+      const [hRes, retRes, intelRes] = await Promise.all([
+        axiosInstance.get('/api/v1/admin/notifications/health').catch(() => null),
+        axiosInstance.get('/api/v1/admin/notifications/retention/health').catch(() => null),
+        axiosInstance.get('/api/v1/admin/notifications/intelligence').catch(() => null),
+      ]);
+
+      if (hRes?.data?.data) {
+        const data = hRes.data.data;
         setOverallStatus(data.overallStatus || 'HEALTHY');
         setAlerts(data.activeAlerts || []);
         setBacklog(data.backlog || null);
         if (data.resilience && data.resilience.providers) {
           setProviders(data.resilience.providers);
         }
+      }
+      if (retRes?.data?.data) {
+        setRetention(retRes.data.data);
+      }
+      if (intelRes?.data?.data) {
+        setIntelligence(intelRes.data.data);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to load notification operations health';
@@ -189,6 +251,19 @@ export const NotificationOperationsConsole: React.FC = () => {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error executing recovery';
       alert('Stale recovery failed: ' + msg);
+    }
+  };
+
+  const handleRetentionRun = async (dryRun: boolean) => {
+    try {
+      const res = await axiosInstance.post(`/api/v1/admin/notifications/retention/run?dryRun=${dryRun}`);
+      const d = res.data?.data;
+      alert(`Retention ${dryRun ? 'Dry-Run' : 'Run'} completed. Deleted: ${d?.deletedNotificationsCount || 0}, Minimized: ${d?.minimizedPayloadsCount || 0}, Outbox Deleted: ${d?.deletedOutboxEventsCount || 0}`);
+      fetchHealthAndBacklog();
+      fetchNotifications();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error running retention';
+      alert('Retention run failed: ' + msg);
     }
   };
 
@@ -367,6 +442,111 @@ export const NotificationOperationsConsole: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Notification Governance & Data Retention Card */}
+      {retention && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                Notification Governance & Data Retention
+                {retention.dryRun && <span className="px-2 py-0.5 text-xs font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">DRY-RUN MODE</span>}
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">Automated cleanup, payload minimization, and data lifecycle management</p>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleRetentionRun(true)}
+                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded shadow transition"
+              >
+                Preview Dry-Run
+              </button>
+              <button
+                onClick={() => handleRetentionRun(false)}
+                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded shadow transition"
+              >
+                Execute Retention Cleanup
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 text-xs font-mono">
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Eligible Deletions</span>
+              <span className="text-xl font-bold text-rose-400 mt-1 block">{retention.eligibleNotificationsForDeletion}</span>
+              <span className="text-[10px] text-slate-500">Cutoff: {retention.notificationRetentionDays}d</span>
+            </div>
+
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Eligible Minimization</span>
+              <span className="text-xl font-bold text-amber-400 mt-1 block">{retention.eligibleNotificationsForPayloadMinimization}</span>
+              <span className="text-[10px] text-slate-500">Cutoff: {retention.payloadRetentionDays}d</span>
+            </div>
+
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Eligible Outbox</span>
+              <span className="text-xl font-bold text-sky-400 mt-1 block">{retention.eligibleOutboxEventsForDeletion}</span>
+              <span className="text-[10px] text-slate-500">Cutoff: {retention.outboxRetentionDays}d</span>
+            </div>
+
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Total Deleted</span>
+              <span className="text-xl font-bold text-emerald-400 mt-1 block">{retention.totalRecordsDeleted}</span>
+              <span className="text-[10px] text-slate-500">Outbox: {retention.totalOutboxCleaned}</span>
+            </div>
+
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Payloads Minimized</span>
+              <span className="text-xl font-bold text-purple-400 mt-1 block">{retention.totalPayloadsMinimized}</span>
+              <span className="text-[10px] text-slate-500">SHA-256 Hashed</span>
+            </div>
+
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Retention Status</span>
+              <span className="text-sm font-bold text-emerald-400 mt-1 block">{retention.status}</span>
+              <span className="text-[10px] text-slate-500">Failures: {retention.totalFailures}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Operational Intelligence Card */}
+      {intelligence && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold text-white">Operational Intelligence (24h Window)</h2>
+            <span className="text-xs font-mono text-slate-400">Total Notifications: {intelligence.totalNotifications}</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs font-mono">
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Success Rate</span>
+              <span className="text-xl font-bold text-emerald-400 mt-1 block">{intelligence.successRatePercent}%</span>
+              <span className="text-[10px] text-slate-500">{intelligence.deliveredNotifications} delivered</span>
+            </div>
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Failure Rate</span>
+              <span className="text-xl font-bold text-rose-400 mt-1 block">{intelligence.failureRatePercent}%</span>
+              <span className="text-[10px] text-slate-500">{intelligence.failedNotifications} failed</span>
+            </div>
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Retry Rate</span>
+              <span className="text-xl font-bold text-orange-400 mt-1 block">{intelligence.retryRatePercent}%</span>
+              <span className="text-[10px] text-slate-500">{intelligence.retriedNotifications} retried</span>
+            </div>
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Suppression Rate</span>
+              <span className="text-xl font-bold text-purple-400 mt-1 block">{intelligence.suppressionRatePercent}%</span>
+              <span className="text-[10px] text-slate-500">{intelligence.suppressedNotifications} suppressed</span>
+            </div>
+            <div className="bg-slate-900/60 p-3 rounded border border-slate-700">
+              <span className="text-slate-400 block text-[10px] uppercase">Cancellation Rate</span>
+              <span className="text-xl font-bold text-gray-400 mt-1 block">{intelligence.cancellationRatePercent}%</span>
+              <span className="text-[10px] text-slate-500">{intelligence.cancelledNotifications} cancelled</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Notifications Inspection & Filters */}
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg space-y-4">

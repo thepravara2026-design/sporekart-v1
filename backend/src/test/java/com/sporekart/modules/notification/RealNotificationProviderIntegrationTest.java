@@ -85,6 +85,7 @@ public class RealNotificationProviderIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        outboxWorker.setEnabled(true);
         notificationRepository.deleteAll();
         outboxEventRepository.deleteAll();
         testRestTemplate = new RestTemplate();

@@ -12,6 +12,7 @@ public class NotificationProperties {
     private ChannelProperties whatsapp = new ChannelProperties("mock", "meta");
     private ChannelProperties push = new ChannelProperties("mock", "mock");
     private ResilienceProperties resilience = new ResilienceProperties();
+    private RetentionProperties retention = new RetentionProperties();
 
     public ChannelProperties getEmail() { return email; }
     public void setEmail(ChannelProperties email) { this.email = email; }
@@ -27,6 +28,9 @@ public class NotificationProperties {
 
     public ResilienceProperties getResilience() { return resilience; }
     public void setResilience(ResilienceProperties resilience) { this.resilience = resilience; }
+
+    public RetentionProperties getRetention() { return retention; }
+    public void setRetention(RetentionProperties retention) { this.retention = retention; }
 
     public static class ChannelProperties {
         private String mode = "mock"; // mock | real
@@ -139,5 +143,36 @@ public class NotificationProperties {
 
         public long getReconciliationStaleSentSeconds() { return reconciliationStaleSentSeconds; }
         public void setReconciliationStaleSentSeconds(long reconciliationStaleSentSeconds) { this.reconciliationStaleSentSeconds = reconciliationStaleSentSeconds; }
+    }
+
+    public static class RetentionProperties {
+        private boolean enabled = true;
+        private boolean dryRun = false;
+        private int notificationDays = 30;
+        private int payloadDays = 7;
+        private int auditDays = 90;
+        private int outboxDays = 14;
+        private int batchSize = 100;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+        public boolean isDryRun() { return dryRun; }
+        public void setDryRun(boolean dryRun) { this.dryRun = dryRun; }
+
+        public int getNotificationDays() { return notificationDays; }
+        public void setNotificationDays(int notificationDays) { this.notificationDays = notificationDays; }
+
+        public int getPayloadDays() { return payloadDays; }
+        public void setPayloadDays(int payloadDays) { this.payloadDays = payloadDays; }
+
+        public int getAuditDays() { return auditDays; }
+        public void setAuditDays(int auditDays) { this.auditDays = auditDays; }
+
+        public int getOutboxDays() { return outboxDays; }
+        public void setOutboxDays(int outboxDays) { this.outboxDays = outboxDays; }
+
+        public int getBatchSize() { return batchSize; }
+        public void setBatchSize(int batchSize) { this.batchSize = batchSize; }
     }
 }

@@ -94,6 +94,7 @@ public class NotificationOperationsIntegrationTest {
 
     @BeforeEach
     public void setUp() {
+        outboxWorker.setEnabled(true);
         circuitBreaker.reset("MockEmailProvider", NotificationChannel.EMAIL);
         circuitBreaker.reset("MockSmsProvider", NotificationChannel.SMS);
         circuitBreaker.reset("SendGrid", NotificationChannel.EMAIL);

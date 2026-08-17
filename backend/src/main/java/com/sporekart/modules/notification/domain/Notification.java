@@ -119,6 +119,12 @@ public class Notification {
     @Column(name = "last_reconciliation_at")
     private Instant lastReconciliationAt;
 
+    @Column(name = "content_hash")
+    private String contentHash;
+
+    @Column(name = "payload_minimized_at")
+    private Instant payloadMinimizedAt;
+
     protected Notification() {}
 
     public Notification(String eventId, String eventType, String userId, String customerId,
@@ -282,6 +288,15 @@ public class Notification {
     public Instant getNextRetryAt() { return nextRetryAt; }
     public Integer getReconciliationAttemptCount() { return reconciliationAttemptCount != null ? reconciliationAttemptCount : 0; }
     public Instant getLastReconciliationAt() { return lastReconciliationAt; }
+    public String getContentHash() { return contentHash; }
+    public Instant getPayloadMinimizedAt() { return payloadMinimizedAt; }
+
+    public void minimizePayload(String hash) {
+        this.body = "[REDACTED_PAYLOAD]";
+        this.contentHash = hash;
+        this.payloadMinimizedAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
 
     @Override
     public boolean equals(Object o) {
