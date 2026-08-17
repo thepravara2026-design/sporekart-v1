@@ -186,7 +186,7 @@ class TrainingDataIntegrityTest {
     void inv12_attendanceHasValidEnrollment() {
         List<Map<String, Object>> orphaned = jdbc.queryForList(
                 "SELECT a.id, a.enrollment_id " +
-                "FROM training_attendance a " +
+                "FROM training_attendances a " +
                 "WHERE NOT EXISTS (SELECT 1 FROM training_enrollments e WHERE e.id = a.enrollment_id)"
         );
         assertThat(orphaned)

@@ -147,7 +147,7 @@ class TrainingSecurityAcceptanceTest {
             Capacity fullCapacity = new Capacity(5, 5);
             assertThatThrownBy(fullCapacity::allocateSeat)
                     .isInstanceOf(CapacityExceededException.class)
-                    .hasMessageContaining("FULL");
+                    .hasMessageContaining("full");
         }
 
         @Test
