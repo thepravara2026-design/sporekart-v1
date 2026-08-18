@@ -188,8 +188,7 @@ public class PaymentApplicationService {
         if (!validSig) {
             log.warn("Payment signature verification failed for ref {}", command.paymentReference());
             if (activeAttempt != null) {
-                payment.markFailed(activeAttempt.getId(), "INVALID_SIGNATURE", "Cryptographic signature verification failed");
-                paymentRepository.save(payment);
+                recordPaymentFailure(payment.getId(), activeAttempt.getId(), "INVALID_SIGNATURE", "Cryptographic signature verification failed");
             }
             throw new PaymentVerificationFailedException("Payment signature verification failed");
         }
@@ -198,8 +197,7 @@ public class PaymentApplicationService {
         if (activeAttempt != null && activeAttempt.getProviderOrderId() != null
                 && !activeAttempt.getProviderOrderId().equals(command.providerOrderId())) {
             log.warn("Provider order ID mismatch: expected {}, got {}", activeAttempt.getProviderOrderId(), command.providerOrderId());
-            payment.markFailed(activeAttempt.getId(), "ORDER_ID_MISMATCH", "Provider order ID mismatch");
-            paymentRepository.save(payment);
+            recordPaymentFailure(payment.getId(), activeAttempt.getId(), "ORDER_ID_MISMATCH", "Provider order ID mismatch");
             throw new PaymentVerificationFailedException("Provider order ID mismatch");
         }
 
@@ -359,6 +357,15 @@ public class PaymentApplicationService {
         if (reservation != null && reservation.isActive()) {
             inventoryApplicationService.releaseReservation(reservation.getId(), reason);
             log.info("Stock reservation for order {} RELEASED due to payment failure", orderId);
+        }
+    }
+
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public void recordPaymentFailure(UUID paymentId, UUID attemptId, String code, String reason) {
+        Payment payment = paymentRepository.findById(paymentId).orElse(null);
+        if (payment != null && !payment.isSuccessful()) {
+            payment.markFailed(attemptId, code, reason);
+            paymentRepository.save(payment);
         }
     }
 }

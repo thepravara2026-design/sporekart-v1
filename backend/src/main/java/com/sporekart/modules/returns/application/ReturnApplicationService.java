@@ -254,6 +254,18 @@ public class ReturnApplicationService {
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found for order: " + returnAgg.getOrderId()));
 
         String idempotencyKey = "RFD-" + returnAgg.getReturnReference();
+
+        // Enforce financial invariant: cumulative refunds cannot exceed payment amount
+        List<RefundRecordEntity> existingOrderRefunds = refundRecordRepository.findByOrderId(returnAgg.getOrderId());
+        BigDecimal cumulativeRefunded = existingOrderRefunds.stream()
+                .filter(r -> "PROCESSED".equals(r.getStatus()) && !r.getIdempotencyKey().equals(idempotencyKey))
+                .map(RefundRecordEntity::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (cumulativeRefunded.add(refundAmount).compareTo(payment.getAmount()) > 0) {
+            throw new IllegalArgumentException("Cumulative refund amount (" + cumulativeRefunded.add(refundAmount) + ") exceeds original payment amount (" + payment.getAmount() + ")");
+        }
+
         Optional<RefundRecordEntity> existingRefundOpt = refundRecordRepository.findByIdempotencyKey(idempotencyKey);
 
         RefundRecordEntity refundRecord;
