@@ -32,6 +32,12 @@ const GrowerShipmentsPage = lazy(() => import('../features/grower/pages/GrowerSh
 const GrowerReportsPage = lazy(() => import('../features/grower/pages/GrowerReportsPage').then(module => ({ default: module.GrowerReportsPage })));
 const GrowerSettingsPage = lazy(() => import('../features/grower/pages/GrowerSettingsPage').then(module => ({ default: module.GrowerSettingsPage })));
 
+// Seller Portal Routes (FD-15)
+const SellerDashboardPage = lazy(() => import('../features/seller/pages/SellerDashboardPage').then(module => ({ default: module.SellerDashboardPage })));
+const SellerProductManagementPage = lazy(() => import('../features/seller/pages/SellerProductManagementPage').then(module => ({ default: module.SellerProductManagementPage })));
+const SellerInventoryPage = lazy(() => import('../features/seller/pages/SellerInventoryPage').then(module => ({ default: module.SellerInventoryPage })));
+const SellerOrderManagementPage = lazy(() => import('../features/seller/pages/SellerOrderManagementPage').then(module => ({ default: module.SellerOrderManagementPage })));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -72,6 +78,15 @@ export const App: FC = () => {
                 <Route path="shipments" element={<GrowerShipmentsPage />} />
                 <Route path="reports" element={<GrowerReportsPage />} />
                 <Route path="settings" element={<GrowerSettingsPage />} />
+              </Route>
+
+              {/* Seller Portal (FD-15) */}
+              <Route path="seller">
+                <Route index element={<Suspense fallback={<RouteFallback />}><SellerDashboardPage /></Suspense>} />
+                <Route path="dashboard" element={<Suspense fallback={<RouteFallback />}><SellerDashboardPage /></Suspense>} />
+                <Route path="products" element={<Suspense fallback={<RouteFallback />}><SellerProductManagementPage /></Suspense>} />
+                <Route path="inventory" element={<Suspense fallback={<RouteFallback />}><SellerInventoryPage /></Suspense>} />
+                <Route path="orders" element={<Suspense fallback={<RouteFallback />}><SellerOrderManagementPage /></Suspense>} />
               </Route>
 
               {/* Main Storefront Routes */}

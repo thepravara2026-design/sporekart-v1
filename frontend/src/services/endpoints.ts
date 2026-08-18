@@ -111,4 +111,14 @@ export const ENDPOINTS = {
   GROWER_SHIPMENTS: '/api/v1/grower/shipments',
   GROWER_REPORTS: '/api/v1/grower/reports/summary',
   GROWER_SETTINGS: '/api/v1/grower/settings',
+
+  // Seller Marketplace
+  SELLER_DASHBOARD: '/api/v1/seller/dashboard',
+  SELLER_PRODUCTS: '/api/v1/seller/products',
+  SELLER_PRODUCT_BY_ID: (id: string) => `/api/v1/seller/products/${id}`,
+  SELLER_INVENTORY: '/api/v1/seller/inventory',
+  SELLER_INVENTORY_ADJUST: (sku: string) => `/api/v1/seller/inventory/${sku}/adjustments`,
+  SELLER_ORDERS: '/api/v1/seller/orders',
+  SELLER_ORDER_TRANSITION: (id: string) => `/api/v1/seller/orders/${id}/status`,
+  SELLER_PAYOUTS: '/api/v1/seller/payouts',
 } as const;
