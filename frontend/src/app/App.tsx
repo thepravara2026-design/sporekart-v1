@@ -9,9 +9,10 @@ import { ProductListPage } from '../features/catalog/pages/ProductListPage';
 import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage';
 import { CategoryListPage } from '../features/catalog/pages/CategoryListPage';
 
-// Sprint 6E Performance Hardening: Code-split secondary routes using React.lazy & Suspense
+// Code-split secondary routes using React.lazy & Suspense
 const HealthPage = lazy(() => import('../pages/HealthPage').then(module => ({ default: module.HealthPage })));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage').then(module => ({ default: module.NotFoundPage })));
+const DesignSystemShowcase = lazy(() => import('../pages/DesignSystemShowcase').then(module => ({ default: module.DesignSystemShowcase })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +26,7 @@ const queryClient = new QueryClient({
 
 const RouteFallback: FC = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '3rem' }}>
-    <div style={{ fontSize: '1rem', color: '#64748b' }}>Loading page...</div>
+    <div style={{ fontSize: '1rem', color: '#9ca3af' }}>Loading page...</div>
   </div>
 );
 
@@ -45,6 +46,14 @@ export const App: FC = () => {
                 element={
                   <Suspense fallback={<RouteFallback />}>
                     <HealthPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="design-system-showcase"
+                element={
+                  <Suspense fallback={<RouteFallback />}>
+                    <DesignSystemShowcase />
                   </Suspense>
                 }
               />
