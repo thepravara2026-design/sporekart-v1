@@ -16,6 +16,12 @@ import com.sporekart.modules.order.infrastructure.persistence.OrderRepository;
 import com.sporekart.modules.shipment.domain.Shipment;
 import com.sporekart.modules.shipment.infrastructure.persistence.ShipmentRepository;
 
+import com.sporekart.modules.security.application.SecurityAuditService;
+import com.sporekart.modules.security.domain.AuditEventType;
+import com.sporekart.modules.security.domain.AuditStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +38,14 @@ import java.util.UUID;
 @Transactional
 public class GrowerApplicationService {
 
+    private static final Logger log = LoggerFactory.getLogger(GrowerApplicationService.class);
+
     private final GrowerProfileRepository growerProfileRepository;
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
     private final OrderRepository orderRepository;
     private final ShipmentRepository shipmentRepository;
+    private final SecurityAuditService auditService;
 
     public GrowerApplicationService(
             GrowerProfileRepository growerProfileRepository,
@@ -45,11 +54,24 @@ public class GrowerApplicationService {
             OrderRepository orderRepository,
             ShipmentRepository shipmentRepository
     ) {
+        this(growerProfileRepository, productRepository, inventoryRepository, orderRepository, shipmentRepository, null);
+    }
+
+    @Autowired
+    public GrowerApplicationService(
+            GrowerProfileRepository growerProfileRepository,
+            ProductRepository productRepository,
+            InventoryRepository inventoryRepository,
+            OrderRepository orderRepository,
+            ShipmentRepository shipmentRepository,
+            @Autowired(required = false) SecurityAuditService auditService
+    ) {
         this.growerProfileRepository = growerProfileRepository;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
         this.orderRepository = orderRepository;
         this.shipmentRepository = shipmentRepository;
+        this.auditService = auditService;
     }
 
     private GrowerProfile getOrCreateProfile(String userId) {
@@ -71,6 +93,15 @@ public class GrowerApplicationService {
         GrowerProfile profile = getOrCreateProfile(userId);
         profile.updateProfile(dto.businessName(), dto.contactEmail(), dto.contactPhone(), dto.farmAddress());
         growerProfileRepository.save(GrowerProfileEntity.fromDomain(profile));
+        log.info("GROWER_AUDIT: Grower profile updated for userId={}", userId);
+        if (auditService != null) {
+            auditService.logEvent(
+                    AuditEventType.GROWER_PROFILE_UPDATED,
+                    userId, profile.getId(), null, null,
+                    AuditStatus.SUCCESS,
+                    "Updated business profile: " + dto.businessName()
+            );
+        }
         return GrowerProfileDto.fromDomain(profile);
     }
 
@@ -96,6 +127,15 @@ public class GrowerApplicationService {
                 dto.defaultFulfillmentLocation()
         );
         growerProfileRepository.save(GrowerProfileEntity.fromDomain(profile));
+        log.info("GROWER_AUDIT: Grower settings updated for userId={}", userId);
+        if (auditService != null) {
+            auditService.logEvent(
+                    AuditEventType.GROWER_SETTINGS_UPDATED,
+                    userId, profile.getId(), null, null,
+                    AuditStatus.SUCCESS,
+                    "Updated threshold to " + dto.lowStockAlertThreshold()
+            );
+        }
         return getSettings(userId);
     }
 
@@ -165,13 +205,33 @@ public class GrowerApplicationService {
         item.setGrowerId(userId);
         inventoryRepository.save(item);
 
+        log.info("GROWER_AUDIT: Product created for userId={}, sku={}, productId={}", userId, savedProduct.getSku(), savedProduct.getId());
+        if (auditService != null) {
+            auditService.logEvent(
+                    AuditEventType.GROWER_PRODUCT_CREATED,
+                    userId, savedProduct.getId().toString(), null, null,
+                    AuditStatus.SUCCESS,
+                    "Created product SKU " + savedProduct.getSku()
+            );
+        }
+
         return savedProduct;
     }
 
     public Product updateProduct(String userId, UUID productId, CreateGrowerProductRequestDto dto) {
         Product product = getProductById(userId, productId);
         product.updateDetails(dto.name(), dto.description(), dto.price(), dto.currency(), null);
-        return productRepository.save(product);
+        Product updated = productRepository.save(product);
+        log.info("GROWER_AUDIT: Product updated for userId={}, productId={}", userId, productId);
+        if (auditService != null) {
+            auditService.logEvent(
+                    AuditEventType.GROWER_PRODUCT_UPDATED,
+                    userId, productId.toString(), null, null,
+                    AuditStatus.SUCCESS,
+                    "Updated product details for " + productId
+            );
+        }
+        return updated;
     }
 
     @Transactional(readOnly = true)
@@ -191,8 +251,19 @@ public class GrowerApplicationService {
 
     public InventoryItem adjustStock(String userId, String sku, AdjustStockRequestDto dto) {
         InventoryItem item = getInventoryBySku(userId, sku);
+        int oldQuantity = item.getOnHandQuantity();
         item.adjustOnHand(dto.newOnHandQuantity());
-        return inventoryRepository.save(item);
+        InventoryItem updated = inventoryRepository.save(item);
+        log.info("GROWER_AUDIT: Stock adjusted for userId={}, sku={}, oldQty={}, newQty={}", userId, sku, oldQuantity, dto.newOnHandQuantity());
+        if (auditService != null) {
+            auditService.logEvent(
+                    AuditEventType.GROWER_STOCK_ADJUSTED,
+                    userId, item.getId().toString(), null, null,
+                    AuditStatus.SUCCESS,
+                    "Adjusted SKU " + sku + " from " + oldQuantity + " to " + dto.newOnHandQuantity()
+            );
+        }
+        return updated;
     }
 
     @Transactional(readOnly = true)
@@ -212,6 +283,7 @@ public class GrowerApplicationService {
 
     public Order transitionOrder(String userId, UUID orderId, OrderStatus newStatus) {
         Order order = getOrderById(userId, orderId);
+        OrderStatus oldStatus = order.getStatus();
         switch (newStatus) {
             case PROCESSING -> order.startProcessing();
             case READY_FOR_FULFILMENT -> order.markReadyForFulfilment();
@@ -221,7 +293,17 @@ public class GrowerApplicationService {
             case CANCELLED -> order.cancel();
             default -> throw new IllegalArgumentException("Unsupported order status transition to: " + newStatus);
         }
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        log.info("GROWER_AUDIT: Order status transitioned for userId={}, orderId={}, from={}, to={}", userId, orderId, oldStatus, newStatus);
+        if (auditService != null) {
+            auditService.logEvent(
+                    AuditEventType.GROWER_ORDER_TRANSITIONED,
+                    userId, orderId.toString(), null, null,
+                    AuditStatus.SUCCESS,
+                    "Transitioned order " + orderId + " from " + oldStatus + " to " + newStatus
+            );
+        }
+        return saved;
     }
 
     @Transactional(readOnly = true)
