@@ -1,6 +1,6 @@
-# FD-04 — Accessibility Architecture & WCAG 2.2 AA Compliance Standard
+# SPOREKART v3.0 — Accessibility Architecture & WCAG 2.2 AA Compliance Standard
 
-**Sprint:** FD-04  
+**Sprint:** FD-04 & FD-05  
 **Repository:** `f:/sporekart-v3.0`  
 **Date:** 2026-08-18  
 **Status:** Active Baseline  
@@ -26,11 +26,11 @@ Every application page MUST render a clean landmark structure without duplicate 
 ### 2.2 Keyboard Skip Navigation
 The `<SkipLink />` component is rendered as the first element in every layout. It is positioned offscreen (`top: -9999px`) until targeted by keyboard focus (`Tab`), at which point it shifts to `top: 1rem` with Bio-emerald background and skips directly to `#main-content`.
 
-### 2.3 Mobile Navigation Drawer Accessibility
+### 2.3 Mobile Navigation Drawer & Dialog Focus Management (FD-04 & FD-05)
 - Trigger button uses `aria-expanded={isOpen}`, `aria-controls="mobile-nav-drawer"`, and explicit `aria-label`.
-- Opening the drawer focuses the close button (`.mobile-nav-close`).
-- Pressing `Escape` or clicking the backdrop closes the drawer and restores keyboard focus to the hamburger trigger button (`triggerRef.current.focus()`).
-- Background page scrolling is locked (`body.style.overflow = 'hidden'`) while drawer is open.
+- Opening the modal dialog or drawer focuses the close button (`.dialog-close-btn` / `.drawer-close-btn`).
+- Pressing `Escape` or clicking the backdrop closes the modal/drawer and restores keyboard focus to the trigger element (`triggerRef.current.focus()`).
+- Background page scrolling is locked (`body.style.overflow = 'hidden'`) while modal/drawer is active.
 
 ### 2.4 Focus-Visible Rings
 All focusable elements (`<a>`, `<button>`, `<input>`, `<select>`) exhibit a high-contrast 2px bio-emerald outline offset (`:focus-visible`):
@@ -41,9 +41,20 @@ All focusable elements (`<a>`, `<button>`, `<input>`, `<select>`) exhibit a high
 }
 ```
 
-### 2.5 Loading & Skeleton Semantics
+### 2.5 Form Controls & FormField ARIA Association (FD-05)
+- Every `<FormField>` explicitly links `label` to control via `htmlFor` and matching `id`.
+- Helper descriptions link to control via `aria-describedby="{id}-desc"`.
+- Error messages link to control via `aria-describedby="{id}-error"` and render with `role="alert"`.
+- Inputs expose `aria-invalid="true"` when validation fails.
+- Icon-only buttons (`<IconButton />`) mandate an `aria-label` prop.
+
+### 2.6 Interactive Primitives Keyboard Map (FD-05)
+- **Dialog & Drawer:** `Tab` focus trap inside overlay, `Escape` key close.
+- **DropdownMenu:** `ArrowDown` / `ArrowUp` item navigation, `Home` (first item), `End` (last item), `Enter` / `Space` select item, `Escape` close.
+- **Tabs:** `role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-selected`. `ArrowLeft` / `ArrowRight` tab switching.
+- **Switch:** `role="switch"`, `aria-checked`, `Space` / `Enter` toggle.
+- **Toast Notifications:** Fixed container with `aria-live="polite"` (`role="status"`) for info/success and `aria-live="assertive"` (`role="alert"`) for errors.
+
+### 2.7 Loading & Skeleton Semantics
 - Active loading spinners use `role="status"` and explicit `aria-label="Loading..."` for screen readers.
 - Purely visual skeleton placeholders use `aria-hidden="true"` to prevent screen reader noise during background data fetching.
-
-### 2.6 Error Boundary Announcements
-React error boundaries render fallback containers with `role="alert"` and `aria-live="assertive"`, ensuring immediate screen reader notification without exposing raw stack traces.

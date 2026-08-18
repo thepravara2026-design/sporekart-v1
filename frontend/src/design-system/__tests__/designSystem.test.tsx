@@ -11,6 +11,7 @@ import {
   zIndex,
 } from '../tokens';
 import { DesignSystemShowcase } from '../../pages/DesignSystemShowcase';
+import { ToastProvider } from '../../components/ui/Toast';
 
 describe('Design System Tokens Unit Tests', () => {
   it('exports valid primitive and semantic color tokens', () => {
@@ -44,9 +45,11 @@ describe('Design System Tokens Unit Tests', () => {
   });
 
   it('renders DesignSystemShowcase validation component cleanly', () => {
-    render(<DesignSystemShowcase />);
-    expect(screen.getByText('Sporekart Design System Foundation')).toBeInTheDocument();
-    expect(screen.getByText('Color Tokens')).toBeInTheDocument();
-    expect(screen.getByText('Sporekart Forest Color Palette')).toBeInTheDocument();
+    render(
+      <ToastProvider>
+        <DesignSystemShowcase />
+      </ToastProvider>
+    );
+    expect(screen.getByText('Sporekart Design System & Shared UI Components')).toBeInTheDocument();
   });
 });

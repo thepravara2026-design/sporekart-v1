@@ -2,6 +2,7 @@ import { FC, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { ToastProvider } from '../components/ui/Toast';
 import { MainLayout } from '../layouts/MainLayout';
 import { HomePage } from '../pages/HomePage';
 
@@ -34,40 +35,42 @@ export const App: FC = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="products" element={<ProductListPage />} />
-              <Route path="products/:productId" element={<ProductDetailPage />} />
-              <Route path="categories" element={<CategoryListPage />} />
-              <Route
-                path="health"
-                element={
-                  <Suspense fallback={<RouteFallback />}>
-                    <HealthPage />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="design-system-showcase"
-                element={
-                  <Suspense fallback={<RouteFallback />}>
-                    <DesignSystemShowcase />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="*"
-                element={
-                  <Suspense fallback={<RouteFallback />}>
-                    <NotFoundPage />
-                  </Suspense>
-                }
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <ToastProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<HomePage />} />
+                <Route path="products" element={<ProductListPage />} />
+                <Route path="products/:productId" element={<ProductDetailPage />} />
+                <Route path="categories" element={<CategoryListPage />} />
+                <Route
+                  path="health"
+                  element={
+                    <Suspense fallback={<RouteFallback />}>
+                      <HealthPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="design-system-showcase"
+                  element={
+                    <Suspense fallback={<RouteFallback />}>
+                      <DesignSystemShowcase />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <Suspense fallback={<RouteFallback />}>
+                      <NotFoundPage />
+                    </Suspense>
+                  }
+                />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ToastProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
