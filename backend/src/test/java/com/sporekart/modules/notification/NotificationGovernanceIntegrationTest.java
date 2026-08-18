@@ -328,7 +328,7 @@ public class NotificationGovernanceIntegrationTest {
 
     @Test
     public void test7J_027_InvalidTimestampHandling() {
-        Notification del = createNotification("evt-invalid-time", NotificationStatus.DELIVERED, Instant.now());
+        Notification del = createNotification("evt-invalid-time", NotificationStatus.DELIVERED, Instant.now().minusSeconds(10));
         setField(del, "deliveredAt", null);
         setField(del, "providerName", "SendGrid");
         notificationRepository.saveAndFlush(del);

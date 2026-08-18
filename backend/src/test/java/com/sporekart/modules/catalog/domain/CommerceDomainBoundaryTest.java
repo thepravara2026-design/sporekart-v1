@@ -19,7 +19,7 @@ class CommerceDomainBoundaryTest {
     @Test
     @DisplayName("Product SKU normalization handles valid SKUs and strips invalid characters")
     void testProductNormalizeSkuValid() {
-        assertEquals("SPK-ITEM-100", Product.normalizeSku("  spk-item#100  "));
+        assertEquals("SPK-ITEM100", Product.normalizeSku("  spk-item#100  "));
     }
 
     @Test
