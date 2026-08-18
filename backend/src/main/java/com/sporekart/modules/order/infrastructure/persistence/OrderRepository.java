@@ -23,6 +23,12 @@ public interface OrderRepository {
 
     Page<Order> findByCustomerId(String customerId, Pageable pageable);
 
+    Page<Order> findByGrowerId(String growerId, Pageable pageable);
+
+    Optional<Order> findByIdAndGrowerId(UUID id, String growerId);
+
+    List<Order> findAllByGrowerId(String growerId);
+
     Optional<Order> findByCustomerIdAndIdempotencyKey(String customerId, String idempotencyKey);
 
     Page<Order> findAll(Pageable pageable);

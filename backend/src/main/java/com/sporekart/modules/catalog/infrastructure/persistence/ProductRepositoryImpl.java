@@ -55,6 +55,18 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
+    public List<Product> findAllByGrowerId(String growerId) {
+        return springDataProductRepository.findAllByGrowerId(growerId).stream()
+                .map(ProductEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Product> findByIdAndGrowerId(UUID id, String growerId) {
+        return springDataProductRepository.findByIdAndGrowerId(id, growerId).map(ProductEntity::toDomain);
+    }
+
+    @Override
     public Page<Product> findByFilters(String search, UUID categoryId, ProductStatus status, Pageable pageable) {
         return findByFilters(search, categoryId, status, null, null, pageable);
     }

@@ -39,6 +39,9 @@ public class ProductEntity {
     @JoinColumn(name = "category_id")
     private CategoryEntity category;
 
+    @Column(name = "grower_id", length = 100)
+    private String growerId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -47,7 +50,7 @@ public class ProductEntity {
 
     public ProductEntity() {}
 
-    public ProductEntity(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, CategoryEntity category, Instant createdAt, Instant updatedAt) {
+    public ProductEntity(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, CategoryEntity category, String growerId, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.sku = sku;
         this.name = name;
@@ -56,6 +59,7 @@ public class ProductEntity {
         this.currency = currency;
         this.status = status;
         this.category = category;
+        this.growerId = growerId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -72,6 +76,7 @@ public class ProductEntity {
                 product.getCurrency(),
                 product.getStatus(),
                 categoryEntity,
+                product.getGrowerId(),
                 product.getCreatedAt(),
                 product.getUpdatedAt()
         );
@@ -79,7 +84,7 @@ public class ProductEntity {
 
     public Product toDomain() {
         Category categoryDomain = category != null ? category.toDomain() : null;
-        return new Product(id, sku, name, description, price, currency, status, categoryDomain, createdAt, updatedAt);
+        return new Product(id, sku, name, description, price, currency, status, categoryDomain, growerId, createdAt, updatedAt);
     }
 
     public UUID getId() { return id; }
@@ -90,6 +95,7 @@ public class ProductEntity {
     public String getCurrency() { return currency; }
     public ProductStatus getStatus() { return status; }
     public CategoryEntity getCategory() { return category; }
+    public String getGrowerId() { return growerId; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

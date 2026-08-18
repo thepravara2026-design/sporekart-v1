@@ -16,6 +16,10 @@ public interface SpringDataJpaInventoryItemRepository extends JpaRepository<Inve
 
     List<InventoryItemEntity> findAllBySkuIn(List<String> skus);
 
+    List<InventoryItemEntity> findAllByGrowerId(String growerId);
+
+    Optional<InventoryItemEntity> findBySkuAndGrowerId(String sku, String growerId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT i FROM InventoryItemEntity i WHERE i.sku = :sku")
     Optional<InventoryItemEntity> findBySkuForUpdate(@Param("sku") String sku);

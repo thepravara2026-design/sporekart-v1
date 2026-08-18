@@ -99,6 +99,11 @@ public class ShipmentRepositoryImpl implements ShipmentRepository {
     }
 
     @Override
+    public List<Shipment> findAllByGrowerId(String growerId) {
+        return springDataRepository.findAllByGrowerId(growerId).stream().map(ShipmentEntity::toDomain).toList();
+    }
+
+    @Override
     public boolean existsWebhookEvent(ShipmentProviderType provider, String providerEventId) {
         return webhookRepository.existsByProviderAndProviderEventId(provider, providerEventId);
     }

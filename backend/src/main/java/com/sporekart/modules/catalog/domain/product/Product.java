@@ -17,10 +17,15 @@ public class Product {
     private String currency;
     private ProductStatus status;
     private Category category;
+    private String growerId;
     private final Instant createdAt;
     private Instant updatedAt;
 
     public Product(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, Category category, Instant createdAt, Instant updatedAt) {
+        this(id, sku, name, description, price, currency, status, category, null, createdAt, updatedAt);
+    }
+
+    public Product(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, Category category, String growerId, Instant createdAt, Instant updatedAt) {
         if (id == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
         }
@@ -42,6 +47,7 @@ public class Product {
         this.currency = (currency != null && !currency.isBlank()) ? currency.trim().toUpperCase() : "USD";
         this.status = status != null ? status : ProductStatus.DRAFT;
         this.category = category;
+        this.growerId = growerId;
         this.createdAt = createdAt != null ? createdAt : Instant.now();
         this.updatedAt = updatedAt != null ? updatedAt : this.createdAt;
     }
@@ -121,6 +127,14 @@ public class Product {
 
     public Category getCategory() {
         return category;
+    }
+
+    public String getGrowerId() {
+        return growerId;
+    }
+
+    public void setGrowerId(String growerId) {
+        this.growerId = growerId;
     }
 
     public Instant getCreatedAt() {

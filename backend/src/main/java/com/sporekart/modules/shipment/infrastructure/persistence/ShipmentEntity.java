@@ -45,6 +45,9 @@ public class ShipmentEntity {
     @Column(name = "customer_id", nullable = false)
     private String customerId;
 
+    @Column(name = "grower_id", length = 100)
+    private String growerId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ShipmentStatus status;
@@ -146,6 +149,7 @@ public class ShipmentEntity {
         entity.orderId = domain.getOrderId();
         entity.orderReference = domain.getOrderReference();
         entity.customerId = domain.getCustomerId();
+        entity.growerId = domain.getGrowerId();
         entity.status = domain.getStatus();
         entity.provider = domain.getProvider();
         entity.providerShipmentId = domain.getProviderShipmentId();
@@ -250,6 +254,7 @@ public class ShipmentEntity {
                 orderId,
                 orderReference,
                 customerId,
+                growerId,
                 status,
                 provider,
                 providerShipmentId,
@@ -278,6 +283,8 @@ public class ShipmentEntity {
     public UUID getOrderId() { return orderId; }
     public String getOrderReference() { return orderReference; }
     public String getCustomerId() { return customerId; }
+    public String getGrowerId() { return growerId; }
+    public void setGrowerId(String growerId) { this.growerId = growerId; }
     public ShipmentStatus getStatus() { return status; }
     public ShipmentProviderType getProvider() { return provider; }
     public String getProviderShipmentId() { return providerShipmentId; }

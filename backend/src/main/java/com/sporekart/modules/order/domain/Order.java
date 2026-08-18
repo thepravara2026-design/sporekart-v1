@@ -23,6 +23,7 @@ public final class Order {
     private final String idempotencyKey;
     private final AddressSnapshot shippingAddress;
     private final String customerNotes;
+    private String growerId;
     private final List<OrderItem> items;
     private Long version;
     private final OffsetDateTime createdAt;
@@ -42,6 +43,7 @@ public final class Order {
             String idempotencyKey,
             AddressSnapshot shippingAddress,
             String customerNotes,
+            String growerId,
             List<OrderItem> items,
             Long version,
             OffsetDateTime createdAt,
@@ -60,6 +62,7 @@ public final class Order {
         this.idempotencyKey = idempotencyKey;
         this.shippingAddress = Objects.requireNonNull(shippingAddress, "Shipping address snapshot cannot be null");
         this.customerNotes = customerNotes;
+        this.growerId = growerId;
         this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
         this.version = version != null ? version : 0L;
         this.createdAt = createdAt != null ? createdAt : OffsetDateTime.now();
@@ -189,6 +192,8 @@ public final class Order {
     public String getIdempotencyKey() { return idempotencyKey; }
     public AddressSnapshot getShippingAddress() { return shippingAddress; }
     public String getCustomerNotes() { return customerNotes; }
+    public String getGrowerId() { return growerId; }
+    public void setGrowerId(String growerId) { this.growerId = growerId; }
     public List<OrderItem> getItems() { return Collections.unmodifiableList(items); }
     public Long getVersion() { return version; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

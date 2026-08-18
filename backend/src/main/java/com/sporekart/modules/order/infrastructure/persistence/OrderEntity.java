@@ -85,6 +85,9 @@ public class OrderEntity {
     @Column(name = "customer_notes", length = 500)
     private String customerNotes;
 
+    @Column(name = "grower_id", length = 100)
+    private String growerId;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
 
@@ -121,6 +124,7 @@ public class OrderEntity {
             String shippingPostalCode,
             String shippingCountry,
             String customerNotes,
+            String growerId,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
     ) {
@@ -144,6 +148,7 @@ public class OrderEntity {
         this.shippingPostalCode = shippingPostalCode;
         this.shippingCountry = shippingCountry;
         this.customerNotes = customerNotes;
+        this.growerId = growerId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -171,6 +176,7 @@ public class OrderEntity {
                 address.getPostalCode(),
                 address.getCountry(),
                 order.getCustomerNotes(),
+                order.getGrowerId(),
                 order.getCreatedAt(),
                 order.getUpdatedAt()
         );
@@ -195,6 +201,9 @@ public class OrderEntity {
         this.updatedAt = order.getUpdatedAt();
         if (order.getCustomerNotes() != null) {
             this.customerNotes = order.getCustomerNotes();
+        }
+        if (order.getGrowerId() != null) {
+            this.growerId = order.getGrowerId();
         }
     }
 
@@ -228,6 +237,7 @@ public class OrderEntity {
                 this.idempotencyKey,
                 address,
                 this.customerNotes,
+                this.growerId,
                 domainItems,
                 this.version,
                 this.createdAt,
@@ -244,6 +254,9 @@ public class OrderEntity {
 
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
+
+    public String getGrowerId() { return growerId; }
+    public void setGrowerId(String growerId) { this.growerId = growerId; }
 
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }

@@ -23,6 +23,15 @@ public interface SpringDataJpaOrderRepository extends JpaRepository<OrderEntity,
 
     Optional<OrderEntity> findByCustomerIdAndIdempotencyKey(String customerId, String idempotencyKey);
 
+    @EntityGraph(attributePaths = {"items"})
+    Page<OrderEntity> findByGrowerIdOrderByCreatedAtDesc(String growerId, Pageable pageable);
+
+    @Query("SELECT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.id = :id AND o.growerId = :growerId")
+    Optional<OrderEntity> findByIdAndGrowerId(@Param("id") UUID id, @Param("growerId") String growerId);
+
+    @Query("SELECT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.growerId = :growerId")
+    java.util.List<OrderEntity> findAllByGrowerId(@Param("growerId") String growerId);
+
     @Query("SELECT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.orderNumber = :orderNumber")
     Optional<OrderEntity> findByOrderNumber(@Param("orderNumber") String orderNumber);
 

@@ -20,6 +20,8 @@ public interface SpringDataJpaShipmentRepository extends JpaRepository<ShipmentE
 
     Page<ShipmentEntity> findByCustomerId(String customerId, Pageable pageable);
 
+    List<ShipmentEntity> findAllByGrowerId(String growerId);
+
     @Query("SELECT s FROM ShipmentEntity s WHERE (:status IS NULL OR s.status = :status)")
     Page<ShipmentEntity> findAllWithFilter(@Param("status") ShipmentStatus status, Pageable pageable);
 

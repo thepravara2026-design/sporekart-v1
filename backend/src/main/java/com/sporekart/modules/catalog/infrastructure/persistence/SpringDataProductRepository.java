@@ -15,6 +15,8 @@ public interface SpringDataProductRepository extends JpaRepository<ProductEntity
     Optional<ProductEntity> findBySku(String sku);
     boolean existsBySku(String sku);
     long countByCategoryId(UUID categoryId);
+    java.util.List<ProductEntity> findAllByGrowerId(String growerId);
+    Optional<ProductEntity> findByIdAndGrowerId(UUID id, String growerId);
 
     @Query(value = "SELECT p FROM ProductEntity p LEFT JOIN FETCH p.category WHERE " +
            "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +

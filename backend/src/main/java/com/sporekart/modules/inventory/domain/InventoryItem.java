@@ -17,6 +17,7 @@ public class InventoryItem {
     private int damagedQuantity;
     private int lowStockThreshold;
     private String status;
+    private String growerId;
     private Long version;
     private final OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
@@ -31,6 +32,24 @@ public class InventoryItem {
             int damagedQuantity,
             int lowStockThreshold,
             String status,
+            Long version,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
+        this(id, productId, variantId, sku, onHandQuantity, reservedQuantity, damagedQuantity, lowStockThreshold, status, null, version, createdAt, updatedAt);
+    }
+
+    public InventoryItem(
+            UUID id,
+            UUID productId,
+            UUID variantId,
+            String sku,
+            int onHandQuantity,
+            int reservedQuantity,
+            int damagedQuantity,
+            int lowStockThreshold,
+            String status,
+            String growerId,
             Long version,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
@@ -56,6 +75,7 @@ public class InventoryItem {
         this.damagedQuantity = damagedQuantity;
         this.lowStockThreshold = lowStockThreshold >= 0 ? lowStockThreshold : 5;
         this.status = status != null ? status : "ACTIVE";
+        this.growerId = growerId;
         this.version = version;
         this.createdAt = createdAt != null ? createdAt : OffsetDateTime.now();
         this.updatedAt = updatedAt != null ? updatedAt : OffsetDateTime.now();
@@ -155,6 +175,8 @@ public class InventoryItem {
     public int getDamagedQuantity() { return damagedQuantity; }
     public int getLowStockThreshold() { return lowStockThreshold; }
     public String getStatus() { return status; }
+    public String getGrowerId() { return growerId; }
+    public void setGrowerId(String growerId) { this.growerId = growerId; }
     public Long getVersion() { return version; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
