@@ -1,4 +1,5 @@
 import { axiosInstance } from '../../../services/apiClient';
+import { PageResponse } from '../../../types/api';
 
 export type BatchStatusType = 'PLANNED' | 'SCHEDULED' | 'ACTIVE' | 'FULL' | 'COMPLETED' | 'CANCELLED';
 export type DeliveryModeType = 'ONLINE' | 'OFFLINE' | 'HYBRID';
@@ -59,14 +60,6 @@ export interface AddSchedulePayload {
   scheduledAt: string;
   durationMinutes: number;
   location?: string;
-}
-
-export interface PageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
 }
 
 export const fetchAdminBatches = async (

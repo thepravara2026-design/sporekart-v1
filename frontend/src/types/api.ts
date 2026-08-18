@@ -7,12 +7,23 @@ export interface ApiErrorDetails {
   code: string;
   message: string;
   timestamp: string;
-  path: string;
+  path?: string;
+  requestId?: string;
 }
 
 export interface ApiErrorResponse {
   success: false;
   error: ApiErrorDetails;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface HealthStatusData {

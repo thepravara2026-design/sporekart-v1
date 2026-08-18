@@ -1,4 +1,5 @@
 import { axiosInstance } from '../../../services/apiClient';
+import { PageResponse } from '../../../types/api';
 
 export interface TrainingProgramDto {
   id: string;
@@ -32,14 +33,6 @@ export interface UpdateTrainingProgramPayload {
   durationHours?: number;
   priceAmount?: number;
   currency?: string;
-}
-
-export interface PageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
 }
 
 export const fetchAdminTrainingPrograms = async (
