@@ -65,3 +65,12 @@ All focusable elements (`<a>`, `<button>`, `<input>`, `<select>`) exhibit a high
 - **Purchase Errors:** Inline mutation failures render inside the purchase panel with `role="alert"`; toast failures use `aria-live="assertive"`. The UI never announces success before the cart API resolves.
 - **Image Fallback:** When no image URL exists in the product contract, the gallery renders a branded placeholder with `alt="Mushroom Spawn"` instead of a broken image.
 - **Sticky Purchase Bar (mobile):** The sticky bar appears only on mobile viewports and respects safe-area padding; it does not trap focus or introduce overlay landmarks.
+
+### 2.9 Checkout & Order Review Experience (FD-12)
+
+- **Step Progress:** `CheckoutStepper` is a `<nav aria-label="Checkout progress">` with `<ol>`/`<li>` items; the current step is announced via `aria-current="step"`, completed steps render a check, and separators are `aria-hidden`. Steps are informational (navigation happens via form CTAs).
+- **Address Form:** `FormField` label→`htmlFor`/`id` association, `aria-invalid` on failed controls, and `aria-describedby="{id}-error"` linking error messages that render with `role="alert"`. Client-side validation is convenience only; the backend remains authoritative for address acceptance.
+- **Revalidation Notice & Warnings:** `CheckoutValidationAlert` renders blocking warnings (item unavailable) as `role="alert"` (assertive) and advisory/price warnings via the Alert's `role="status"` live region so screen readers are informed when the order total changes after review.
+- **Place Order CTA:** The submit button sets `aria-busy` and an accessible `Loading...` name while the order pipeline runs; radios and the CTA are `disabled`, and the handler no-ops while a submission is pending (duplicate-submission protection).
+- **Error State:** `CheckoutErrorState` shows a safe user-facing message (never stack traces) with the backend `requestId` as a diagnostic reference, plus Retry and Return to Cart actions.
+- **Loading States:** `CheckoutSkeleton` placeholders use `aria-hidden="true"` skeletons (no screen-reader noise); explicit computing status text (`role="status"`) announces preview calculation.

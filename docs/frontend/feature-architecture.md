@@ -80,11 +80,28 @@ src/features/catalog/
 └── index.ts               # Public feature module export index
 ```
 
+### Checkout Feature Layout (FD-12)
+
+The checkout feature follows the same layered layout as catalog, with an extra constraint: **the feature never invents backend data**. It mirrors backend endpoints 1:1 (`/checkout/preview`, `/orders`, `/inventory/reserve`, `/payments`, `/auth/me`).
+
+```text
+src/features/checkout/
+├── constants/checkoutConstants.ts      # Step order, payment methods, backend error codes
+├── types/checkout.ts                    # ShippingOption, CheckoutRevalidation
+├── utils/checkoutUtils.ts               # Safe error mapping, warning classification, preview-change detection
+├── hooks/                               # useCheckoutPreview, useCheckoutValidation, useCustomerProfile,
+│                                        # useShippingOptions, usePlaceOrder, useOrder, usePayment
+├── components/                          # AddressForm, OrderReview, CheckoutSummary, CheckoutSubmit,
+│                                        # CheckoutValidationAlert, CheckoutPaymentForm, ... (+ __tests__)
+├── pages/                               # CheckoutPage, OrderConfirmationPage (+ __tests__)
+└── index.ts                             # Public feature module export index
+```
+
+The order pipeline (create order → reserve inventory → initiate payment → verify payment) lives in `hooks/usePlaceOrder.ts`, keeping business orchestration out of the page and components. See [`checkout-architecture.md`](./checkout-architecture.md) for the full contract-driven design.
+
 ---
 
-## 3. Strict Boundary Rules
-
-1. **Domain Isolation**: Feature-specific components (`ProductCard.tsx`) MUST reside in `src/features/{feature}/components/`. They must NEVER be placed in `src/components/ui/`.
+## 3. Strict Boundary Rules1. **Domain Isolation**: Feature-specific components (`ProductCard.tsx`) MUST reside in `src/features/{feature}/components/`. They must NEVER be placed in `src/components/ui/`.
 2. **Generic UI Primitives**: `src/components/ui/` primitives (`Button`, `Card`, `Badge`, `Select`, `Input`) MUST remain domain-neutral. They must never import from `src/features/`.
 3. **API Contracts**: Feature API calls MUST consume centralized envelopes (`ApiResponse<T>`, `PageResponse<T>`, `ApiError`) aligned with FD-02 backend specifications.
 4. **Public Barrel Index**: Cross-feature imports should consume from `src/features/{feature}/index.ts`.

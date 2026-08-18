@@ -15,7 +15,7 @@ const fillRequiredFields = () => {
   fireEvent.change(screen.getByLabelText(/Postal code/), { target: { value: '560001' } });
 };
 
-describe('CheckoutShippingForm (FD-11)', () => {
+describe('CheckoutShippingForm (FD-12)', () => {
   it('renders address fields and the continue CTA', () => {
     renderForm();
     expect(screen.getByTestId('checkout-shipping-form')).toBeInTheDocument();

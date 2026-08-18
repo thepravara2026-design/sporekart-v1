@@ -6,6 +6,8 @@ import { CheckoutPage } from '../CheckoutPage';
 import { cartApi, CheckoutPreviewResponse } from '../../../../services/cartApi';
 import { orderApi, OrderDto } from '../../../../services/orderApi';
 import { paymentApi, PaymentCheckoutDto, PaymentDto } from '../../../../services/paymentApi';
+import { inventoryApi, ReservationDto } from '../../../../services/inventoryApi';
+import { authApi, UserProfileDto } from '../../../../services/authApi';
 import { ToastProvider } from '../../../../components/ui/Toast';
 import { makeCartResponse } from '../../../cart/__tests__/fixtures';
 
@@ -36,7 +38,31 @@ vi.mock('../../../../services/paymentApi', () => ({
   },
 }));
 
-const makePreview = (): CheckoutPreviewResponse => ({
+vi.mock('../../../../services/inventoryApi', () => ({
+  inventoryApi: {
+    reserveInventory: vi.fn(),
+    releaseReservation: vi.fn(),
+    getAvailability: vi.fn(),
+    listAdminInventory: vi.fn(),
+    getAdminInventoryBySku: vi.fn(),
+    listMovements: vi.fn(),
+    adjustStock: vi.fn(),
+    recordDamagedStock: vi.fn(),
+  },
+}));
+
+vi.mock('../../../../services/authApi', () => ({
+  authApi: {
+    getCurrentUser: vi.fn(),
+    login: vi.fn(),
+    register: vi.fn(),
+    refreshToken: vi.fn(),
+    changePassword: vi.fn(),
+    getSessions: vi.fn(),
+  },
+}));
+
+const makePreview = (overrides: Partial<CheckoutPreviewResponse> = {}): CheckoutPreviewResponse => ({
   previewId: 'preview-1',
   cartId: 'cart-1',
   customerId: 'cust-1',
@@ -60,6 +86,7 @@ const makePreview = (): CheckoutPreviewResponse => ({
   breakdown: { subtotal: 498, discountTotal: 0, taxTotal: 44.82, shippingFee: 25, grandTotal: 567.82, currency: 'INR' },
   warnings: [],
   generatedAt: '2026-08-18T11:00:00Z',
+  ...overrides,
 });
 
 const makeOrder = (): OrderDto => ({
@@ -129,6 +156,27 @@ const makePayment = (): PaymentDto => ({
   updatedAt: '2026-08-18T11:00:00Z',
 });
 
+const makeReservation = (): ReservationDto => ({
+  id: 'res-1',
+  reservationReference: 'RSV-2026-000001',
+  orderId: 'order-1',
+  status: 'ACTIVE',
+  expiresAt: '2026-08-18T11:15:00Z',
+  releaseReason: null,
+  items: [],
+  createdAt: '2026-08-18T11:00:00Z',
+  updatedAt: '2026-08-18T11:00:00Z',
+});
+
+const makeProfile = (): UserProfileDto => ({
+  id: 'cust-1',
+  email: 'buyer@example.com',
+  firstName: 'A.',
+  lastName: 'Buyer',
+  role: 'CUSTOMER',
+  status: 'ACTIVE',
+});
+
 const renderCheckoutPage = (queryClient: QueryClient, route = '/checkout') => {
   return render(
     <QueryClientProvider client={queryClient}>
@@ -158,7 +206,7 @@ const fillShippingForm = () => {
   fireEvent.change(screen.getByLabelText(/Postal code/), { target: { value: '560001' } });
 };
 
-describe('CheckoutPage (FD-11)', () => {
+describe('CheckoutPage (FD-12)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem('accessToken', 'jwt-token');
@@ -173,28 +221,43 @@ describe('CheckoutPage (FD-11)', () => {
 
   it('shows the empty cart state when the cart is empty', async () => {
     vi.mocked(cartApi.getCart).mockResolvedValue(makeCartResponse({ itemCount: 0, items: [], subtotal: 0 }));
+    vi.mocked(authApi.getCurrentUser).mockResolvedValue(makeProfile());
     renderCheckoutPage(newClient());
     expect(await screen.findByTestId('cart-empty')).toBeInTheDocument();
   });
 
-  it('runs the full multi-step flow: shipping → preview → place order → confirmation', async () => {
+  it('prefills customer information from the profile', async () => {
+    vi.mocked(cartApi.getCart).mockResolvedValue(makeCartResponse({ itemCount: 2 }));
+    vi.mocked(authApi.getCurrentUser).mockResolvedValue(makeProfile());
+
+    renderCheckoutPage(newClient());
+
+    await screen.findByTestId('checkout-shipping-form');
+    expect(screen.getByText('A. Buyer')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Full name/)).toHaveValue('A. Buyer');
+  });
+
+  it('runs the 3-step flow: delivery → review → payment → confirmation', async () => {
     const queryClient = newClient();
     vi.mocked(cartApi.getCart).mockResolvedValue(makeCartResponse({ itemCount: 2 }));
+    vi.mocked(authApi.getCurrentUser).mockResolvedValue(makeProfile());
     vi.mocked(cartApi.generateCheckoutPreview).mockResolvedValue({ success: true, data: makePreview() });
     vi.mocked(orderApi.createOrder).mockResolvedValue({ success: true, data: makeOrder() });
+    vi.mocked(inventoryApi.reserveInventory).mockResolvedValue({ success: true, data: makeReservation() });
     vi.mocked(paymentApi.initiatePayment).mockResolvedValue({ success: true, data: makePaymentCheckout() });
     vi.mocked(paymentApi.verifyPayment).mockResolvedValue({ success: true, data: makePayment() });
 
     renderCheckoutPage(queryClient);
 
-    // Step 0 — Shipping.
+    // Step 0 — Customer & Delivery.
     await screen.findByTestId('checkout-shipping-form');
     expect(screen.getByTestId('checkout-stepper')).toBeInTheDocument();
+    expect(screen.getByTestId('checkout-step-0')).toHaveAttribute('aria-current', 'step');
     fillShippingForm();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue to Payment' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to Review' }));
 
-    // Step 1 — Payment: preview fetched, summary rendered.
-    await screen.findByTestId('checkout-payment-form');
+    // Step 1 — Review & Confirm: preview fetched, totals rendered.
+    await screen.findByTestId('checkout-order-review');
     await waitFor(() => {
       expect(cartApi.generateCheckoutPreview).toHaveBeenCalledWith({
         destinationAddress: '42 Fungal Lane, Bengaluru, Karnataka, 560001',
@@ -202,13 +265,25 @@ describe('CheckoutPage (FD-11)', () => {
     });
     await screen.findByTestId('checkout-summary-total');
     expect(screen.getByTestId('checkout-summary-total')).toHaveTextContent('₹567.82');
+    expect(screen.getByTestId('checkout-step-1')).toHaveAttribute('aria-current', 'step');
+    expect(screen.getByText('A. Buyer')).toBeInTheDocument();
+    expect(screen.getByText('42 Fungal Lane')).toBeInTheDocument();
 
-    // Place order → backend pipeline → confirmation route.
+    // Continue to the payment step.
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to Payment' }));
+    await screen.findByTestId('checkout-payment-form');
+    expect(screen.getByTestId('checkout-step-2')).toHaveAttribute('aria-current', 'step');
+
+    // Step 2 — Payment: place order → backend pipeline → confirmation route.
     fireEvent.click(screen.getByRole('button', { name: 'Place Order & Pay' }));
 
     await waitFor(() => {
-      expect(orderApi.createOrder).toHaveBeenCalled();
+      expect(orderApi.createOrder).toHaveBeenCalledTimes(1);
     });
+    expect(orderApi.createOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ shippingAddress: expect.objectContaining({ postalCode: '560001' }) })
+    );
+    expect(inventoryApi.reserveInventory).toHaveBeenCalledWith('order-1');
     expect(paymentApi.initiatePayment).toHaveBeenCalledWith('order-1');
     expect(paymentApi.verifyPayment).toHaveBeenCalledWith(
       expect.objectContaining({ paymentReference: 'PAY-ORD-2026-000001', providerOrderId: 'order_mock_123' })
@@ -218,10 +293,7 @@ describe('CheckoutPage (FD-11)', () => {
 
   it('surfaces preview warnings from the backend before placement', async () => {
     vi.mocked(cartApi.getCart).mockResolvedValue(makeCartResponse({ itemCount: 2 }));
-    vi.mocked(cartApi.generateCheckoutPreview).mockResolvedValue({
-      success: true,
-      data: makePreview(),
-    });
+    vi.mocked(authApi.getCurrentUser).mockResolvedValue(makeProfile());
     vi.mocked(cartApi.generateCheckoutPreview).mockImplementation(async () => ({
       success: true,
       data: {
@@ -235,8 +307,39 @@ describe('CheckoutPage (FD-11)', () => {
     renderCheckoutPage(newClient());
     await screen.findByTestId('checkout-shipping-form');
     fillShippingForm();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue to Payment' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to Review' }));
 
     expect(await screen.findByText('The price of this item changed since you added it.')).toBeInTheDocument();
+  });
+
+  it('blocks placement and prompts review when totals change on revalidation', async () => {
+    const queryClient = newClient();
+    vi.mocked(cartApi.getCart).mockResolvedValue(makeCartResponse({ itemCount: 2 }));
+    vi.mocked(authApi.getCurrentUser).mockResolvedValue(makeProfile());
+
+    let calls = 0;
+    vi.mocked(cartApi.generateCheckoutPreview).mockImplementation(async () => {
+      calls += 1;
+      const base = makePreview();
+      if (calls === 1) return { success: true, data: base };
+      return {
+        success: true,
+        data: { ...base, breakdown: { ...base.breakdown, grandTotal: 612.82 } },
+      };
+    });
+
+    renderCheckoutPage(queryClient);
+    await screen.findByTestId('checkout-shipping-form');
+    fillShippingForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to Review' }));
+    await screen.findByTestId('checkout-order-review');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to Payment' }));
+    await screen.findByTestId('checkout-payment-form');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Place Order & Pay' }));
+
+    expect(await screen.findByText('The order total has changed. Please review your order.')).toBeInTheDocument();
+    expect(orderApi.createOrder).not.toHaveBeenCalled();
   });
 });

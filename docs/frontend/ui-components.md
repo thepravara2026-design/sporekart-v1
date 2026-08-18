@@ -81,3 +81,21 @@ export const GrowerForm = () => (
 All components are demonstrated across default, hover, focus, disabled, loading, error, success, and selected states at:
 - **Route:** `/design-system-showcase`
 - **File:** [`frontend/src/pages/DesignSystemShowcase.tsx`](file:///f:/sporekart-v3.0/frontend/src/pages/DesignSystemShowcase.tsx)
+
+---
+
+## 5. Feature Consumption Example — Checkout (FD-12)
+
+Checkout feature components compose the shared primitives without embedding business logic in them. Domain orchestration stays in feature hooks (`usePlaceOrder`, `useCheckoutPreview`); primitives remain domain-neutral.
+
+| Checkout surface | Composed primitives |
+|---|---|
+| `AddressForm` | `Card`, `CardHeader`, `CardTitle`, `FormField`, `Input`, `Button` (`isLoading`, `rightIcon`) |
+| `CheckoutStepper` | Semantic `<nav>`/`<ol>` with `aria-current` (uses `Check` from lucide) |
+| `CheckoutItem` / `CheckoutSummary` | `Card` surfaces + shared `formatPrice` (catalog util); totals are backend-provided |
+| `CheckoutValidationAlert` | `Alert` (`error` for blocking, `warning`/`info` for advisory) |
+| `CheckoutSubmit` | `Card`, `RadioGroup` (`<fieldset>`/`<legend>`), `Button` (`fullWidth`, `isLoading`, `leftIcon`) |
+| `CheckoutErrorState` | `Alert`, `Button` (`size="sm"`, `leftIcon`) |
+| `CheckoutSkeleton` | `Card`, `CardHeader`, `CardTitle`, `Skeleton` (`aria-hidden`) |
+| `OrderReview` | `Card`, `Button` (secondary/ghost/primary), `Link`, composed checkout components |
+| `CheckoutPage` | `PageShell`, `Breadcrumb`, `CartValidationAlert`, `CartEmptyState`, checkout components |

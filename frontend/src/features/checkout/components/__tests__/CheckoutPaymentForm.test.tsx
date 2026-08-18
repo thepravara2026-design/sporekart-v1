@@ -37,7 +37,7 @@ const makePreview = (overrides: Partial<CheckoutPreviewResponse> = {}): Checkout
   ...overrides,
 });
 
-describe('CheckoutPaymentForm (FD-11)', () => {
+describe('CheckoutPaymentForm (FD-12)', () => {
   it('renders payment methods, order summary totals, and the place-order CTA', () => {
     render(
       <CheckoutPaymentForm preview={makePreview()} onSubmit={vi.fn()} onBack={vi.fn()} />
@@ -91,6 +91,6 @@ describe('CheckoutPaymentForm (FD-11)', () => {
     );
     expect(screen.getByRole('button', { name: /Loading/ })).toBeDisabled();
     expect(screen.getByRole('radio', { name: /UPI/ })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Back to Shipping' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Back to Review' })).toBeDisabled();
   });
 });

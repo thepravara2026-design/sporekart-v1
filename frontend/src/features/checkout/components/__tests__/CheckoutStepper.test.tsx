@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CheckoutStepper } from '../CheckoutStepper';
 
-describe('CheckoutStepper (FD-11)', () => {
+describe('CheckoutStepper (FD-12)', () => {
   it('renders all steps with the current step marked and announced', () => {
     render(<CheckoutStepper currentStep={1} />);
 
     expect(screen.getByRole('navigation', { name: 'Checkout progress' })).toBeInTheDocument();
-    expect(screen.getByText('Shipping')).toBeInTheDocument();
+    expect(screen.getByText('Customer & Delivery')).toBeInTheDocument();
+    expect(screen.getByText('Review & Confirm')).toBeInTheDocument();
     expect(screen.getByText('Payment')).toBeInTheDocument();
-    expect(screen.getByText('Review & Place Order')).toBeInTheDocument();
 
     const current = screen.getByTestId('checkout-step-1');
     expect(current).toHaveAttribute('aria-current', 'step');

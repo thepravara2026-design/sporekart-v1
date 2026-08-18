@@ -1,8 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import { useToast } from '../../../components/ui/Toast';
 import { orderApi, AddressDto, OrderDto } from '../../../services/orderApi';
 import { paymentApi, PaymentDto } from '../../../services/paymentApi';
+import { inventoryApi, ReservationDto } from '../../../services/inventoryApi';
 import { getCheckoutErrorMessage } from '../utils/checkoutUtils';
 
 export interface PlaceOrderInput {
@@ -13,6 +15,7 @@ export interface PlaceOrderInput {
 export interface PlaceOrderResult {
   order: OrderDto;
   payment: PaymentDto;
+  reservation: ReservationDto;
 }
 
 /** Generates a client idempotency key (UUID) for order replay protection. */
@@ -22,40 +25,59 @@ const createIdempotencyKey = (): string =>
     : `ord-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 /**
- * PlaceOrder — orchestrates the checkout pipeline:
- *   create order → initiate payment → verify (mock provider completes instantly).
+ * PlaceOrder — orchestrates the checkout pipeline required by the backend:
+ *   create order → reserve inventory → initiate payment → verify payment.
  *
- * The mock backend provider accepts any non-null signature except the literal
- * "INVALID_SIGNATURE", so the frontend simulates the provider redirect by
- * supplying stable mock provider values from the initiated attempt. On success
- * the cart cache is already invalidated by useCreateOrder.
+ * The backend requires an active inventory reservation before payment
+ * initiation (payment initiation returns ORDER_NOT_PAYABLE otherwise). The
+ * same idempotency key is reused for retries within a checkout session so a
+ * retry after a mid-pipeline failure replays the existing order instead of
+ * creating a duplicate. If payment fails after the reservation was created,
+ * the reservation is released best-effort.
+ *
+ * The mock provider completes instantly, so the frontend simulates the hosted
+ * provider return with stable mock provider values before calling the backend
+ * verification endpoint. Verification itself is always backend-authoritative;
+ * no secret is ever handled client-side.
  */
 export const usePlaceOrder = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   return useMutation({
     mutationFn: async (input: PlaceOrderInput): Promise<PlaceOrderResult> => {
-      const idempotencyKey = createIdempotencyKey();
+      idempotencyKeyRef.current ??= createIdempotencyKey();
+
       const orderResponse = await orderApi.createOrder({
         shippingAddress: input.shippingAddress,
-        idempotencyKey,
+        idempotencyKey: idempotencyKeyRef.current,
         customerNotes: input.customerNotes,
       });
       const order = orderResponse.data;
 
-      const paymentCheckout = await paymentApi.initiatePayment(order.id);
-      const checkout = paymentCheckout.data;
+      const reservationResponse = await inventoryApi.reserveInventory(order.id);
+      const reservation = reservationResponse.data;
 
-      // Simulate the customer completing payment in the hosted provider flow.
-      const paymentResponse = await paymentApi.verifyPayment({
-        paymentReference: checkout.paymentReference,
-        providerOrderId: checkout.providerOrderId,
-        providerPaymentId: `pay_${checkout.providerOrderId}`,
-        providerSignature: 'mock_provider_signature',
-      });
+      try {
+        const paymentCheckout = await paymentApi.initiatePayment(order.id);
+        const checkout = paymentCheckout.data;
 
-      return { order, payment: paymentResponse.data };
+        // Simulate the customer completing payment in the hosted provider flow.
+        const paymentResponse = await paymentApi.verifyPayment({
+          paymentReference: checkout.paymentReference,
+          providerOrderId: checkout.providerOrderId,
+          providerPaymentId: `pay_${checkout.providerOrderId}`,
+          providerSignature: 'mock_provider_signature',
+        });
+
+        return { order, payment: paymentResponse.data, reservation };
+      } catch (error) {
+        // Payment did not complete — release the reserved stock so it can be
+        // resold. Best-effort: release failures (e.g. already released) are ignored.
+        await inventoryApi.releaseReservation(reservation.id, 'PAYMENT_FAILED').catch(() => {});
+        throw error;
+      }
     },
     onSuccess: (result) => {
       addToast({

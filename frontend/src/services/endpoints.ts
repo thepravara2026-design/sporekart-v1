@@ -45,6 +45,8 @@ export const ENDPOINTS = {
 
   // Inventory
   INVENTORY_AVAILABILITY: (sku: string) => `/api/v1/inventory/skus/${sku}/availability`,
+  INVENTORY_RESERVE: (orderId: string) => `/api/v1/inventory/reserve/${orderId}`,
+  INVENTORY_RESERVATION_RELEASE: (reservationId: string) => `/api/v1/inventory/reservations/${reservationId}/release`,
   ADMIN_INVENTORY_LIST: '/api/v1/admin/inventory',
   ADMIN_INVENTORY_BY_SKU: (sku: string) => `/api/v1/admin/inventory/${sku}`,
   ADMIN_INVENTORY_MOVEMENTS: (sku: string) => `/api/v1/admin/inventory/${sku}/movements`,

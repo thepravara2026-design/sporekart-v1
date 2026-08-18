@@ -2,7 +2,7 @@
  * Checkout domain constants. The step order is the single source of truth for
  * the CheckoutPage multi-step flow and the CheckoutStepper component.
  */
-export const CHECKOUT_STEP_LABELS = ['Shipping', 'Payment', 'Review & Place Order'] as const;
+export const CHECKOUT_STEP_LABELS = ['Customer & Delivery', 'Review & Confirm', 'Payment'] as const;
 
 export type CheckoutStep = (typeof CHECKOUT_STEP_LABELS)[number];
 export type CheckoutStepIndex = 0 | 1 | 2;
@@ -17,8 +17,8 @@ export const PAYMENT_METHODS = [
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]['value'];
 
 /**
- * Backend error codes surfaced by the checkout, order, and payment APIs.
- * Mirrors the backend GlobalExceptionHandler error codes.
+ * Backend error codes surfaced by the checkout, order, payment, and inventory
+ * APIs. Mirrors the backend GlobalExceptionHandler error codes.
  */
 export const CHECKOUT_ERROR_CODES = {
   CART_EMPTY: 'CHECKOUT_CART_EMPTY',
@@ -34,4 +34,14 @@ export const CHECKOUT_ERROR_CODES = {
   PAYMENT_VERIFICATION_FAILED: 'PAYMENT_VERIFICATION_FAILED',
   PAYMENT_INVALID_STATE: 'PAYMENT_INVALID_STATE',
   PAYMENT_PROVIDER_UNAVAILABLE: 'PAYMENT_PROVIDER_UNAVAILABLE',
+  INSUFFICIENT_STOCK: 'INSUFFICIENT_STOCK',
+  RESERVATION_NOT_FOUND: 'RESERVATION_NOT_FOUND',
+  RESERVATION_EXPIRED: 'RESERVATION_EXPIRED',
+  RESERVATION_ALREADY_RELEASED: 'RESERVATION_ALREADY_RELEASED',
+  INVENTORY_ITEM_NOT_FOUND: 'INVENTORY_ITEM_NOT_FOUND',
+  CART_NOT_FOUND: 'CART_NOT_FOUND',
+  CART_CONCURRENCY_CONFLICT: 'CART_CONCURRENCY_CONFLICT',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
 } as const;
