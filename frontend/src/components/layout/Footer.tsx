@@ -1,8 +1,11 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Sprout, ShieldCheck, Truck, Headphones } from 'lucide-react';
+import { FOOTER_NAVIGATION } from '../../config/navigation';
 
 export const Footer: FC = () => {
+  const year = new Date().getFullYear();
+
   return (
     <footer
       role="contentinfo"
@@ -15,101 +18,137 @@ export const Footer: FC = () => {
       }}
     >
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Value Proposition Highlights */}
+        {/* Value Proposition Strip */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '1.5rem',
             paddingBottom: '2.5rem',
             marginBottom: '2.5rem',
             borderBottom: '1px solid var(--border-color)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Sprout size={24} style={{ color: 'var(--accent-primary)' }} />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>High-Yield Spawn</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Sterile certified mushroom batches</div>
+          {[
+            {
+              icon: <Sprout size={24} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />,
+              title: 'High-Yield Spawn',
+              desc: 'Sterile certified mushroom batches',
+            },
+            {
+              icon: <Truck size={24} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />,
+              title: 'Cold-Chain Express',
+              desc: 'Temperature-controlled shipping',
+            },
+            {
+              icon: <ShieldCheck size={24} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />,
+              title: 'Batch Viability Guarantee',
+              desc: 'Non-viable batches replaced at no charge',
+            },
+            {
+              icon: <Headphones size={24} style={{ color: 'var(--accent-primary)' }} aria-hidden="true" />,
+              title: 'Expert Cultivator Support',
+              desc: 'Mycology technical help from professionals',
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}
+            >
+              {item.icon}
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{item.title}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.desc}</div>
+              </div>
             </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Truck size={24} style={{ color: 'var(--accent-primary)' }} />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Cold-Chain Express</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Temperature controlled shipping</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShieldCheck size={24} style={{ color: 'var(--accent-primary)' }} />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Grower Guarantee</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>100% batch viability guarantee</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Headphones size={24} style={{ color: 'var(--accent-primary)' }} />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Expert Cultivator Support</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>24/7 mycology technical help</div>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Footer Navigation Columns */}
+        {/* Navigation Columns */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
             gap: '2rem',
             marginBottom: '2.5rem',
           }}
         >
+          {/* Brand column */}
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--accent-primary)', marginBottom: '0.75rem' }}>
+            <div
+              style={{
+                fontWeight: 800,
+                fontSize: '1.25rem',
+                color: 'var(--accent-primary)',
+                marginBottom: '0.75rem',
+              }}
+            >
               SPOREKART
             </div>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              India's premier mushroom spawn, substrate equipment, and professional grower training platform.
+            <p
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary)',
+                lineHeight: 1.6,
+                margin: 0,
+              }}
+            >
+              India's premier mushroom spawn, substrate, and professional grower training platform.
             </p>
           </div>
 
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
-              Catalog
-            </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <li><Link to="/products" className="nav-link" style={{ fontSize: '0.875rem' }}>Oyster Spawn</Link></li>
-              <li><Link to="/products" className="nav-link" style={{ fontSize: '0.875rem' }}>Button Spawn</Link></li>
-              <li><Link to="/products" className="nav-link" style={{ fontSize: '0.875rem' }}>Substrates & Bags</Link></li>
-              <li><Link to="/categories" className="nav-link" style={{ fontSize: '0.875rem' }}>All Categories</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
-              Training
-            </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <li><Link to="/health" className="nav-link" style={{ fontSize: '0.875rem' }}>Grower Workshops</Link></li>
-              <li><Link to="/design-system-showcase" className="nav-link" style={{ fontSize: '0.875rem' }}>Certification Specs</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
-              Platform
-            </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <li><Link to="/health" className="nav-link" style={{ fontSize: '0.875rem' }}>System Health</Link></li>
-              <li><Link to="/design-system-showcase" className="nav-link" style={{ fontSize: '0.875rem' }}>Design System Foundation</Link></li>
-            </ul>
-          </div>
+          {/* Dynamic nav columns from centralized config */}
+          {FOOTER_NAVIGATION.map((group) => (
+            <nav key={group.heading} aria-label={`Footer — ${group.heading}`}>
+              <div
+                style={{
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  marginBottom: '1rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                {group.heading}
+              </div>
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                }}
+              >
+                {group.links.map((link) => (
+                  <li key={link.path}>
+                    <Link
+                      to={link.path}
+                      className="nav-link"
+                      style={{ fontSize: '0.875rem' }}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
 
         {/* Copyright */}
-        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-          &copy; {new Date().getFullYear()} Sporekart v3.0. All rights reserved. Built with FAANG-grade React & Spring Boot.
+        <div
+          style={{
+            borderTop: '1px solid var(--border-color)',
+            paddingTop: '1.5rem',
+            textAlign: 'center',
+            fontSize: '0.825rem',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          &copy; {year} SPOREKART. All rights reserved.
         </div>
       </div>
     </footer>
