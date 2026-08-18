@@ -33,6 +33,10 @@ public class OutboxService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public OutboxEvent publish(String aggregateType, String aggregateId, String eventType, Object payloadObj) {
+        java.util.Objects.requireNonNull(aggregateType, "aggregateType must not be null");
+        java.util.Objects.requireNonNull(aggregateId, "aggregateId must not be null");
+        java.util.Objects.requireNonNull(eventType, "eventType must not be null");
+
         String payloadJson;
         if (payloadObj instanceof String) {
             payloadJson = (String) payloadObj;
