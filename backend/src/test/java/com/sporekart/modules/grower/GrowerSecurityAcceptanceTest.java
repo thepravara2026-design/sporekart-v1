@@ -157,4 +157,60 @@ class GrowerSecurityAcceptanceTest {
         verify(orderRepository, times(1)).findAllByGrowerId(growerA);
         verify(orderRepository, never()).findAllByGrowerId(growerB);
     }
+
+    @Test
+    @DisplayName("SCENARIO #6: Reporting data isolation — Grower A report contains only Grower A orders")
+    void scenario6_reporting_data_isolation() {
+        Order orderA = Order.createNewOrder(
+                "ORD-A-1", "cust-1", "USD", new BigDecimal("150.00"),
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("150.00"),
+                "idemp-a1", new com.sporekart.modules.order.domain.AddressSnapshot("Alice", "555-0199", "Line1", "Line2", "City", "State", "12345", "USA"),
+                "Notes", List.of()
+        );
+        orderA.setGrowerId(growerA);
+
+        when(orderRepository.findAllByGrowerId(growerA)).thenReturn(List.of(orderA));
+
+        var summary = growerService.getReportSummary(growerA, "THIS_MONTH");
+
+        assertNotNull(summary);
+        assertEquals(1, summary.totalOrders());
+        assertEquals(new BigDecimal("150.00"), summary.totalSales());
+    }
+
+    @Test
+    @DisplayName("SCENARIO #7: Stock adjustment — onHand quantity update preserves inventory consistency")
+    void scenario7_stock_adjustment_consistency() {
+        String sku = "SKU-MUSHROOM-01";
+        InventoryItem item = InventoryItem.createNew(UUID.randomUUID(), null, sku, 50);
+        item.setGrowerId(growerA);
+
+        when(inventoryRepository.findBySku(sku)).thenReturn(Optional.of(item));
+        when(inventoryRepository.save(any(InventoryItem.class))).thenAnswer(i -> i.getArgument(0));
+
+        var dto = new com.sporekart.modules.grower.web.dto.AdjustStockRequestDto(75, "INVENTORY_COUNT");
+        InventoryItem updated = growerService.adjustStock(growerA, sku, dto);
+
+        assertEquals(75, updated.getOnHandQuantity());
+        verify(inventoryRepository, times(1)).save(any(InventoryItem.class));
+    }
+
+    @Test
+    @DisplayName("SCENARIO #8: Invalid order transition — unsupported transition throws IllegalArgumentException")
+    void scenario8_invalid_order_transition_throws() {
+        UUID orderId = UUID.randomUUID();
+        Order order = Order.createNewOrder(
+                "ORD-TRANS-1", "cust-1", "USD", new BigDecimal("50.00"),
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("50.00"),
+                "idemp-t1", new com.sporekart.modules.order.domain.AddressSnapshot("Bob", "555-0200", "Line1", "Line2", "City", "State", "12345", "USA"),
+                "Notes", List.of()
+        );
+        order.setGrowerId(growerA);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                growerService.transitionOrder(growerA, orderId, OrderStatus.CREATED)
+        );
+    }
 }

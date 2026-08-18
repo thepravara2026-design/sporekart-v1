@@ -30,22 +30,28 @@ public class GrowerController {
         this.growerService = growerService;
     }
 
-    private String resolveUserId(UserPrincipal principal) {
-        if (principal != null) {
-            return principal.getId();
+    private String resolveUserId(Object principal) {
+        if (principal instanceof UserPrincipal up) {
+            return up.getId();
         }
-        return "grower-1"; // Fallback identity for dev
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+            return ud.getUsername();
+        }
+        if (principal instanceof String str && !str.isBlank()) {
+            return str;
+        }
+        throw new org.springframework.security.access.AccessDeniedException("User must be authenticated");
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<GrowerProfileDto>> getProfile(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ApiResponse<GrowerProfileDto>> getProfile(@AuthenticationPrincipal Object principal) {
         GrowerProfileDto profile = growerService.getProfile(resolveUserId(principal));
         return ResponseEntity.ok(ApiResponse.success(profile));
     }
 
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<GrowerProfileDto>> updateProfile(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @RequestBody GrowerProfileDto dto
     ) {
         GrowerProfileDto updated = growerService.updateProfile(resolveUserId(principal), dto);
@@ -53,14 +59,14 @@ public class GrowerController {
     }
 
     @GetMapping("/settings")
-    public ResponseEntity<ApiResponse<GrowerSettingsDto>> getSettings(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ApiResponse<GrowerSettingsDto>> getSettings(@AuthenticationPrincipal Object principal) {
         GrowerSettingsDto settings = growerService.getSettings(resolveUserId(principal));
         return ResponseEntity.ok(ApiResponse.success(settings));
     }
 
     @PutMapping("/settings")
     public ResponseEntity<ApiResponse<GrowerSettingsDto>> updateSettings(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @RequestBody GrowerSettingsDto dto
     ) {
         GrowerSettingsDto updated = growerService.updateSettings(resolveUserId(principal), dto);
@@ -68,20 +74,20 @@ public class GrowerController {
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<ApiResponse<GrowerDashboardDto>> getDashboard(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ApiResponse<GrowerDashboardDto>> getDashboard(@AuthenticationPrincipal Object principal) {
         GrowerDashboardDto dashboard = growerService.getDashboard(resolveUserId(principal));
         return ResponseEntity.ok(ApiResponse.success(dashboard));
     }
 
     @GetMapping("/products")
-    public ResponseEntity<ApiResponse<List<Product>>> getProducts(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ApiResponse<List<Product>>> getProducts(@AuthenticationPrincipal Object principal) {
         List<Product> products = growerService.getProducts(resolveUserId(principal));
         return ResponseEntity.ok(ApiResponse.success(products));
     }
 
     @GetMapping("/products/{id}")
     public ResponseEntity<ApiResponse<Product>> getProductById(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("id") UUID id
     ) {
         Product product = growerService.getProductById(resolveUserId(principal), id);
@@ -90,7 +96,7 @@ public class GrowerController {
 
     @PostMapping("/products")
     public ResponseEntity<ApiResponse<Product>> createProduct(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @RequestBody CreateGrowerProductRequestDto dto
     ) {
         Product created = growerService.createProduct(resolveUserId(principal), dto);
@@ -99,7 +105,7 @@ public class GrowerController {
 
     @PutMapping("/products/{id}")
     public ResponseEntity<ApiResponse<Product>> updateProduct(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("id") UUID id,
             @RequestBody CreateGrowerProductRequestDto dto
     ) {
@@ -108,14 +114,14 @@ public class GrowerController {
     }
 
     @GetMapping("/inventory")
-    public ResponseEntity<ApiResponse<List<InventoryItem>>> getInventory(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ApiResponse<List<InventoryItem>>> getInventory(@AuthenticationPrincipal Object principal) {
         List<InventoryItem> inventory = growerService.getInventory(resolveUserId(principal));
         return ResponseEntity.ok(ApiResponse.success(inventory));
     }
 
     @GetMapping("/inventory/{sku}")
     public ResponseEntity<ApiResponse<InventoryItem>> getInventoryBySku(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("sku") String sku
     ) {
         InventoryItem item = growerService.getInventoryBySku(resolveUserId(principal), sku);
@@ -124,7 +130,7 @@ public class GrowerController {
 
     @PostMapping("/inventory/{sku}/adjustments")
     public ResponseEntity<ApiResponse<InventoryItem>> adjustStock(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("sku") String sku,
             @RequestBody AdjustStockRequestDto dto
     ) {
@@ -133,14 +139,14 @@ public class GrowerController {
     }
 
     @GetMapping("/orders")
-    public ResponseEntity<ApiResponse<List<Order>>> getOrders(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ApiResponse<List<Order>>> getOrders(@AuthenticationPrincipal Object principal) {
         List<Order> orders = growerService.getOrders(resolveUserId(principal));
         return ResponseEntity.ok(ApiResponse.success(orders));
     }
 
     @GetMapping("/orders/{id}")
     public ResponseEntity<ApiResponse<Order>> getOrderById(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("id") UUID id
     ) {
         Order order = growerService.getOrderById(resolveUserId(principal), id);
@@ -149,7 +155,7 @@ public class GrowerController {
 
     @PostMapping("/orders/{id}/process")
     public ResponseEntity<ApiResponse<Order>> processOrder(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("id") UUID id
     ) {
         Order updated = growerService.transitionOrder(resolveUserId(principal), id, OrderStatus.PROCESSING);
@@ -158,7 +164,7 @@ public class GrowerController {
 
     @PostMapping("/orders/{id}/ready-for-fulfilment")
     public ResponseEntity<ApiResponse<Order>> readyForFulfillment(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("id") UUID id
     ) {
         Order updated = growerService.transitionOrder(resolveUserId(principal), id, OrderStatus.READY_FOR_FULFILMENT);
@@ -167,7 +173,7 @@ public class GrowerController {
 
     @PostMapping("/orders/{id}/shipped")
     public ResponseEntity<ApiResponse<Order>> markShipped(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @PathVariable("id") UUID id
     ) {
         Order updated = growerService.transitionOrder(resolveUserId(principal), id, OrderStatus.SHIPPED);
@@ -175,14 +181,14 @@ public class GrowerController {
     }
 
     @GetMapping("/shipments")
-    public ResponseEntity<ApiResponse<List<Shipment>>> getShipments(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ApiResponse<List<Shipment>>> getShipments(@AuthenticationPrincipal Object principal) {
         List<Shipment> shipments = growerService.getShipments(resolveUserId(principal));
         return ResponseEntity.ok(ApiResponse.success(shipments));
     }
 
     @GetMapping("/reports/summary")
     public ResponseEntity<ApiResponse<GrowerReportSummaryDto>> getReportSummary(
-            @AuthenticationPrincipal UserPrincipal principal,
+            @AuthenticationPrincipal Object principal,
             @RequestParam(name = "period", required = false, defaultValue = "THIS_MONTH") String period
     ) {
         GrowerReportSummaryDto summary = growerService.getReportSummary(resolveUserId(principal), period);

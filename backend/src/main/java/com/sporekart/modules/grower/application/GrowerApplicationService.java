@@ -219,7 +219,7 @@ public class GrowerApplicationService {
             case DELIVERED -> order.markDelivered();
             case COMPLETED -> order.markCompleted();
             case CANCELLED -> order.cancel();
-            default -> {}
+            default -> throw new IllegalArgumentException("Unsupported order status transition to: " + newStatus);
         }
         return orderRepository.save(order);
     }
