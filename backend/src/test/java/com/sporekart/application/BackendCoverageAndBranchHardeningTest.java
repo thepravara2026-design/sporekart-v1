@@ -3,7 +3,6 @@ package com.sporekart.application;
 import com.sporekart.modules.security.domain.UserRole;
 import com.sporekart.modules.security.infrastructure.jwt.JwtTokenProvider;
 import com.sporekart.modules.training.application.reporting.TrainingReportingService;
-import com.sporekart.modules.training.controller.dto.ExecutiveTrainingOverviewDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,10 +98,7 @@ class BackendCoverageAndBranchHardeningTest {
     @Test
     @DisplayName("Training Reporting Service - Executive overview metrics computation")
     void testExecutiveTrainingOverviewComputation() {
-        ExecutiveTrainingOverviewDto overview = trainingReportingService.getExecutiveOverview(
-                LocalDate.now().minusDays(30),
-                LocalDate.now()
-        );
+        Object overview = trainingReportingService.getExecutiveOverview();
         assertNotNull(overview);
     }
 }
