@@ -104,10 +104,11 @@ export const ENDPOINTS = {
 
   // Grower Portal
   GROWER_DASHBOARD: '/api/v1/grower/dashboard',
-  GROWER_PROFILE: '/api/v1/auth/me',
-  GROWER_PRODUCTS: '/api/v1/catalog/products',
-  GROWER_INVENTORY: '/api/v1/admin/inventory',
-  GROWER_ORDERS: '/api/v1/admin/orders',
-  GROWER_SHIPMENTS: '/api/v1/admin/shipments',
-  GROWER_REPORTS: '/api/v1/admin/training-reports/summary',
+  GROWER_PROFILE: '/api/v1/grower/me',
+  GROWER_PRODUCTS: '/api/v1/grower/products',
+  GROWER_INVENTORY: '/api/v1/grower/inventory',
+  GROWER_ORDERS: '/api/v1/grower/orders',
+  GROWER_SHIPMENTS: '/api/v1/grower/shipments',
+  GROWER_REPORTS: '/api/v1/grower/reports/summary',
+  GROWER_SETTINGS: '/api/v1/grower/settings',
 } as const;
