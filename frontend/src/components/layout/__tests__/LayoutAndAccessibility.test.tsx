@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SkipLink } from '../SkipLink';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -19,6 +20,19 @@ import { LoadingSpinner } from '../../ui/LoadingSpinner';
 import { Skeleton } from '../../ui/Skeleton';
 import { MAIN_NAVIGATION, ADMIN_NAVIGATION } from '../../../config/navigation';
 
+// The Header renders the shared cart-count query, so layout tests that mount
+// it must run inside a QueryClientProvider (mirroring the application shell).
+const renderWithProviders = (ui: React.ReactNode) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
+};
+
 describe('Layout Primitives & Accessibility Unit Tests', () => {
   it('renders SkipLink pointing to target content ID', () => {
     render(<SkipLink targetId="main-content" label="Skip to main content" />);
@@ -27,11 +41,7 @@ describe('Layout Primitives & Accessibility Unit Tests', () => {
   });
 
   it('renders Header banner landmark and primary navigation', () => {
-    render(
-      <MemoryRouter>
-        <Header />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Header />);
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument();
     expect(screen.getByText('SPOREKART')).toBeInTheDocument();
@@ -124,11 +134,7 @@ describe('Layout Primitives & Accessibility Unit Tests', () => {
   });
 
   it('renders MainLayout with SkipLink, Header, Main, and Footer', () => {
-    render(
-      <MemoryRouter>
-        <MainLayout />
-      </MemoryRouter>
-    );
+    renderWithProviders(<MainLayout />);
     expect(screen.getByRole('link', { name: 'Skip to main content' })).toBeInTheDocument();
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('main')).toBeInTheDocument();
@@ -136,11 +142,7 @@ describe('Layout Primitives & Accessibility Unit Tests', () => {
   });
 
   it('renders AdminLayout with Admin Console sidebar and main region', () => {
-    render(
-      <MemoryRouter>
-        <AdminLayout />
-      </MemoryRouter>
-    );
+    renderWithProviders(<AdminLayout />);
     expect(screen.getByRole('link', { name: 'Skip to admin content' })).toBeInTheDocument();
     expect(screen.getByRole('complementary', { name: 'Admin console sidebar navigation' })).toBeInTheDocument();
     expect(screen.getByRole('main')).toBeInTheDocument();

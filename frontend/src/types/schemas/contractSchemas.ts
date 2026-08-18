@@ -77,31 +77,157 @@ export const UserProfileSchema = z.object({
 export const CartItemSchema = z.object({
   id: z.string(),
   productId: z.string(),
-  productName: z.string(),
+  variantId: z.string().nullable().optional(),
   sku: z.string(),
+  productName: z.string(),
+  variantName: z.string().nullable().optional(),
   unitPrice: z.number(),
   quantity: z.number(),
-  lineSubtotal: z.number(),
+  lineTotal: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export const CartSchema = z.object({
   id: z.string(),
   customerId: z.string(),
-  items: z.array(CartItemSchema),
-  totalQuantity: z.number(),
-  subtotal: z.number(),
   status: z.string(),
+  currency: z.string(),
+  subtotal: z.number(),
+  itemCount: z.number(),
+  items: z.array(CartItemSchema),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
-export const CheckoutPreviewResponseSchema = z.object({
-  cartId: z.string(),
-  itemSubtotal: z.number(),
+export const CheckoutLineResponseSchema = z.object({
+  cartItemId: z.string(),
+  productId: z.string(),
+  sku: z.string(),
+  productName: z.string(),
+  quantity: z.number(),
+  cartUnitPrice: z.number(),
+  authoritativeUnitPrice: z.number(),
+  priceChanged: z.boolean(),
+  lineSubtotal: z.number(),
   discountAmount: z.number(),
-  shippingFee: z.number(),
   taxAmount: z.number(),
+  lineTotal: z.number(),
+});
+
+export const PriceBreakdownResponseSchema = z.object({
+  subtotal: z.number(),
+  discountTotal: z.number(),
+  taxTotal: z.number(),
+  shippingFee: z.number(),
   grandTotal: z.number(),
   currency: z.string(),
-  itemsCount: z.number(),
+});
+
+export const CheckoutWarningResponseSchema = z.object({
+  type: z.string(),
+  productId: z.string(),
+  message: z.string(),
+});
+
+export const CheckoutPreviewResponseSchema = z.object({
+  previewId: z.string(),
+  cartId: z.string(),
+  customerId: z.string(),
+  currency: z.string(),
+  items: z.array(CheckoutLineResponseSchema),
+  breakdown: PriceBreakdownResponseSchema,
+  warnings: z.array(CheckoutWarningResponseSchema),
+  generatedAt: z.string(),
+});
+
+export const AddressSchema = z.object({
+  fullName: z.string(),
+  phone: z.string(),
+  addressLine1: z.string(),
+  addressLine2: z.string().nullable().optional(),
+  city: z.string(),
+  state: z.string(),
+  postalCode: z.string(),
+  country: z.string().nullable().optional(),
+});
+
+export const OrderItemDtoSchema = z.object({
+  id: z.string(),
+  orderId: z.string(),
+  productId: z.string(),
+  variantId: z.string().nullable().optional(),
+  sku: z.string(),
+  productNameSnapshot: z.string(),
+  variantNameSnapshot: z.string().nullable().optional(),
+  unitPrice: z.number(),
+  quantity: z.number(),
+  discountAmount: z.number(),
+  taxAmount: z.number(),
+  lineSubtotal: z.number(),
+  lineTotal: z.number(),
+  createdAt: z.string(),
+});
+
+export const OrderDtoSchema = z.object({
+  id: z.string(),
+  orderNumber: z.string(),
+  customerId: z.string(),
+  status: z.string(),
+  currency: z.string(),
+  subtotal: z.number(),
+  discountTotal: z.number(),
+  taxTotal: z.number(),
+  shippingFee: z.number(),
+  grandTotal: z.number(),
+  idempotencyKey: z.string().nullable().optional(),
+  shippingAddress: AddressSchema.nullable().optional(),
+  customerNotes: z.string().nullable().optional(),
+  items: z.array(OrderItemDtoSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const PaymentCheckoutDtoSchema = z.object({
+  paymentId: z.string(),
+  paymentReference: z.string(),
+  attemptId: z.string(),
+  attemptReference: z.string(),
+  orderId: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  provider: z.string(),
+  providerOrderId: z.string(),
+  keyId: z.string(),
+});
+
+export const PaymentAttemptDtoSchema = z.object({
+  id: z.string(),
+  paymentId: z.string(),
+  attemptReference: z.string(),
+  provider: z.string(),
+  providerOrderId: z.string().nullable().optional(),
+  providerPaymentId: z.string().nullable().optional(),
+  status: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  failureCode: z.string().nullable().optional(),
+  failureReason: z.string().nullable().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const PaymentDtoSchema = z.object({
+  id: z.string(),
+  paymentReference: z.string(),
+  orderId: z.string(),
+  customerId: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  status: z.string(),
+  provider: z.string(),
+  activeAttemptId: z.string().nullable().optional(),
+  attempts: z.array(PaymentAttemptDtoSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });

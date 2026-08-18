@@ -93,20 +93,25 @@ describe('Zod Contract Schemas Validation', () => {
     const cartPayload = {
       id: 'cart-1',
       customerId: 'cust-10',
+      status: 'ACTIVE',
+      currency: 'USD',
+      subtotal: 30.0,
+      itemCount: 2,
       items: [
         {
           id: 'item-1',
           productId: 'prod-10',
-          productName: 'Shiitake Substrate',
+          variantId: null,
           sku: 'SKU-SHII-01',
+          productName: 'Shiitake Substrate',
+          variantName: null,
           unitPrice: 15.0,
           quantity: 2,
-          lineSubtotal: 30.0,
+          lineTotal: 30.0,
+          createdAt: '2026-08-18T00:00:00Z',
+          updatedAt: '2026-08-18T00:00:00Z',
         },
       ],
-      totalQuantity: 2,
-      subtotal: 30.0,
-      status: 'ACTIVE',
       createdAt: '2026-08-18T00:00:00Z',
       updatedAt: '2026-08-18T00:00:00Z',
     };
@@ -114,14 +119,36 @@ describe('Zod Contract Schemas Validation', () => {
     expect(CartSchema.safeParse(cartPayload).success).toBe(true);
 
     const previewPayload = {
+      previewId: 'preview-1',
       cartId: 'cart-1',
-      itemSubtotal: 30.0,
-      discountAmount: 0.0,
-      shippingFee: 5.0,
-      taxAmount: 2.7,
-      grandTotal: 37.7,
+      customerId: 'cust-10',
       currency: 'INR',
-      itemsCount: 1,
+      items: [
+        {
+          cartItemId: 'item-1',
+          productId: 'prod-10',
+          sku: 'SKU-SHII-01',
+          productName: 'Shiitake Substrate',
+          quantity: 2,
+          cartUnitPrice: 15.0,
+          authoritativeUnitPrice: 15.0,
+          priceChanged: false,
+          lineSubtotal: 30.0,
+          discountAmount: 0.0,
+          taxAmount: 2.7,
+          lineTotal: 32.7,
+        },
+      ],
+      breakdown: {
+        subtotal: 30.0,
+        discountTotal: 0.0,
+        taxTotal: 2.7,
+        shippingFee: 5.0,
+        grandTotal: 37.7,
+        currency: 'INR',
+      },
+      warnings: [],
+      generatedAt: '2026-08-18T11:00:00Z',
     };
 
     expect(CheckoutPreviewResponseSchema.safeParse(previewPayload).success).toBe(true);

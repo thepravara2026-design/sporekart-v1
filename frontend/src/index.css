@@ -301,3 +301,19 @@ body {
     gap: 2.5rem;
   }
 }
+
+/* Cart Layout — items + order summary. Single column on mobile to avoid
+   horizontal overflow at 320px; fixed-width summary column on desktop. */
+.cart-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+@media (min-width: 1024px) {
+  .cart-layout {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 2.5rem;
+  }
+}

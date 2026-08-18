@@ -24,6 +24,15 @@ export const ENDPOINTS = {
   CART_ITEM_BY_ID: (itemId: string) => `/api/v1/cart/items/${itemId}`,
   CHECKOUT_PREVIEW: '/api/v1/checkout/preview',
 
+  // Orders
+  ORDERS: '/api/v1/orders',
+  ORDER_BY_REFERENCE: (orderReference: string) => `/api/v1/orders/${orderReference}`,
+
+  // Payments
+  PAYMENTS: '/api/v1/payments',
+  PAYMENT_VERIFY: '/api/v1/payments/verify',
+  PAYMENT_BY_REFERENCE: (paymentReference: string) => `/api/v1/payments/${paymentReference}`,
+
   // Returns
   RETURNS_ELIGIBILITY: (orderRef: string) => `/api/v1/returns/eligibility/${orderRef}`,
   RETURNS_CREATE: '/api/v1/returns',

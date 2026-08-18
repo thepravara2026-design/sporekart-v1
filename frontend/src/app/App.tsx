@@ -9,6 +9,9 @@ import { HomePage } from '../pages/HomePage';
 import { ProductListPage } from '../features/catalog/pages/ProductListPage';
 import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage';
 import { CategoryListPage } from '../features/catalog/pages/CategoryListPage';
+import { CartPage } from '../features/cart/pages/CartPage';
+import { CheckoutPage } from '../features/checkout/pages/CheckoutPage';
+import { OrderConfirmationPage } from '../features/checkout/pages/OrderConfirmationPage';
 
 // Code-split secondary routes using React.lazy & Suspense
 const HealthPage = lazy(() => import('../pages/HealthPage').then(module => ({ default: module.HealthPage })));
@@ -43,6 +46,9 @@ export const App: FC = () => {
                 <Route path="products" element={<ProductListPage />} />
                 <Route path="products/:productId" element={<ProductDetailPage />} />
                 <Route path="categories" element={<CategoryListPage />} />
+                <Route path="cart" element={<CartPage />} />
+                <Route path="checkout" element={<CheckoutPage />} />
+                <Route path="checkout/confirmation" element={<OrderConfirmationPage />} />
                 <Route
                   path="health"
                   element={
