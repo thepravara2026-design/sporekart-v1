@@ -1,34 +1,18 @@
 import { FC } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { SkipLink } from '../components/layout/SkipLink';
+import { Header } from '../components/layout/Header';
+import { Footer } from '../components/layout/Footer';
 
 export const MainLayout: FC = () => {
   return (
-    <>
-      <nav className="navbar">
-        <Link to="/" className="brand">
-          SPOREKART v3.0
-        </Link>
-        <div className="nav-links">
-          <NavLink to="/" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} end>
-            Home
-          </NavLink>
-          <NavLink to="/products" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            Products
-          </NavLink>
-          <NavLink to="/categories" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            Categories
-          </NavLink>
-          <NavLink to="/health" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            System Health
-          </NavLink>
-        </div>
-      </nav>
-      <main className="container">
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <SkipLink targetId="main-content" />
+      <Header />
+      <main id="main-content" tabIndex={-1} style={{ flex: 1, outline: 'none' }}>
         <Outlet />
       </main>
-      <footer>
-        <p>&copy; 2026 Sporekart Inc. Modular Monolith Baseline Baseline v3.0 (Sprint 0)</p>
-      </footer>
-    </>
+      <Footer />
+    </div>
   );
 };

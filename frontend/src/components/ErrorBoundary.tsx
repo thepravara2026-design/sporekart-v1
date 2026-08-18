@@ -1,7 +1,9 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertOctagon, RefreshCw } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface State {
@@ -19,23 +21,43 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error in React Component tree:', error, errorInfo);
+    console.error('Uncaught exception caught in React Error Boundary:', error, errorInfo);
   }
+
+  private handleReset = () => {
+    this.setState({ hasError: false, error: undefined });
+    window.location.reload();
+  };
 
   public render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        <div className="container" style={{ textAlign: 'center', paddingTop: '4rem' }}>
-          <div className="card" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <h2 style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>Application Rendering Exception</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              An unexpected error occurred in the user interface.
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="container"
+          style={{ textAlign: 'center', paddingTop: '4rem', paddingBottom: '4rem' }}
+        >
+          <div className="card" style={{ maxWidth: '540px', margin: '0 auto', padding: '2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <AlertOctagon size={48} style={{ color: 'var(--danger-color)' }} />
+            </div>
+            <h2 style={{ color: 'var(--text-primary)', marginBottom: '0.75rem', fontSize: '1.5rem', fontWeight: 800 }}>
+              Application Execution Exception
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.6, fontSize: '0.95rem' }}>
+              An unexpected user-interface exception occurred. Diagnostic details have been recorded safely.
             </p>
             <button
               className="btn btn-primary"
-              onClick={() => window.location.reload()}
+              onClick={this.handleReset}
+              aria-label="Reload and reset application"
             >
-              Reload Page
+              <RefreshCw size={16} /> Reload Page
             </button>
           </div>
         </div>
