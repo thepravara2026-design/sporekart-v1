@@ -5,13 +5,23 @@ import { ProductPrice } from './ProductPrice';
 import { ProductAvailability } from './ProductAvailability';
 import { ProductActions } from './ProductActions';
 import { ProductMetadata } from './ProductMetadata';
+import { useAddToCart } from '../hooks/useAddToCart';
 
 export interface ProductInfoProps {
   product: Product;
   className?: string;
+  quantity?: number;
+  onQuantityChange?: (newQuantity: number) => void;
+  mutation?: ReturnType<typeof useAddToCart>;
 }
 
-export const ProductInfo: FC<ProductInfoProps> = ({ product, className = '' }) => {
+export const ProductInfo: FC<ProductInfoProps> = ({
+  product,
+  className = '',
+  quantity,
+  onQuantityChange,
+  mutation,
+}) => {
   return (
     <div className={`product-info-wrapper ${className}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -38,7 +48,7 @@ export const ProductInfo: FC<ProductInfoProps> = ({ product, className = '' }) =
         <ProductPrice price={product.price} currency={product.currency} style={{ fontSize: '2rem' }} />
       </div>
 
-      <ProductActions product={product} />
+      <ProductActions product={product} quantity={quantity} onQuantityChange={onQuantityChange} mutation={mutation} />
 
       <ProductMetadata product={product} />
     </div>

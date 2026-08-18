@@ -1,6 +1,7 @@
-import { FC } from 'react';
+import { FC, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProduct } from '../hooks/useProduct';
+import { useAddToCart } from '../hooks/useAddToCart';
 import { ApiError } from '../../../services/apiError';
 import { PageShell } from '../../../components/layout/PageShell';
 import { Breadcrumb, BreadcrumbItem } from '../../../components/ui/Breadcrumb';
@@ -11,6 +12,8 @@ import { ProductDescription } from '../components/ProductDescription';
 import { RelatedProducts } from '../components/RelatedProducts';
 import { ProductDetailSkeleton } from '../components/ProductDetailSkeleton';
 import { CatalogErrorState } from '../components/CatalogErrorState';
+import { ProductStickyAction, useStickyActionVisibility } from '../components/ProductStickyAction';
+import { isProductPurchasable } from '../utils/catalogUtils';
 import { ArrowLeft } from 'lucide-react';
 
 export const ProductDetailPage: FC = () => {
@@ -26,10 +29,17 @@ export const ProductDetailPage: FC = () => {
 
   const product = response?.data;
 
+  const [quantity, setQuantity] = useState(1);
+  const addToCartMutation = useAddToCart();
+  const purchasePanelRef = useRef<HTMLDivElement>(null);
+  const stickyVisible = useStickyActionVisibility(purchasePanelRef);
+
   const isNotFound =
     isError &&
     error instanceof ApiError &&
     (error.status === 404 || error.code === 'CATALOG_PRODUCT_NOT_FOUND');
+
+  const purchasable = product ? isProductPurchasable(product.status) : false;
 
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Home', path: '/' },
@@ -48,6 +58,11 @@ export const ProductDetailPage: FC = () => {
   } else {
     breadcrumbItems.push({ label: 'Product Details' });
   }
+
+  const handleStickyAddToCart = () => {
+    if (!product || !purchasable || addToCartMutation.isPending) return;
+    addToCartMutation.mutate({ productId: product.id, quantity });
+  };
 
   return (
     <PageShell className="product-detail-page">
@@ -89,10 +104,19 @@ export const ProductDetailPage: FC = () => {
         )}
 
         {!isLoading && !isError && product && (
-          <>
-            <Card data-testid="product-detail-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', padding: '2rem' }}>
+          <div style={{ paddingBottom: stickyVisible ? '5.5rem' : 0, transition: 'padding-bottom var(--transition-fast)' }}>
+            <Card
+              ref={purchasePanelRef}
+              data-testid="product-detail-card"
+              className="product-detail-layout"
+            >
               <ProductGallery productName={product.name} />
-              <ProductInfo product={product} />
+              <ProductInfo
+                product={product}
+                quantity={quantity}
+                onQuantityChange={setQuantity}
+                mutation={addToCartMutation}
+              />
             </Card>
 
             <ProductDescription description={product.description} />
@@ -104,7 +128,17 @@ export const ProductDetailPage: FC = () => {
                 <ArrowLeft size={16} /> Back to Products Catalog
               </Link>
             </div>
-          </>
+          </div>
+        )}
+
+        {product && (
+          <ProductStickyAction
+            productName={product.name}
+            visible={stickyVisible && purchasable}
+            isPending={addToCartMutation.isPending}
+            disabled={!purchasable}
+            onAddToCart={handleStickyAddToCart}
+          />
         )}
       </div>
     </PageShell>

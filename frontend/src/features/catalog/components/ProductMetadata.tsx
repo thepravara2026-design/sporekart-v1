@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { Product } from '../types/catalog';
+import { getStatusLabel } from '../utils/catalogUtils';
 
 export interface ProductMetadataProps {
   product: Product;
@@ -45,7 +46,7 @@ export const ProductMetadata: FC<ProductMetadataProps> = ({ product, className =
             Availability Status
           </dt>
           <dd style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0.2rem 0 0 0' }}>
-            {product.status}
+            {getStatusLabel(product.status)}
           </dd>
         </div>
 

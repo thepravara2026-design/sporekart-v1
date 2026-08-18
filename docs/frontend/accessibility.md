@@ -58,3 +58,10 @@ All focusable elements (`<a>`, `<button>`, `<input>`, `<select>`) exhibit a high
 ### 2.7 Loading & Skeleton Semantics
 - Active loading spinners use `role="status"` and explicit `aria-label="Loading..."` for screen readers.
 - Purely visual skeleton placeholders use `aria-hidden="true"` to prevent screen reader noise during background data fetching.
+
+### 2.8 Product Purchase Experience (FD-10)
+- **Gallery:** Prev/next and zoom controls are real `<button>` elements with accessible names (`Previous image`, `Next image`, `Open image zoom`). Thumbnails expose `aria-label` and `aria-current` for the active slide; the thumbnail group supports `ArrowLeft` / `ArrowRight` / `Home` / `End` navigation, and `Escape` closes the zoom lightbox.
+- **Quantity:** The stepper uses 40px touch targets (≥44px against adjacent interactive targets is not required here). The input exposes `aria-label="Quantity"`, `inputMode="numeric"`, `aria-invalid`, and `aria-describedby` linking to its error message.
+- **Purchase Errors:** Inline mutation failures render inside the purchase panel with `role="alert"`; toast failures use `aria-live="assertive"`. The UI never announces success before the cart API resolves.
+- **Image Fallback:** When no image URL exists in the product contract, the gallery renders a branded placeholder with `alt="Mushroom Spawn"` instead of a broken image.
+- **Sticky Purchase Bar (mobile):** The sticky bar appears only on mobile viewports and respects safe-area padding; it does not trap focus or introduce overlay landmarks.

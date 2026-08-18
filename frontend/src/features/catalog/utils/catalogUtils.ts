@@ -1,6 +1,12 @@
 import { ProductStatus } from '../types/catalog';
 import { BadgeVariant } from '../../../components/ui/Badge';
 
+/**
+ * Backend-authorized purchasability check: only products in ACTIVE status can
+ * be added to the cart (mirrors the backend CartPort/CatalogAdapter rule).
+ */
+export const isProductPurchasable = (status: ProductStatus): boolean => status === 'ACTIVE';
+
 export const formatPrice = (amount: number, currency: string = 'INR'): string => {
   try {
     return new Intl.NumberFormat('en-IN', {

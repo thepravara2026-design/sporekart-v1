@@ -30,6 +30,7 @@ export * from './components/ProductInfo';
 export * from './components/ProductDescription';
 export * from './components/ProductMetadata';
 export * from './components/RelatedProducts';
+export * from './components/ProductStickyAction';
 export * from './components/ProductCardSkeleton';
 export * from './components/ProductDetailSkeleton';
 export * from './components/CategoryCard';

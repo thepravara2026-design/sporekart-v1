@@ -1,11 +1,12 @@
-import { FC, ReactNode, HTMLAttributes, CSSProperties } from 'react';
+import { FC, ReactNode, HTMLAttributes, CSSProperties, forwardRef } from 'react';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-export const Card: FC<CardProps> = ({ children, className = '', style = {}, ...props }) => (
+export const Card = forwardRef<HTMLDivElement, CardProps>(({ children, className = '', style = {}, ...props }, ref) => (
   <div
+    ref={ref}
     className={`card ${className}`}
     style={{
       background: 'var(--bg-card)',
@@ -23,7 +24,9 @@ export const Card: FC<CardProps> = ({ children, className = '', style = {}, ...p
   >
     {children}
   </div>
-);
+));
+
+Card.displayName = 'Card';
 
 export const CardHeader: FC<CardProps> = ({ children, className = '', style = {}, ...props }) => (
   <div className={`card-header ${className}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', ...style }} {...props}>

@@ -3,22 +3,40 @@ import { Product } from '../types/catalog';
 import { ProductQuantity } from './ProductQuantity';
 import { Button } from '../../../components/ui/Button';
 import { useAddToCart } from '../hooks/useAddToCart';
+import { isProductPurchasable, getStatusLabel } from '../utils/catalogUtils';
 import { ShoppingCart } from 'lucide-react';
 
 export interface ProductActionsProps {
   product: Product;
   className?: string;
+  /** Controlled quantity (lifted to the page so a mobile sticky action can share it). */
+  quantity?: number;
+  onQuantityChange?: (newQuantity: number) => void;
+  /** Injected add-to-cart mutation (shared with the mobile sticky action). */
+  mutation?: ReturnType<typeof useAddToCart>;
 }
 
-export const ProductActions: FC<ProductActionsProps> = ({ product, className = '' }) => {
-  const [quantity, setQuantity] = useState(1);
-  const addToCartMutation = useAddToCart();
+export const ProductActions: FC<ProductActionsProps> = ({
+  product,
+  className = '',
+  quantity: quantityProp,
+  onQuantityChange: onQuantityChangeProp,
+  mutation: mutationProp,
+}) => {
+  const [localQuantity, setLocalQuantity] = useState(1);
+  const ownMutation = useAddToCart();
+  const mutation = mutationProp ?? ownMutation;
 
-  const isOutOfStock = product.status === 'OUT_OF_STOCK' || product.status === 'DISCONTINUED';
+  const quantity = quantityProp ?? localQuantity;
+  const setQuantity = onQuantityChangeProp ?? setLocalQuantity;
+
+  const purchasable = isProductPurchasable(product.status);
+  const isPending = mutation.isPending;
+  const disabled = !purchasable || isPending;
 
   const handleAddToCart = () => {
-    if (isOutOfStock) return;
-    addToCartMutation.mutate({
+    if (disabled) return;
+    mutation.mutate({
       productId: product.id,
       quantity,
     });
@@ -27,25 +45,39 @@ export const ProductActions: FC<ProductActionsProps> = ({ product, className = '
   return (
     <div
       className={`product-actions ${className}`}
-      style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.25rem', marginTop: '1.5rem' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}
     >
-      <ProductQuantity
-        quantity={quantity}
-        onQuantityChange={setQuantity}
-        disabled={isOutOfStock || addToCartMutation.isPending}
-      />
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.25rem' }}>
+        <ProductQuantity
+          quantity={quantity}
+          onQuantityChange={setQuantity}
+          disabled={disabled}
+        />
 
-      <Button
-        variant={isOutOfStock ? 'secondary' : 'primary'}
-        size="lg"
-        disabled={isOutOfStock || addToCartMutation.isPending}
-        isLoading={addToCartMutation.isPending}
-        leftIcon={<ShoppingCart size={20} />}
-        onClick={handleAddToCart}
-        style={{ minWidth: '180px' }}
-      >
-        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-      </Button>
+        <Button
+          variant={purchasable ? 'primary' : 'secondary'}
+          size="lg"
+          disabled={disabled}
+          isLoading={isPending}
+          leftIcon={purchasable ? <ShoppingCart size={20} /> : undefined}
+          onClick={handleAddToCart}
+          style={{ minWidth: '180px' }}
+        >
+          {purchasable ? 'Add to Cart' : getStatusLabel(product.status)}
+        </Button>
+      </div>
+
+      {mutation.isError && (
+        <p
+          role="alert"
+          data-testid="add-to-cart-error"
+          style={{ fontSize: '0.85rem', color: 'var(--danger-color)', margin: 0 }}
+        >
+          {mutation.error instanceof Error
+            ? mutation.error.message
+            : 'Unable to add the item to your cart. Please try again.'}
+        </p>
+      )}
     </div>
   );
 };

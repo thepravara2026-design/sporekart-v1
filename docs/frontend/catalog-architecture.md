@@ -23,6 +23,8 @@ It refactors the legacy product list, category list, and product detail componen
 - `useProduct(productId)`: Query hook for retrieving single product details.
 - `useCategories(params)`: Query hook for category listing.
 - `useCatalogFilters(initialState)`: Filter state management hook with URL parameter synchronization.
+- `useAddToCart` (FD-10): Add-to-cart mutation syncing the `['cart']` query cache (`setQueryData` + `invalidateQueries`) only on a resolved server response.
+- `useStickyActionVisibility` (FD-10): Composes `useIsMobileViewport` (`matchMedia`) and `useElementInViewport` (`IntersectionObserver`) to drive the mobile sticky purchase bar.
 
 ### 2.4 Domain Components (`src/features/catalog/components/`)
 | Component | Description | UI Primitives Consumed |
@@ -42,16 +44,27 @@ It refactors the legacy product list, category list, and product detail componen
 | `CatalogPagination` | Accessible pagination controls | `Pagination` |
 | `CatalogEmptyState` | Empty state container with filter reset trigger | `EmptyState`, `Button` |
 | `CatalogErrorState` | Accessible error banner with query retry trigger | `Alert`, `Button` |
+| `ProductGallery` | Primary image + lazy thumbnails, prev/next, zoom lightbox, image fallback | `Dialog`, `ProductImage`, `IconButton` |
+| `ProductQuantity` | Quantity stepper with 40px targets, max `50`, clamping | `IconButton`, `Input` |
+| `ProductActions` | Purchase panel with controlled quantity, inline error region, pending lock | `Button`, `ProductQuantity`, `ProductAvailability`, `Alert` |
+| `ProductStickyAction` | Mobile sticky Add to Cart bar with safe-area padding | `Button`, `ProductQuantity`, `ProductPrice` |
 
 ### 2.5 Feature Pages (`src/features/catalog/pages/`)
 - `ProductListPage`: Main product catalog page wrapped in FD-04 `PageShell`, handling filter state, skeletons, error boundaries, empty states, and pagination.
-- `ProductDetailPage`: Comprehensive product view featuring breadcrumb navigation, image gallery, status badge, SKU meta, price formatting, detailed description, and cart actions.
+- `ProductDetailPage`: Comprehensive product view featuring breadcrumb navigation, image gallery, status badge, SKU meta, price formatting, detailed description, and cart actions. Handles loading / not-found / error-retry / out-of-stock / pending states and wires the mobile `ProductStickyAction` bar.
 - `CategoryListPage`: Category browsing page with category cards and search.
+
+### 2.6 Purchase Constants & Utilities (FD-10)
+- `catalogConstants.ts` → `DEFAULT_MAX_PRODUCT_QUANTITY = 50` (mirrors the backend maximum item quantity).
+- `catalogUtils.ts` → `isProductPurchasable(status)` (only `ACTIVE` products are purchasable, matching the backend `CartPort` gate) and `getStatusLabel(status)`.
+
+### 2.7 Cart Integration
+Cart state is owned by the `['cart']` TanStack Query key. `useAddToCart` writes the server response into the cache after the mutation resolves; the frontend never claims success before backend confirmation. A dedicated cart page is scheduled for a later sprint — the header cart link continues to point to `/products`.
 
 ---
 
 ## 3. Verification & Quality Assurance
 
-- **Vitest Unit & Integration Suite**: `19 / 19` test files passed (100%), `87 / 87` tests passed (100%).
+- **Vitest Unit & Integration Suite**: `26 / 26` test files passed (100%), `212 / 212` tests passed (100%), covering catalog listing, category browsing, and the FD-10 product detail & purchase experience (gallery, quantity, purchase actions, sticky bar, page states, and the end-to-end purchase integration flow).
 - **TypeScript Compliance**: `npx tsc --noEmit` passed with 0 errors.
-- **Production Build**: `npm run build` passed in 6.45s.
+- **Production Build**: `npm run build` passed.

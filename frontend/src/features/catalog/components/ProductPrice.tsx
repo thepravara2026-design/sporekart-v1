@@ -10,7 +10,7 @@ export interface ProductPriceProps {
 
 export const ProductPrice: FC<ProductPriceProps> = ({
   price,
-  currency = 'USD',
+  currency = 'INR',
   className = '',
   style = {},
 }) => {

@@ -287,3 +287,17 @@ body {
     display: inline-flex !important;
   }
 }
+
+/* Product Detail Layout — single column on mobile, two columns from 768px */
+.product-detail-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .product-detail-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+}

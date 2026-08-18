@@ -99,6 +99,12 @@ All interactive controls accept keyboard focus cleanly and display a high-contra
 }
 ```
 
+### 3.4 Quantity Stepper Touch Targets (FD-10)
+The product quantity stepper (`ProductQuantity`) mandates **≥40px** icon-button targets to satisfy WCAG 2.2 Level AA pointer target sizing on the product detail page and the mobile sticky purchase bar.
+
+### 3.5 Product Detail Layout (FD-10)
+The product detail page uses the shared `.product-detail-layout` CSS class: a responsive grid that collapses to a single column on mobile and a two-column layout at ≥768px, with `minmax(0, 1fr)` tracks to prevent horizontal overflow at 320px viewports.
+
 ---
 
 ## 4. Visual Validation Showcase Route

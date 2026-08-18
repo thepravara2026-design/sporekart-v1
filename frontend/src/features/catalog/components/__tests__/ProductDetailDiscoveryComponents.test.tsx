@@ -106,9 +106,12 @@ describe('Product Detail & Discovery Components (Sprint FD-07)', () => {
     });
   });
 
-  it('renders ProductGallery with main image and zoom capability', () => {
+  it('renders ProductGallery with branded placeholder when no images are provided', () => {
     render(<ProductGallery productName="Lions Mane" />);
-    expect(screen.getByText('Lions Mane Spawn Specimen')).toBeInTheDocument();
+    expect(screen.getByText('Mushroom Spawn')).toBeInTheDocument();
+    // No gallery controls should be rendered for a single image product.
+    expect(screen.queryByRole('button', { name: 'Previous product image' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Next product image' })).not.toBeInTheDocument();
   });
 
   it('renders ProductMetadata definition list cleanly', () => {

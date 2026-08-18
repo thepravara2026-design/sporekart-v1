@@ -4,7 +4,7 @@ import { Skeleton } from '../../../components/ui/Skeleton';
 
 export const ProductDetailSkeleton: FC = () => {
   return (
-    <Card style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', padding: '2rem' }}>
+    <Card className="product-detail-layout">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <Skeleton height="320px" borderRadius="var(--radius-lg)" />
         <div style={{ display: 'flex', gap: '0.75rem' }}>

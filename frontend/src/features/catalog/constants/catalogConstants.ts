@@ -2,6 +2,12 @@ export const DEFAULT_PAGE_SIZE = 12;
 
 export const DEFAULT_SORT = 'createdAt,desc';
 
+/**
+ * Matches the backend `cart.max-item-quantity` default. Quantity selection is
+ * UX-only; the backend remains authoritative.
+ */
+export const DEFAULT_MAX_PRODUCT_QUANTITY = 50;
+
 export const SORT_OPTIONS = [
   { value: 'createdAt,desc', label: 'Newest Additions' },
   { value: 'name,asc', label: 'Name (A to Z)' },

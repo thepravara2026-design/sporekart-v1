@@ -8,6 +8,8 @@ export interface ProductImageProps {
   loading?: 'eager' | 'lazy';
   className?: string;
   style?: React.CSSProperties;
+  /** Invoked when the image fails to load and the fallback is shown. */
+  onError?: () => void;
 }
 
 /**
@@ -24,9 +26,15 @@ export const ProductImage: FC<ProductImageProps> = ({
   loading = 'lazy',
   className = '',
   style = {},
+  onError,
 }) => {
   const [hasError, setHasError] = useState(false);
   const showFallback = !src || hasError;
+
+  const handleError = () => {
+    setHasError(true);
+    onError?.();
+  };
 
   return (
     <div
@@ -50,7 +58,7 @@ export const ProductImage: FC<ProductImageProps> = ({
           alt={alt}
           loading={loading}
           decoding="async"
-          onError={() => setHasError(true)}
+          onError={handleError}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
