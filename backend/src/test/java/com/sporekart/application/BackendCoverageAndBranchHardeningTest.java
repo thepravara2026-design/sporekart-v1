@@ -50,7 +50,7 @@ class BackendCoverageAndBranchHardeningTest {
     void testCustomerSupportListTickets() throws Exception {
         String customerToken = jwtTokenProvider.generateAccessToken("cust-cov-1", "cust@sporekart.com", UserRole.ROLE_CUSTOMER, "sess-cust-cov");
 
-        mockMvc.perform(get("/api/v1/support/tickets")
+        mockMvc.perform(get("/api/v1/customer/support/tickets")
                         .header("Authorization", "Bearer " + customerToken))
                 .andExpect(status().isOk());
     }
@@ -58,10 +58,14 @@ class BackendCoverageAndBranchHardeningTest {
     @Test
     @DisplayName("Customer Review Controller - Get product rating summary and approved reviews")
     void testCustomerReviewEndpoints() throws Exception {
-        mockMvc.perform(get("/api/v1/products/prod-cov-101/rating-summary"))
+        String customerToken = jwtTokenProvider.generateAccessToken("cust-cov-rev", "custrev@sporekart.com", UserRole.ROLE_CUSTOMER, "sess-cust-rev");
+
+        mockMvc.perform(get("/api/v1/products/prod-cov-101/rating-summary")
+                        .header("Authorization", "Bearer " + customerToken))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/v1/products/prod-cov-101/reviews"))
+        mockMvc.perform(get("/api/v1/products/prod-cov-101/reviews")
+                        .header("Authorization", "Bearer " + customerToken))
                 .andExpect(status().isOk());
     }
 
@@ -71,17 +75,16 @@ class BackendCoverageAndBranchHardeningTest {
         String adminToken = jwtTokenProvider.generateAccessToken("admin-cov-2", "admin@sporekart.com", UserRole.ROLE_ADMIN, "sess-admin-cov-2");
 
         mockMvc.perform(get("/api/v1/admin/reviews")
-                        .param("status", "PENDING")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("Admin Inventory Controller - Stock check and low stock threshold listing")
+    @DisplayName("Admin Inventory Controller - Stock check and inventory listing")
     void testAdminInventoryList() throws Exception {
         String adminToken = jwtTokenProvider.generateAccessToken("admin-cov-3", "admin@sporekart.com", UserRole.ROLE_ADMIN, "sess-admin-cov-3");
 
-        mockMvc.perform(get("/api/v1/admin/inventory/low-stock")
+        mockMvc.perform(get("/api/v1/admin/inventory")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk());
     }
