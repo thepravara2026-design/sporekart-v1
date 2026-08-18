@@ -27,7 +27,7 @@ class TrainingDomainBoundaryTest {
                 now, now.plus(30, ChronoUnit.DAYS), 10
         );
 
-        batch.cancelBatch("ADMIN", "Testing cancellation guard");
+        batch.cancel();
         assertEquals(BatchStatus.CANCELLED, batch.getStatus());
 
         assertThrows(InvalidBatchStateException.class, batch::allocateSeat);
@@ -37,8 +37,13 @@ class TrainingDomainBoundaryTest {
     @DisplayName("TrainingCompletionService rejects invalid attendance percentage thresholds")
     void testTrainingCompletionThresholdRangeValidation() {
         TrainingCompletionService service = new TrainingCompletionService(
-                enrollmentId -> null, batchId -> null, null,
-                null, null, null, null
+                org.mockito.Mockito.mock(com.sporekart.modules.training.domain.port.TrainingEnrollmentRepository.class),
+                org.mockito.Mockito.mock(com.sporekart.modules.training.domain.port.TrainingBatchRepository.class),
+                null,
+                org.mockito.Mockito.mock(com.sporekart.modules.training.application.TrainingAttendanceService.class),
+                org.mockito.Mockito.mock(com.sporekart.modules.training.application.TrainingCertificateService.class),
+                org.mockito.Mockito.mock(com.sporekart.modules.training.application.EnrollmentLifecycleService.class),
+                org.mockito.Mockito.mock(org.springframework.context.ApplicationEventPublisher.class)
         );
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -84,6 +89,9 @@ class TrainingDomainBoundaryTest {
 
         enrollment.markPaymentPending();
         assertEquals(EnrollmentStatus.PAYMENT_PENDING, enrollment.getStatus());
+
+        enrollment.markPaymentVerified("PAY-REF-100");
+        assertEquals(EnrollmentStatus.PAYMENT_VERIFIED, enrollment.getStatus());
 
         enrollment.confirm("PAY-REF-100");
         assertEquals(EnrollmentStatus.CONFIRMED, enrollment.getStatus());
