@@ -228,9 +228,19 @@ export const OrderConfirmationPage: FC = () => {
               </ul>
             </Card>
 
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Link to="/products">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <Link to={`/orders/${order.orderNumber}`}>
                 <Button variant="primary" size="lg">
+                  View Order Details
+                </Button>
+              </Link>
+              <Link to="/orders">
+                <Button variant="secondary" size="lg">
+                  My Orders
+                </Button>
+              </Link>
+              <Link to="/products">
+                <Button variant="outline" size="lg">
                   Continue Shopping
                 </Button>
               </Link>

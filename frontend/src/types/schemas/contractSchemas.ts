@@ -188,6 +188,99 @@ export const OrderDtoSchema = z.object({
   updatedAt: z.string(),
 });
 
+export const OrderSummaryDtoSchema = z.object({
+  id: z.string(),
+  orderNumber: z.string(),
+  status: z.string(),
+  currency: z.string(),
+  grandTotal: z.number(),
+  itemCount: z.number(),
+  createdAt: z.string(),
+});
+
+export const OrderStatusHistoryDtoSchema = z.object({
+  id: z.string(),
+  orderId: z.string(),
+  previousStatus: z.string().nullable().optional(),
+  newStatus: z.string(),
+  reason: z.string().nullable().optional(),
+  actorType: z.string(),
+  actorId: z.string().nullable().optional(),
+  createdAt: z.string(),
+});
+
+export const OrderTimelineDtoSchema = z.object({
+  orderId: z.string(),
+  orderNumber: z.string(),
+  currentStatus: z.string(),
+  history: z.array(OrderStatusHistoryDtoSchema),
+});
+
+export const ShipmentTrackingEventDtoSchema = z.object({
+  id: z.string().optional(),
+  providerEventId: z.string().optional(),
+  providerStatus: z.string(),
+  normalizedStatus: z.string(),
+  description: z.string(),
+  location: z.string().optional(),
+  occurredAt: z.string(),
+});
+
+export const ShipmentTrackingResponseDtoSchema = z.object({
+  shipmentReference: z.string(),
+  orderReference: z.string(),
+  status: z.string(),
+  awb: z.string().optional(),
+  courierName: z.string().optional(),
+  estimatedDeliveryAt: z.string().optional(),
+  timeline: z.array(ShipmentTrackingEventDtoSchema),
+});
+
+export const ShipmentDtoSchema = z.object({
+  id: z.string(),
+  shipmentReference: z.string(),
+  orderId: z.string(),
+  orderReference: z.string(),
+  customerId: z.string(),
+  status: z.string(),
+  provider: z.string(),
+  providerShipmentId: z.string().optional(),
+  awb: z.string().optional(),
+  trackingNumber: z.string().optional(),
+  courierName: z.string().optional(),
+  courierCode: z.string().optional(),
+  estimatedDeliveryAt: z.string().optional(),
+  bookedAt: z.string().optional(),
+  pickedUpAt: z.string().optional(),
+  deliveredAt: z.string().optional(),
+  trackingEvents: z.array(ShipmentTrackingEventDtoSchema),
+  version: z.number().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const ItemEligibilityDtoSchema = z.object({
+  orderItemId: z.string(),
+  productId: z.string(),
+  sku: z.string(),
+  productName: z.string(),
+  orderedQuantity: z.number(),
+  previouslyReturnedQuantity: z.number(),
+  returnableQuantity: z.number(),
+  isReturnable: z.boolean(),
+  reasonCode: z.string().nullable().optional(),
+});
+
+export const ReturnEligibilityDtoSchema = z.object({
+  orderId: z.string(),
+  orderReference: z.string(),
+  eligible: z.boolean(),
+  ineligibilityReason: z.string().nullable().optional(),
+  deliveryTimestamp: z.string().nullable().optional(),
+  returnDeadline: z.string().nullable().optional(),
+  items: z.array(ItemEligibilityDtoSchema),
+});
+
 export const PaymentCheckoutDtoSchema = z.object({
   paymentId: z.string(),
   paymentReference: z.string(),

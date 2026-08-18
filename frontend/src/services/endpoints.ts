@@ -27,6 +27,8 @@ export const ENDPOINTS = {
   // Orders
   ORDERS: '/api/v1/orders',
   ORDER_BY_REFERENCE: (orderReference: string) => `/api/v1/orders/${orderReference}`,
+  ORDER_TIMELINE: (orderReference: string) => `/api/v1/orders/${orderReference}/timeline`,
+  ORDER_CANCEL: (orderReference: string) => `/api/v1/orders/${orderReference}/cancel`,
 
   // Payments
   PAYMENTS: '/api/v1/payments',
@@ -34,10 +36,10 @@ export const ENDPOINTS = {
   PAYMENT_BY_REFERENCE: (paymentReference: string) => `/api/v1/payments/${paymentReference}`,
 
   // Returns
-  RETURNS_ELIGIBILITY: (orderRef: string) => `/api/v1/returns/eligibility/${orderRef}`,
-  RETURNS_CREATE: '/api/v1/returns',
+  RETURNS_ELIGIBILITY: (orderReference: string) => `/api/v1/orders/${orderReference}/return-eligibility`,
+  RETURNS_CREATE: (orderReference: string) => `/api/v1/orders/${orderReference}/returns`,
   RETURN_BY_REF: (returnRef: string) => `/api/v1/returns/${returnRef}`,
-  RETURNS_CUSTOMER: '/api/v1/returns',
+  RETURNS_CUSTOMER: '/api/v1/customer/returns',
   ADMIN_RETURNS: '/api/v1/admin/returns',
   ADMIN_RETURN_APPROVE: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/approve`,
   ADMIN_RETURN_REJECT: (returnRef: string) => `/api/v1/admin/returns/${returnRef}/reject`,
@@ -54,7 +56,8 @@ export const ENDPOINTS = {
   ADMIN_INVENTORY_DAMAGED: (sku: string) => `/api/v1/admin/inventory/${sku}/damaged`,
 
   // Shipping
-  CUSTOMER_SHIPMENT_TRACKING: (orderRef: string) => `/api/v1/orders/${orderRef}/shipment`,
+  CUSTOMER_SHIPMENT: (orderRef: string) => `/api/v1/orders/${orderRef}/shipment`,
+  CUSTOMER_SHIPMENT_TRACKING: (orderRef: string) => `/api/v1/orders/${orderRef}/tracking`,
   ADMIN_SHIPMENTS: '/api/v1/admin/shipments',
   ADMIN_SHIPMENT_BY_REF: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}`,
   ADMIN_SHIPMENT_RETRY: (shipmentRef: string) => `/api/v1/admin/shipments/${shipmentRef}/retry`,

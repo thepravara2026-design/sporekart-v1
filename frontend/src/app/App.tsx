@@ -17,6 +17,9 @@ import { OrderConfirmationPage } from '../features/checkout/pages/OrderConfirmat
 const HealthPage = lazy(() => import('../pages/HealthPage').then(module => ({ default: module.HealthPage })));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage').then(module => ({ default: module.NotFoundPage })));
 const DesignSystemShowcase = lazy(() => import('../pages/DesignSystemShowcase').then(module => ({ default: module.DesignSystemShowcase })));
+const OrdersPage = lazy(() => import('../features/orders/pages/OrdersPage').then(module => ({ default: module.OrdersPage })));
+const OrderDetailPage = lazy(() => import('../features/orders/pages/OrderDetailPage').then(module => ({ default: module.OrderDetailPage })));
+const ReturnRequestPage = lazy(() => import('../features/returns/pages/ReturnRequestPage').then(module => ({ default: module.ReturnRequestPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +52,30 @@ export const App: FC = () => {
                 <Route path="cart" element={<CartPage />} />
                 <Route path="checkout" element={<CheckoutPage />} />
                 <Route path="checkout/confirmation" element={<OrderConfirmationPage />} />
+                <Route
+                  path="orders"
+                  element={
+                    <Suspense fallback={<RouteFallback />}>
+                      <OrdersPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="orders/:orderReference"
+                  element={
+                    <Suspense fallback={<RouteFallback />}>
+                      <OrderDetailPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="orders/:orderReference/return-request"
+                  element={
+                    <Suspense fallback={<RouteFallback />}>
+                      <ReturnRequestPage />
+                    </Suspense>
+                  }
+                />
                 <Route
                   path="health"
                   element={

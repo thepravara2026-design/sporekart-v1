@@ -99,3 +99,22 @@ Checkout feature components compose the shared primitives without embedding busi
 | `CheckoutSkeleton` | `Card`, `CardHeader`, `CardTitle`, `Skeleton` (`aria-hidden`) |
 | `OrderReview` | `Card`, `Button` (secondary/ghost/primary), `Link`, composed checkout components |
 | `CheckoutPage` | `PageShell`, `Breadcrumb`, `CartValidationAlert`, `CartEmptyState`, checkout components |
+
+---
+
+## 6. Feature Consumption Example — Order Management (FD-13)
+
+Order surfaces compose the shared primitives; domain orchestration (pagination, filters, cancellation, eligibility gating) stays in feature hooks (`useOrders`, `useCancelOrder`, `useReturnEligibility`) and the domain lives in `orders/utils/orderStatus.ts` + `orders/constants/orderConstants.ts`.
+
+| Order surface | Composed primitives |
+|---|---|
+| `OrderStatusBadge` | `Badge` (variant mapped by `getOrderStatusVariant`) |
+| `OrderCard` / `OrderList` | `Card`, `Link`, shared `formatPrice` (catalog util), `OrderStatusBadge` |
+| `OrderFilters` | Labelled `Select` (native `<select>` via primitive) |
+| `OrderPagination` | Accessible page buttons (Prev/Next + numbered pages) |
+| `OrderSummary` / `OrderItem` / `OrderItems` | `Card` surfaces; totals are backend-provided |
+| `OrderTimeline` / `ShipmentTracking` | Semantic `<ol>/<li>` lists with `aria-hidden` markers |
+| `ShipmentStatus` | `Card`, `Badge` (shipment status variant) |
+| `OrderActions` | `Button` (`destructive`, `aria-haspopup="dialog"`), `Dialog`, `FormField`, `Input` |
+| `OrderReturnHandoff` | `Card`, `Alert`, `Button` (`outline`), `Link`, `PackageSearch` icon |
+| `OrdersPage` / `OrderDetailPage` | `PageShell`, `Breadcrumb`, `Alert`, `LoadingSpinner`, `Card` + feature components |

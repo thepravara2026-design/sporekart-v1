@@ -18,17 +18,26 @@ export interface ReturnItemDto {
 }
 
 export interface ReturnStatusHistoryDto {
-  previousStatus?: string;
+  id?: string;
+  previousStatus?: string | null;
   newStatus: string;
-  reason?: string;
+  reason?: string | null;
   actorType: string;
-  actorId?: string;
-  timestamp: string;
+  actorId?: string | null;
+  correlationId?: string | null;
   createdAt?: string;
+  timestamp?: string;
+}
+
+export interface ReturnInspectionDto {
+  outcome?: string;
+  notes?: string;
+  inspectedAt?: string;
+  inspectorId?: string;
 }
 
 export interface RefundRecordDto {
-  id: string;
+  id?: string;
   refundReference: string;
   amount: number;
   currency: string;
@@ -49,87 +58,72 @@ export interface ReturnDto {
   reasonDescription?: string;
   evidenceUrls?: string;
   policyVersion?: string;
-  totalRefundableAmount: number;
   requestedAt: string;
   approvedAt?: string;
   receivedAt?: string;
   inspectedAt?: string;
   completedAt?: string;
+  reverseShipmentId?: string | null;
+  version?: number;
+  totalRefundableAmount: number;
   items: ReturnItemDto[];
   statusHistory: ReturnStatusHistoryDto[];
-  refundRecord?: RefundRecordDto;
+  inspection?: ReturnInspectionDto | null;
+  refundRecord?: RefundRecordDto | null;
 }
 
 export interface ItemEligibilityDto {
   orderItemId: string;
+  productId: string;
   sku: string;
-  productNameSnapshot: string;
-  unitPrice: number;
-  originalQuantity: number;
-  deliveredQuantity: number;
-  returnedQuantity: number;
+  productName: string;
+  orderedQuantity: number;
+  previouslyReturnedQuantity: number;
   returnableQuantity: number;
-  returnable: boolean;
-  ineligibilityReason?: string;
+  isReturnable: boolean;
+  reasonCode?: string;
 }
 
 export interface ReturnEligibilityDto {
+  orderId: string;
+  orderReference: string;
   eligible: boolean;
   ineligibilityReason?: string;
-  itemEligibilities: ItemEligibilityDto[];
+  deliveryTimestamp?: string;
+  returnDeadline?: string;
   items: ItemEligibilityDto[];
 }
 
+export interface CreateReturnCommand {
+  reasonCode: string;
+  reasonDescription?: string;
+  evidenceUrls?: string;
+  items: Array<{ orderItemId: string; quantity: number; itemReasonCode?: string }>;
+}
+
 export const returnApi = {
-  checkEligibility: async (orderRef: string, customerId: string): Promise<ReturnEligibilityDto> => {
-    const response = await axiosInstance.get<ReturnEligibilityDto>(
-      ENDPOINTS.RETURNS_ELIGIBILITY(orderRef),
-      { headers: { 'X-Customer-Id': customerId } }
-    );
-    const data = response.data;
-    if (data && data.itemEligibilities && !data.items) {
-      data.items = data.itemEligibilities;
-    }
-    return data;
-  },
-
-  createReturn: async (
-    orderRef: string,
-    payload: {
-      reasonCode: string;
-      reasonDescription?: string;
-      evidenceUrls?: string;
-      items: { orderItemId: string; quantity: number }[];
-    },
-    customerId: string
-  ): Promise<ReturnDto> => {
-    const response = await axiosInstance.post<ReturnDto>(
-      `/api/v1/orders/${orderRef}/returns`,
-      payload,
-      { headers: { 'X-Customer-Id': customerId } }
-    );
+  checkEligibility: async (orderRef: string): Promise<ReturnEligibilityDto> => {
+    const response = await axiosInstance.get<ReturnEligibilityDto>(ENDPOINTS.RETURNS_ELIGIBILITY(orderRef));
     return response.data;
   },
 
-  getReturnByReference: async (returnRef: string, customerId?: string): Promise<ReturnDto> => {
-    const headers = customerId ? { 'X-Customer-Id': customerId } : undefined;
-    const response = await axiosInstance.get<ReturnDto>(ENDPOINTS.RETURN_BY_REF(returnRef), { headers });
+  createReturn: async (orderRef: string, payload: CreateReturnCommand): Promise<ReturnDto> => {
+    const response = await axiosInstance.post<ReturnDto>(ENDPOINTS.RETURNS_CREATE(orderRef), payload);
     return response.data;
   },
 
-  listCustomerReturns: async (customerId: string): Promise<ReturnDto[]> => {
-    const response = await axiosInstance.get<ReturnDto[]>(ENDPOINTS.RETURNS_CUSTOMER, {
-      headers: { 'X-Customer-Id': customerId }
-    });
+  getReturnByReference: async (returnRef: string): Promise<ReturnDto> => {
+    const response = await axiosInstance.get<ReturnDto>(ENDPOINTS.RETURN_BY_REF(returnRef));
     return response.data;
   },
 
-  cancelReturn: async (returnRef: string, customerId: string): Promise<ReturnDto> => {
-    const response = await axiosInstance.post<ReturnDto>(
-      `/api/v1/returns/${returnRef}/cancel`,
-      {},
-      { headers: { 'X-Customer-Id': customerId } }
-    );
+  listCustomerReturns: async (): Promise<ReturnDto[]> => {
+    const response = await axiosInstance.get<ReturnDto[]>(ENDPOINTS.RETURNS_CUSTOMER);
+    return response.data;
+  },
+
+  cancelReturn: async (returnRef: string): Promise<ReturnDto> => {
+    const response = await axiosInstance.post<ReturnDto>(`/api/v1/returns/${returnRef}/cancel`, {});
     return response.data;
   },
 

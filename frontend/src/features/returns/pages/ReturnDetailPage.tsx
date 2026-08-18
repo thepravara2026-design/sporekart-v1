@@ -3,13 +3,11 @@ import { returnApi, ReturnDto } from '../../../services/returnApi';
 
 interface Props {
   returnReference: string;
-  customerId?: string;
   onBack?: () => void;
 }
 
 export const ReturnDetailPage: React.FC<Props> = ({
   returnReference,
-  customerId = 'cust-101',
   onBack
 }) => {
   const [returnDetails, setReturnDetails] = useState<ReturnDto | null>(null);
@@ -18,13 +16,13 @@ export const ReturnDetailPage: React.FC<Props> = ({
 
   useEffect(() => {
     fetchDetails();
-  }, [returnReference, customerId]);
+  }, [returnReference]);
 
   const fetchDetails = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await returnApi.getReturnByReference(returnReference, customerId);
+      const data = await returnApi.getReturnByReference(returnReference);
       setReturnDetails(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load return details.');
@@ -114,7 +112,7 @@ export const ReturnDetailPage: React.FC<Props> = ({
           {returnDetails.statusHistory.map((history, idx) => (
             <div key={idx} className="text-xs space-y-0.5">
               <span className="font-semibold text-indigo-700">{history.newStatus}</span>
-              <span className="text-gray-400 ml-2">{new Date(history.timestamp).toLocaleString()}</span>
+              <span className="text-gray-400 ml-2">{new Date(history.createdAt ?? history.timestamp ?? '').toLocaleString()}</span>
               <p className="text-gray-600">{history.reason} (by {history.actorType}: {history.actorId})</p>
             </div>
           ))}

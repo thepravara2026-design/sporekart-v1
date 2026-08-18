@@ -74,3 +74,13 @@ All focusable elements (`<a>`, `<button>`, `<input>`, `<select>`) exhibit a high
 - **Place Order CTA:** The submit button sets `aria-busy` and an accessible `Loading...` name while the order pipeline runs; radios and the CTA are `disabled`, and the handler no-ops while a submission is pending (duplicate-submission protection).
 - **Error State:** `CheckoutErrorState` shows a safe user-facing message (never stack traces) with the backend `requestId` as a diagnostic reference, plus Retry and Return to Cart actions.
 - **Loading States:** `CheckoutSkeleton` placeholders use `aria-hidden="true"` skeletons (no screen-reader noise); explicit computing status text (`role="status"`) announces preview calculation.
+
+### 2.10 Order Management & History Experience (FD-13)
+
+- **Status Filter:** `OrderFilters` uses a labelled `Select` (`aria-label="Filter orders by status"`) associated with its visible label via `htmlFor`/`id`.
+- **Order Cards:** `OrderCard` presents the order number as a link with the full number text; layout wraps on narrow viewports so date, item count, badge, and total remain reachable.
+- **Timelines:** `OrderTimeline` and `ShipmentTracking` render semantic `<ol>/<li>` lists; decorative connector dots are `aria-hidden="true"` so screen readers hear only status, time, location, and reason text.
+- **Cancellation Dialog:** The Cancel trigger sets `aria-haspopup="dialog"`; the shared `Dialog` traps focus, returns focus on close, and the confirm button sets `aria-busy`/an accessible `Loading...` name while the mutation runs (duplicate-submission protection).
+- **Return Handoff:** The "Request Return" action is only surfaced after the backend eligibility query resolves eligible — an ineligible order or a transient failure renders nothing rather than a dead control.
+- **Loading & Error:** `OrderSkeleton` placeholders are `aria-hidden`; spinners carry `role="status"` with explicit labels; `OrderErrorState` shows a safe message (never stack traces) with a Retry action.
+- **Shipment Absence:** A missing shipment (404) renders as an informational note, not an error, so the page never announces a failure for a shipment that legitimately does not exist yet.

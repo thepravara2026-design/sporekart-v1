@@ -17,6 +17,7 @@ export const MAIN_NAVIGATION: NavItem[] = [
   { label: 'Home', path: '/' },
   { label: 'Products', path: '/products' },
   { label: 'Categories', path: '/categories' },
+  { label: 'My Orders', path: '/orders' },
 ];
 
 /** Admin dashboard navigation */

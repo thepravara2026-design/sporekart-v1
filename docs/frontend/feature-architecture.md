@@ -99,6 +99,26 @@ src/features/checkout/
 
 The order pipeline (create order → reserve inventory → initiate payment → verify payment) lives in `hooks/usePlaceOrder.ts`, keeping business orchestration out of the page and components. See [`checkout-architecture.md`](./checkout-architecture.md) for the full contract-driven design.
 
+### Order Management Feature Layout (FD-13)
+
+The orders feature owns the canonical order status domain and the customer order-management surfaces (`/orders`, `/orders/:orderReference`, and the return-request entry routed from the order detail page). It follows the same layered layout and mirrors backend endpoints 1:1 (`/orders`, `/orders/{ref}/timeline`, `/orders/{ref}/cancel`, `/orders/{ref}/shipment`, `/orders/{ref}/tracking`, `/orders/{ref}/return-eligibility`).
+
+```text
+src/features/orders/
+├── constants/orderConstants.ts      # ORDER_PAGE_SIZE, ORDER_STATUS_FILTERS, CANCELABLE_ORDER_STATUSES
+├── utils/orderStatus.ts             # Canonical OrderStatus enum, labels, badge variants
+├── utils/orderUtils.ts              # Safe error messages, shipment status, date formatting
+├── hooks/                           # useOrders, useOrderByReference, useOrderTimeline, useCancelOrder,
+│                                    # useOrderShipment, useShipmentTracking, useReturnEligibility
+├── components/                      # OrderCard, OrderList, OrderFilters, OrderPagination, OrderTimeline,
+│                                    # ShipmentStatus, ShipmentTracking, OrderActions, OrderReturnHandoff,
+│                                    # OrderEmptyState, OrderSkeleton, OrderErrorState, ... (+ __tests__)
+├── pages/                           # OrdersPage, OrderDetailPage (+ __tests__)
+└── index.ts                         # Public feature module export index
+```
+
+The domain is re-exported for backward compatibility: `checkout/utils/orderStatus.ts` and `checkout/hooks/useOrder.ts` became thin re-exports of the orders feature. The return-request submission page lives in the returns feature (`features/returns/pages/ReturnRequestPage.tsx`) but is routed from the orders domain. See [`order-architecture.md`](./order-architecture.md) for the full contract-driven design.
+
 ---
 
 ## 3. Strict Boundary Rules1. **Domain Isolation**: Feature-specific components (`ProductCard.tsx`) MUST reside in `src/features/{feature}/components/`. They must NEVER be placed in `src/components/ui/`.

@@ -1,14 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderApi, CreateOrderCommand, OrderDto } from '../../../services/orderApi';
 import { ApiResponse } from '../../../types/api';
 import { useToast } from '../../../components/ui/Toast';
 import { getCheckoutErrorMessage } from '../utils/checkoutUtils';
 import { CART_KEYS } from '../../cart/hooks/useCart';
 
-export const ORDER_KEYS = {
-  all: ['orders'] as const,
-  detail: (reference: string) => ['orders', reference] as const,
-} as const;
+// Order query keys and read hooks live in the orders feature (FD-13). Re-exported
+// here so existing checkout surfaces keep their import paths.
+export { ORDER_KEYS, useOrderByReference } from '../../orders/hooks/useOrder';
 
 /**
  * Place an order from the server-confirmed cart. The backend transitions the
@@ -33,14 +32,5 @@ export const useCreateOrder = () => {
         message: getCheckoutErrorMessage(error),
       });
     },
-  });
-};
-
-/** Load a single order by its reference (UUID or ORD-... string). */
-export const useOrderByReference = (reference: string) => {
-  return useQuery({
-    queryKey: ORDER_KEYS.detail(reference),
-    queryFn: () => orderApi.getOrderByReference(reference),
-    enabled: Boolean(reference),
   });
 };
