@@ -63,7 +63,20 @@ public class NotificationOperationsService {
         List<AlertConditionDto> activeAlerts = detectAlertConditions(backlog);
         List<Map<String, Object>> providers = getProviderListFromTracker();
 
-        String overallStatus = "HEALTHY";
+        String overallStatus = calculateOverallHealthStatus(backlog, providers);
+
+        Map<String, Object> resilienceMap = new HashMap<>();
+        resilienceMap.put("providers", providers);
+
+        summary.put("overallStatus", overallStatus);
+        summary.put("activeAlerts", activeAlerts);
+        summary.put("backlog", backlog);
+        summary.put("resilience", resilienceMap);
+        summary.put("timestamp", Instant.now());
+        return summary;
+    }
+
+    private String calculateOverallHealthStatus(BacklogSummaryDto backlog, List<Map<String, Object>> providers) {
         boolean anyUnavailable = false;
         boolean anyDegraded = false;
         int openCircuits = 0;
@@ -77,20 +90,12 @@ public class NotificationOperationsService {
         }
 
         if (anyUnavailable || openCircuits > 1 || backlog.staleProcessingCount() > 50 || backlog.retryBacklogCount() > 1000) {
-            overallStatus = "CRITICAL";
-        } else if (anyDegraded || openCircuits > 0 || backlog.staleProcessingCount() > 0 || backlog.retryBacklogCount() > 50) {
-            overallStatus = "DEGRADED";
+            return "CRITICAL";
         }
-
-        Map<String, Object> resilienceMap = new HashMap<>();
-        resilienceMap.put("providers", providers);
-
-        summary.put("overallStatus", overallStatus);
-        summary.put("activeAlerts", activeAlerts);
-        summary.put("backlog", backlog);
-        summary.put("resilience", resilienceMap);
-        summary.put("timestamp", Instant.now());
-        return summary;
+        if (anyDegraded || openCircuits > 0 || backlog.staleProcessingCount() > 0 || backlog.retryBacklogCount() > 50) {
+            return "DEGRADED";
+        }
+        return "HEALTHY";
     }
 
     public BacklogSummaryDto getBacklogSummary() {

@@ -227,6 +227,49 @@ public class PaymentApplicationService {
         PaymentProvider provider = providerRegistry.getProvider(providerType);
         boolean validSig = provider.verifyWebhookSignature(rawBody, signatureHeader);
 
+        ParsedWebhookData parsed = parseWebhookPayload(rawBody);
+        String eventId = parsed.eventId();
+        if (eventId == null || eventId.isBlank()) {
+            eventId = "evt_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        }
+
+        // Idempotency Check: check if event was already recorded
+        Optional<PaymentWebhookEvent> existingOpt = webhookEventRepository.findByProviderAndProviderEventId(providerType, eventId);
+        if (existingOpt.isPresent()) {
+            PaymentWebhookEvent existing = existingOpt.get();
+            if (existing.getProcessingStatus() == WebhookProcessingStatus.PROCESSED) {
+                log.info("Webhook event {} already processed, skipping duplicate", eventId);
+                return new WebhookResponseDto(WebhookProcessingStatus.DUPLICATE, "Webhook event already processed");
+            }
+        }
+
+        PaymentWebhookEvent webhookEvent;
+        try {
+            webhookEvent = webhookEventRepository.save(PaymentWebhookEvent.recordEvent(providerType, eventId, parsed.eventType(), validSig));
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            log.info("Concurrent duplicate webhook event detected for eventId: {}", eventId);
+            return new WebhookResponseDto(WebhookProcessingStatus.DUPLICATE, "Webhook event already being processed or completed");
+        }
+
+        if (!validSig) {
+            log.warn("Invalid webhook signature for event {}", eventId);
+            webhookEvent.markFailed("Invalid signature");
+            webhookEventRepository.save(webhookEvent);
+            throw new PaymentVerificationFailedException("Webhook signature verification failed");
+        }
+
+        // Process trusted webhook event
+        if (parsed.providerOrderId() != null) {
+            handleTrustedWebhookEvent(providerType, parsed.providerOrderId(), parsed.eventType(), parsed.providerPaymentId(), signatureHeader, eventId);
+        }
+
+        webhookEvent.markProcessed();
+        webhookEventRepository.save(webhookEvent);
+        log.info("Successfully processed webhook event {}", eventId);
+        return new WebhookResponseDto(WebhookProcessingStatus.PROCESSED, "Webhook processed successfully");
+    }
+
+    private ParsedWebhookData parseWebhookPayload(String rawBody) {
         String eventId = null;
         String eventType = "unknown";
         String providerOrderId = null;
@@ -260,77 +303,45 @@ public class PaymentApplicationService {
             log.error("Failed to parse webhook JSON body: {}", e.getMessage());
         }
 
-        if (eventId == null || eventId.isBlank()) {
-            eventId = "evt_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-        }
-
-        // Idempotency Check: check if event was already recorded
-        Optional<PaymentWebhookEvent> existingOpt = webhookEventRepository.findByProviderAndProviderEventId(providerType, eventId);
-        if (existingOpt.isPresent()) {
-            PaymentWebhookEvent existing = existingOpt.get();
-            if (existing.getProcessingStatus() == WebhookProcessingStatus.PROCESSED) {
-                log.info("Webhook event {} already processed, skipping duplicate", eventId);
-                return new WebhookResponseDto(WebhookProcessingStatus.DUPLICATE, "Webhook event already processed");
-            }
-        }
-
-        PaymentWebhookEvent webhookEvent;
-        try {
-            webhookEvent = webhookEventRepository.save(PaymentWebhookEvent.recordEvent(providerType, eventId, eventType, validSig));
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            log.info("Concurrent duplicate webhook event detected for eventId: {}", eventId);
-            return new WebhookResponseDto(WebhookProcessingStatus.DUPLICATE, "Webhook event already being processed or completed");
-        }
-
-        if (!validSig) {
-            log.warn("Invalid webhook signature for event {}", eventId);
-            webhookEvent.markFailed("Invalid signature");
-            webhookEventRepository.save(webhookEvent);
-            throw new PaymentVerificationFailedException("Webhook signature verification failed");
-        }
-
-        // Process trusted webhook event
-        if (providerOrderId != null) {
-            Optional<PaymentAttempt> attemptOpt = paymentAttemptRepository.findByProviderAndProviderOrderId(providerType, providerOrderId);
-            if (attemptOpt.isPresent()) {
-                PaymentAttempt attempt = attemptOpt.get();
-                Payment payment = paymentRepository.findById(attempt.getPaymentId()).orElse(null);
-
-                if (payment != null) {
-                    if (eventType.contains("captured") || eventType.contains("authorized") || eventType.contains("success")) {
-                        if (!payment.isSuccessful()) {
-                            PaymentStatus prevStatus = payment.getStatus();
-                            payment.markSuccess(attempt.getId(), providerPaymentId, signatureHeader);
-                            Payment saved = paymentRepository.save(payment);
-                            statusHistoryRepository.save(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryEntity.fromDomain(
-                                    com.sporekart.modules.payment.domain.PaymentStatusHistory.recordTransition(
-                                            saved.getId(), prevStatus, PaymentStatus.SUCCESS, "WEBHOOK", "RAZORPAY", providerType.name(), eventId, "Webhook event " + eventType + " processed", null
-                                    )
-                            ));
-                            confirmOrderAndReservation(saved.getOrderId(), saved.getPaymentReference());
-                        }
-                    } else if (eventType.contains("failed")) {
-                        if (!payment.isSuccessful()) {
-                            PaymentStatus prevStatus = payment.getStatus();
-                            payment.markFailed(attempt.getId(), "WEBHOOK_FAILED", "Payment failed event received from provider");
-                            Payment saved = paymentRepository.save(payment);
-                            statusHistoryRepository.save(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryEntity.fromDomain(
-                                    com.sporekart.modules.payment.domain.PaymentStatusHistory.recordTransition(
-                                            saved.getId(), prevStatus, PaymentStatus.FAILED, "WEBHOOK", "RAZORPAY", providerType.name(), eventId, "Webhook event " + eventType + " processed", null
-                                    )
-                            ));
-                            releaseReservationForOrder(saved.getOrderId(), "PAYMENT_FAILED_WEBHOOK");
-                        }
-                    }
-                }
-            }
-        }
-
-        webhookEvent.markProcessed();
-        webhookEventRepository.save(webhookEvent);
-        log.info("Successfully processed webhook event {}", eventId);
-        return new WebhookResponseDto(WebhookProcessingStatus.PROCESSED, "Webhook processed successfully");
+        return new ParsedWebhookData(eventId, eventType, providerOrderId, providerPaymentId);
     }
+
+    private void handleTrustedWebhookEvent(PaymentProviderType providerType, String providerOrderId, String eventType, String providerPaymentId, String signatureHeader, String eventId) {
+        Optional<PaymentAttempt> attemptOpt = paymentAttemptRepository.findByProviderAndProviderOrderId(providerType, providerOrderId);
+        if (attemptOpt.isEmpty()) {
+            return;
+        }
+
+        PaymentAttempt attempt = attemptOpt.get();
+        Payment payment = paymentRepository.findById(attempt.getPaymentId()).orElse(null);
+        if (payment == null || payment.isSuccessful()) {
+            return;
+        }
+
+        if (eventType.contains("captured") || eventType.contains("authorized") || eventType.contains("success")) {
+            PaymentStatus prevStatus = payment.getStatus();
+            payment.markSuccess(attempt.getId(), providerPaymentId, signatureHeader);
+            Payment saved = paymentRepository.save(payment);
+            statusHistoryRepository.save(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryEntity.fromDomain(
+                    com.sporekart.modules.payment.domain.PaymentStatusHistory.recordTransition(
+                            saved.getId(), prevStatus, PaymentStatus.SUCCESS, "WEBHOOK", "RAZORPAY", providerType.name(), eventId, "Webhook event " + eventType + " processed", null
+                    )
+            ));
+            confirmOrderAndReservation(saved.getOrderId(), saved.getPaymentReference());
+        } else if (eventType.contains("failed")) {
+            PaymentStatus prevStatus = payment.getStatus();
+            payment.markFailed(attempt.getId(), "WEBHOOK_FAILED", "Payment failed event received from provider");
+            Payment saved = paymentRepository.save(payment);
+            statusHistoryRepository.save(com.sporekart.modules.payment.infrastructure.persistence.PaymentStatusHistoryEntity.fromDomain(
+                    com.sporekart.modules.payment.domain.PaymentStatusHistory.recordTransition(
+                            saved.getId(), prevStatus, PaymentStatus.FAILED, "WEBHOOK", "RAZORPAY", providerType.name(), eventId, "Webhook event " + eventType + " processed", null
+                    )
+            ));
+            releaseReservationForOrder(saved.getOrderId(), "PAYMENT_FAILED_WEBHOOK");
+        }
+    }
+
+    private record ParsedWebhookData(String eventId, String eventType, String providerOrderId, String providerPaymentId) {}
 
     @Transactional(readOnly = true)
     public PaymentDto getPaymentByReference(String paymentReference, String customerId) {
