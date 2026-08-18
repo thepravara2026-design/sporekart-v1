@@ -72,6 +72,7 @@ public class SecurityConfig {
                 headers.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"));
                 headers.referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN));
                 headers.frameOptions(frame -> frame.sameOrigin());
+                headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000));
             })
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(unauthorizedEntryPoint())
