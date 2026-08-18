@@ -150,7 +150,7 @@ describe('Catalog End-to-End Release Hardening Journey', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Blue Oyster Culture')).toBeInTheDocument();
+      expect(screen.getAllByText('Blue Oyster Culture').length).toBeGreaterThan(0);
       expect(screen.getByText('$24.99')).toBeInTheDocument();
       expect(screen.getByText('SKU: SP-LC-001')).toBeInTheDocument();
     });

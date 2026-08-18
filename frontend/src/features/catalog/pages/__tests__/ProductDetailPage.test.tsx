@@ -64,7 +64,8 @@ describe('ProductDetailPage', () => {
       </QueryClientProvider>
     );
 
-    expect(await screen.findByText('Turkey Tail Extract')).toBeInTheDocument();
+    const titleElements = await screen.findAllByText('Turkey Tail Extract');
+    expect(titleElements.length).toBeGreaterThan(0);
     expect(screen.getByText('SKU: SKU-TURKEY-001')).toBeInTheDocument();
     expect(screen.getByText('$29.99')).toBeInTheDocument();
     expect(screen.getByText('Immune support extract')).toBeInTheDocument();

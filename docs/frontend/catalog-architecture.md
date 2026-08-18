@@ -1,0 +1,57 @@
+# SPOREKART v3.0 — Product Catalog Feature Architecture Specification
+
+## 1. Executive Summary
+
+Sprint **FD-06 — Feature Component Architecture & Product Catalog Refactoring** establishes the production-grade frontend feature architecture for SPOREKART v3.0's product catalog experience.
+
+It refactors the legacy product list, category list, and product detail components into modular, highly accessible, responsive feature components under `src/features/catalog/`.
+
+---
+
+## 2. Catalog Feature Architecture
+
+### 2.1 API & Contracts (`src/features/catalog/api/`)
+- `catalogApi.ts`: Re-exports domain methods (`getProducts`, `getProduct`, `getCategories`, `getCategory`) with support for query parameters, abort signals, and strong TypeScript generics (`ApiResponse<PageResponse<Product>>`).
+
+### 2.2 Domain Types (`src/features/catalog/types/`)
+- `Product`: Complete entity schema including `id`, `sku`, `name`, `description`, `price`, `currency`, `status` (`ACTIVE` | `OUT_OF_STOCK` | `DRAFT` | `DISCONTINUED` | `ARCHIVED`), `category`, and timestamps.
+- `Category`: Entity schema for category classifications (`ACTIVE` | `INACTIVE`).
+- `CatalogFilterState`: Type definition for local and URL query filter states.
+
+### 2.3 Feature Hooks (`src/features/catalog/hooks/`)
+- `useProducts(params)`: Query hook powered by TanStack Query for product listing.
+- `useProduct(productId)`: Query hook for retrieving single product details.
+- `useCategories(params)`: Query hook for category listing.
+- `useCatalogFilters(initialState)`: Filter state management hook with URL parameter synchronization.
+
+### 2.4 Domain Components (`src/features/catalog/components/`)
+| Component | Description | UI Primitives Consumed |
+| :--- | :--- | :--- |
+| `ProductCard` | Product card with image, status badge, title, SKU, price, View Details link, and Add to Cart action | `Card`, `Badge`, `Button`, `ProductPrice`, `ProductAvailability`, `ProductImage` |
+| `ProductCardSkeleton` | Zero CLS loading placeholder for catalog cards | `Card`, `Skeleton` |
+| `ProductGrid` | Responsive grid wrapper for product cards | `Grid` |
+| `ProductList` | Stack layout variant for product cards | `Stack` |
+| `ProductPrice` | Formatted price display with currency formatting | `formatPrice` utility |
+| `ProductAvailability` | Status indicator badge with contextual icons | `Badge` |
+| `CategoryCard` | Category summary card with product count link | `Card`, `Badge`, `Button` |
+| `CategoryGrid` | Grid layout for category cards | `Grid` |
+| `CatalogSearch` | Accessible search control with clear action | `Input` |
+| `CatalogSort` | Select dropdown for sorting catalog products | `Select` |
+| `CatalogFilters` | Comprehensive filter panel for category, price range, and status | `FormField`, `Input`, `Select`, `Button` |
+| `CatalogToolbar` | Top toolbar combining search, sort, total counts, and filter actions | `CatalogSearch`, `CatalogSort` |
+| `CatalogPagination` | Accessible pagination controls | `Pagination` |
+| `CatalogEmptyState` | Empty state container with filter reset trigger | `EmptyState`, `Button` |
+| `CatalogErrorState` | Accessible error banner with query retry trigger | `Alert`, `Button` |
+
+### 2.5 Feature Pages (`src/features/catalog/pages/`)
+- `ProductListPage`: Main product catalog page wrapped in FD-04 `PageShell`, handling filter state, skeletons, error boundaries, empty states, and pagination.
+- `ProductDetailPage`: Comprehensive product view featuring breadcrumb navigation, image gallery, status badge, SKU meta, price formatting, detailed description, and cart actions.
+- `CategoryListPage`: Category browsing page with category cards and search.
+
+---
+
+## 3. Verification & Quality Assurance
+
+- **Vitest Unit & Integration Suite**: `19 / 19` test files passed (100%), `87 / 87` tests passed (100%).
+- **TypeScript Compliance**: `npx tsc --noEmit` passed with 0 errors.
+- **Production Build**: `npm run build` passed in 6.45s.

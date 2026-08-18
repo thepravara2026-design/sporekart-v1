@@ -1,12 +1,13 @@
 import { FC, ReactNode } from 'react';
 import { Container } from './Container';
 
-interface PageShellProps {
+export interface PageShellProps {
   children: ReactNode;
   title?: string;
   subtitle?: string;
   actions?: ReactNode;
   breadcrumbs?: ReactNode;
+  className?: string;
 }
 
 export const PageShell: FC<PageShellProps> = ({
@@ -15,9 +16,10 @@ export const PageShell: FC<PageShellProps> = ({
   subtitle,
   actions,
   breadcrumbs,
+  className = '',
 }) => {
   return (
-    <Container maxWidth="xl" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
+    <Container maxWidth="xl" className={className} style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
       {breadcrumbs && <nav aria-label="Breadcrumb navigation" style={{ marginBottom: '1rem' }}>{breadcrumbs}</nav>}
 
       {(title || actions) && (

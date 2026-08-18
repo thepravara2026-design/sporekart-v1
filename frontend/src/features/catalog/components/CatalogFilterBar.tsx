@@ -1,7 +1,11 @@
 import { FC, ChangeEvent } from 'react';
-import { Category } from '../../../types/catalog';
+import { Category } from '../types/catalog';
+import { FormField } from '../../../components/ui/FormField';
+import { Input } from '../../../components/ui/Input';
+import { Select } from '../../../components/ui/Select';
+import { Button } from '../../../components/ui/Button';
 
-interface CatalogFilterBarProps {
+export interface CatalogFilterBarProps {
   categories: Category[];
   search: string;
   selectedCategory: string;
@@ -38,105 +42,108 @@ export const CatalogFilterBar: FC<CatalogFilterBarProps> = ({
     search || selectedCategory || selectedStatus || minPrice || maxPrice || selectedSort !== 'createdAt,desc'
   );
 
+  const categoryOptions = [
+    { value: '', label: 'All Categories' },
+    ...categories.map((cat) => ({ value: cat.id, label: cat.name })),
+  ];
+
+  const statusOptions = [
+    { value: '', label: 'All Statuses' },
+    { value: 'ACTIVE', label: 'Active / In Stock' },
+    { value: 'OUT_OF_STOCK', label: 'Out of Stock' },
+    { value: 'DRAFT', label: 'Draft' },
+  ];
+
+  const sortOptions = [
+    { value: 'createdAt,desc', label: 'Newest First' },
+    { value: 'name,asc', label: 'Name: A to Z' },
+    { value: 'name,desc', label: 'Name: Z to A' },
+    { value: 'price,asc', label: 'Price: Low to High' },
+    { value: 'price,desc', label: 'Price: High to Low' },
+  ];
+
   return (
-    <div className="catalog-filter-bar" data-testid="catalog-filter-bar">
-      <div className="filter-group filter-search">
-        <label htmlFor="search-input" className="filter-label">Search</label>
-        <input
+    <div
+      className="catalog-filter-bar card"
+      data-testid="catalog-filter-bar"
+      style={{
+        padding: '1.25rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gap: '1rem',
+        alignItems: 'end',
+        marginBottom: '1.5rem',
+      }}
+    >
+      <FormField label="Search" htmlFor="search-input">
+        <Input
           id="search-input"
-          type="text"
-          className="form-control"
           placeholder="Search products..."
           value={search}
           onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
         />
-      </div>
+      </FormField>
 
-      <div className="filter-group">
-        <label htmlFor="category-select" className="filter-label">Category</label>
-        <select
+      <FormField label="Category" htmlFor="category-select">
+        <Select
           id="category-select"
-          className="form-control"
           value={selectedCategory}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => onCategoryChange(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
+          options={categoryOptions}
+        />
+      </FormField>
 
-      <div className="filter-group">
-        <label htmlFor="status-select" className="filter-label">Availability</label>
-        <select
+      <FormField label="Availability" htmlFor="status-select">
+        <Select
           id="status-select"
-          className="form-control"
           value={selectedStatus}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => onStatusChange(e.target.value)}
-        >
-          <option value="">All Statuses</option>
-          <option value="ACTIVE">Active / In Stock</option>
-          <option value="OUT_OF_STOCK">Out of Stock</option>
-          <option value="DRAFT">Draft</option>
-        </select>
-      </div>
+          options={statusOptions}
+        />
+      </FormField>
 
       {onMinPriceChange && (
-        <div className="filter-group">
-          <label htmlFor="min-price-input" className="filter-label">Min Price</label>
-          <input
+        <FormField label="Min Price" htmlFor="min-price-input">
+          <Input
             id="min-price-input"
             type="number"
             min="0"
             step="0.01"
-            className="form-control"
             placeholder="Min $"
             value={minPrice}
             onChange={(e: ChangeEvent<HTMLInputElement>) => onMinPriceChange(e.target.value)}
           />
-        </div>
+        </FormField>
       )}
 
       {onMaxPriceChange && (
-        <div className="filter-group">
-          <label htmlFor="max-price-input" className="filter-label">Max Price</label>
-          <input
+        <FormField label="Max Price" htmlFor="max-price-input">
+          <Input
             id="max-price-input"
             type="number"
             min="0"
             step="0.01"
-            className="form-control"
             placeholder="Max $"
             value={maxPrice}
             onChange={(e: ChangeEvent<HTMLInputElement>) => onMaxPriceChange(e.target.value)}
           />
-        </div>
+        </FormField>
       )}
 
-      <div className="filter-group">
-        <label htmlFor="sort-select" className="filter-label">Sort By</label>
-        <select
+      <FormField label="Sort By" htmlFor="sort-select">
+        <Select
           id="sort-select"
-          className="form-control"
           value={selectedSort}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => onSortChange(e.target.value)}
-        >
-          <option value="createdAt,desc">Newest First</option>
-          <option value="name,asc">Name: A to Z</option>
-          <option value="name,desc">Name: Z to A</option>
-          <option value="price,asc">Price: Low to High</option>
-          <option value="price,desc">Price: High to Low</option>
-        </select>
-      </div>
+          options={sortOptions}
+        />
+      </FormField>
 
       {hasActiveFilters && (
-        <div className="filter-group filter-actions">
-          <button type="button" className="btn btn-secondary btn-sm" onClick={onClearFilters}>
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+          <Button variant="secondary" size="sm" onClick={onClearFilters} fullWidth>
             Clear Filters
-          </button>
+          </Button>
         </div>
       )}
     </div>

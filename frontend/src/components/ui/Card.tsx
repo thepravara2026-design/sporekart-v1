@@ -1,4 +1,4 @@
-import { FC, ReactNode, HTMLAttributes } from 'react';
+import { FC, ReactNode, HTMLAttributes, CSSProperties } from 'react';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -31,14 +31,14 @@ export const CardHeader: FC<CardProps> = ({ children, className = '', style = {}
   </div>
 );
 
-export const CardTitle: FC<{ children: ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <h3 className={`card-title ${className}`} style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+export const CardTitle: FC<{ children: ReactNode; className?: string; style?: CSSProperties }> = ({ children, className = '', style = {} }) => (
+  <h3 className={`card-title ${className}`} style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, ...style }}>
     {children}
   </h3>
 );
 
-export const CardDescription: FC<{ children: ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <p className={`card-description ${className}`} style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>
+export const CardDescription: FC<{ children: ReactNode; className?: string; style?: CSSProperties }> = ({ children, className = '', style = {} }) => (
+  <p className={`card-description ${className}`} style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, ...style }}>
     {children}
   </p>
 );

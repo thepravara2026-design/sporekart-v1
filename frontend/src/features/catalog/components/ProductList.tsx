@@ -1,20 +1,20 @@
 import { FC } from 'react';
 import { Product } from '../types/catalog';
 import { ProductCard } from './ProductCard';
-import { Grid } from '../../../components/layout/Grid';
+import { Stack } from '../../../components/layout/Stack';
 
-export interface ProductGridProps {
+export interface ProductListProps {
   products: Product[];
   onAddToCart?: (product: Product) => void;
   className?: string;
 }
 
-export const ProductGrid: FC<ProductGridProps> = ({ products, onAddToCart, className = '' }) => {
+export const ProductList: FC<ProductListProps> = ({ products, onAddToCart, className = '' }) => {
   return (
-    <Grid minWidth="280px" gap="1.5rem" className={`product-grid ${className}`}>
+    <Stack gap={4} className={`product-list ${className}`}>
       {products.map((product) => (
         <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
       ))}
-    </Grid>
+    </Stack>
   );
 };

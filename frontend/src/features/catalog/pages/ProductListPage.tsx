@@ -1,9 +1,15 @@
 import { FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useProducts, useCategories } from '../hooks/useCatalog';
+import { useProducts } from '../hooks/useProducts';
+import { useCategories } from '../hooks/useCategories';
 import { ProductGrid } from '../components/ProductGrid';
+import { ProductCardSkeleton } from '../components/ProductCardSkeleton';
 import { CatalogFilterBar } from '../components/CatalogFilterBar';
-import { PaginationControls } from '../components/PaginationControls';
+import { CatalogPagination } from '../components/CatalogPagination';
+import { CatalogEmptyState } from '../components/CatalogEmptyState';
+import { CatalogErrorState } from '../components/CatalogErrorState';
+import { PageShell } from '../../../components/layout/PageShell';
+import { Grid } from '../../../components/layout/Grid';
 import { ProductStatus } from '../../../types/catalog';
 
 export const ProductListPage: FC = () => {
@@ -72,77 +78,67 @@ export const ProductListPage: FC = () => {
   const products = pageData?.content || [];
 
   return (
-    <div className="catalog-page" data-testid="product-list-page">
-      <div className="page-header">
-        <h1>Catalog Products</h1>
-        <p className="page-subtitle">Browse our premium selection of mushroom cultures, extracts, and supplies.</p>
-      </div>
+    <PageShell
+      title="Catalog Products"
+      subtitle="Browse our premium selection of high-yield mushroom cultures, spawn batches, and supplies."
+      className="catalog-page"
+    >
+      <div data-testid="product-list-page">
+        <CatalogFilterBar
+          categories={categories}
+          search={search}
+          selectedCategory={categoryId}
+          selectedStatus={status || ''}
+          selectedSort={sort}
+          minPrice={minPriceStr}
+          maxPrice={maxPriceStr}
+          onSearchChange={(val) => updateParam('search', val)}
+          onCategoryChange={(val) => updateParam('categoryId', val)}
+          onStatusChange={(val) => updateParam('status', val)}
+          onSortChange={(val) => updateParam('sort', val)}
+          onMinPriceChange={(val) => updateParam('minPrice', val)}
+          onMaxPriceChange={(val) => updateParam('maxPrice', val)}
+          onClearFilters={handleClearFilters}
+        />
 
-      <CatalogFilterBar
-        categories={categories}
-        search={search}
-        selectedCategory={categoryId}
-        selectedStatus={status || ''}
-        selectedSort={sort}
-        minPrice={minPriceStr}
-        maxPrice={maxPriceStr}
-        onSearchChange={(val) => updateParam('search', val)}
-        onCategoryChange={(val) => updateParam('categoryId', val)}
-        onStatusChange={(val) => updateParam('status', val)}
-        onSortChange={(val) => updateParam('sort', val)}
-        onMinPriceChange={(val) => updateParam('minPrice', val)}
-        onMaxPriceChange={(val) => updateParam('maxPrice', val)}
-        onClearFilters={handleClearFilters}
-      />
-
-      {isLoading && (
-        <div className="loading-container" data-testid="products-loading">
-          <div className="skeleton-grid">
-            {Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="skeleton-card" />
-            ))}
+        {isLoading && (
+          <div className="loading-container" data-testid="products-loading">
+            <Grid minWidth="280px" gap="1.5rem">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <ProductCardSkeleton key={idx} />
+              ))}
+            </Grid>
           </div>
-        </div>
-      )}
+        )}
 
-      {isError && (
-        <div className="alert alert-danger" data-testid="products-error">
-          <h3>Unable to load catalog products</h3>
-          <p>{error instanceof Error ? error.message : 'A network error occurred. Please verify backend connection.'}</p>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => refetch()}>
-            Retry
-          </button>
-        </div>
-      )}
-
-      {!isLoading && !isError && products.length === 0 && (
-        <div className="empty-state" data-testid="products-empty">
-          <h3>No products found</h3>
-          <p>Try adjusting your search query or clearing filter criteria.</p>
-          {(search || categoryId || status || minPriceStr || maxPriceStr) && (
-            <button type="button" className="btn btn-secondary btn-sm" onClick={handleClearFilters}>
-              Clear All Filters
-            </button>
-          )}
-        </div>
-      )}
-
-      {!isLoading && !isError && products.length > 0 && (
-        <>
-          <ProductGrid products={products} />
-          {pageData && (
-            <PaginationControls
-              currentPage={pageData.page}
-              totalPages={pageData.totalPages}
-              totalElements={pageData.totalElements}
-              pageSize={pageData.size}
-              isFirst={pageData.first}
-              isLast={pageData.last}
-              onPageChange={handlePageChange}
+        {isError && (
+          <div data-testid="products-error">
+            <CatalogErrorState
+              message={error instanceof Error ? error.message : 'A network error occurred. Please verify backend connection.'}
+              onRetry={() => refetch()}
             />
-          )}
-        </>
-      )}
-    </div>
+          </div>
+        )}
+
+        {!isLoading && !isError && products.length === 0 && (
+          <div data-testid="products-empty">
+            <CatalogEmptyState onResetFilters={handleClearFilters} />
+          </div>
+        )}
+
+        {!isLoading && !isError && products.length > 0 && (
+          <>
+            <ProductGrid products={products} />
+            {pageData && pageData.totalPages > 1 && (
+              <CatalogPagination
+                currentPage={pageData.page}
+                totalPages={pageData.totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </PageShell>
   );
 };

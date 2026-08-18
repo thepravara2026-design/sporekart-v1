@@ -1,25 +1,30 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, CSSProperties } from 'react';
 import { spacing } from '../../design-system/tokens';
 
-interface StackProps {
+export interface StackProps {
   children: ReactNode;
-  gap?: keyof typeof spacing;
+  gap?: keyof typeof spacing | string;
   align?: 'flex-start' | 'center' | 'flex-end' | 'stretch';
-  style?: React.CSSProperties;
+  className?: string;
+  style?: CSSProperties;
 }
 
 export const Stack: FC<StackProps> = ({
   children,
   gap = 4,
   align = 'stretch',
+  className = '',
   style = {},
 }) => {
+  const gapValue = typeof gap === 'number' && gap in spacing ? spacing[gap as keyof typeof spacing] : String(gap);
+
   return (
     <div
+      className={className}
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing[gap],
+        gap: gapValue,
         alignItems: align,
         ...style,
       }}
