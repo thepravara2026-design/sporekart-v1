@@ -119,7 +119,7 @@ public class GrowerApplicationService {
                 .count();
 
         int activeProductsCount = (int) products.stream()
-                .filter(p -> p.getStatus() == ProductStatus.PUBLISHED)
+                .filter(p -> p.getStatus() == ProductStatus.ACTIVE)
                 .count();
 
         int totalOrders = orders.size();
@@ -157,7 +157,7 @@ public class GrowerApplicationService {
     public Product createProduct(String userId, CreateGrowerProductRequestDto dto) {
         Product product = Product.create(dto.sku(), dto.name(), dto.description(), dto.price(), dto.currency(), null);
         product.setGrowerId(userId);
-        product.changeStatus(ProductStatus.PUBLISHED);
+        product.changeStatus(ProductStatus.ACTIVE);
         Product savedProduct = productRepository.save(product);
 
         // Also create initial inventory item for the product
@@ -212,7 +212,15 @@ public class GrowerApplicationService {
 
     public Order transitionOrder(String userId, UUID orderId, OrderStatus newStatus) {
         Order order = getOrderById(userId, orderId);
-        order.transitionStatus(newStatus, "Grower transition to " + newStatus, com.sporekart.modules.order.domain.OrderActorType.SYSTEM, userId);
+        switch (newStatus) {
+            case PROCESSING -> order.startProcessing();
+            case READY_FOR_FULFILMENT -> order.markReadyForFulfilment();
+            case SHIPPED -> order.markShipped();
+            case DELIVERED -> order.markDelivered();
+            case COMPLETED -> order.markCompleted();
+            case CANCELLED -> order.cancel();
+            default -> {}
+        }
         return orderRepository.save(order);
     }
 

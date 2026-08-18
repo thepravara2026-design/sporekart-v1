@@ -117,7 +117,7 @@ export const growerApi = {
     }
   },
 
-  getProducts: async (filters?: GrowerProductFilter): Promise<{ items: GrowerProduct[]; total: number }> => {
+  getProducts: async (_filters?: GrowerProductFilter): Promise<{ items: GrowerProduct[]; total: number }> => {
     try {
       const response = await axiosInstance.get(ENDPOINTS.GROWER_PRODUCTS);
       const data = response.data?.data || response.data || [];

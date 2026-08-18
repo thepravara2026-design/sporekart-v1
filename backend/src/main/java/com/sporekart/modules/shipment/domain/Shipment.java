@@ -15,6 +15,7 @@ public class Shipment {
     private final UUID orderId;
     private final String orderReference;
     private final String customerId;
+    private String growerId;
     private ShipmentStatus status;
     private final ShipmentProviderType provider;
 

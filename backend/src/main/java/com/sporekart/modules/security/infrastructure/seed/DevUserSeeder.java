@@ -83,7 +83,7 @@ public class DevUserSeeder implements CommandLineRunner {
 
     private void seedGrowerIfMissing() {
         Integer count = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM users WHERE email = 'grower@sporekart.com'", Integer.class);
+                "SELECT COUNT(*) FROM users WHERE id = 'grower-1' OR email = 'grower@sporekart.com'", Integer.class);
         if (count != null && count > 0) {
             log.debug("Dev grower user already exists. Skipping.");
             return;

@@ -1,6 +1,6 @@
 package com.sporekart.modules.grower.web;
 
-import com.sporekart.application.web.ApiResponse;
+import com.sporekart.application.exception.ApiResponse;
 import com.sporekart.modules.catalog.domain.product.Product;
 import com.sporekart.modules.grower.application.GrowerApplicationService;
 import com.sporekart.modules.grower.web.dto.*;

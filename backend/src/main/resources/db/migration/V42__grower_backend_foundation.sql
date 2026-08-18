@@ -4,8 +4,7 @@
 
 -- Seed ROLE_GROWER
 INSERT INTO roles (id, description) VALUES
-('ROLE_GROWER', 'Registered mushroom grower / producer with catalog, inventory, and order fulfillment capabilities')
-ON CONFLICT (id) DO NOTHING;
+('ROLE_GROWER', 'Registered mushroom grower / producer with catalog, inventory, and order fulfillment capabilities');
 
 -- Seed Grower Permissions
 INSERT INTO permissions (id, description) VALUES
@@ -18,8 +17,7 @@ INSERT INTO permissions (id, description) VALUES
 ('GROWER_READ_ORDERS', 'Permission to view orders for owned products'),
 ('GROWER_FULFILL_ORDER', 'Permission to transition status on owned orders'),
 ('GROWER_READ_SHIPMENTS', 'Permission to track shipments for owned orders'),
-('GROWER_READ_REPORTS', 'Permission to access grower operational analytics')
-ON CONFLICT (id) DO NOTHING;
+('GROWER_READ_REPORTS', 'Permission to access grower operational analytics');
 
 -- Assign permissions to ROLE_GROWER
 INSERT INTO role_permissions (role_id, permission_id) VALUES
@@ -32,14 +30,9 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 ('ROLE_GROWER', 'GROWER_READ_ORDERS'),
 ('ROLE_GROWER', 'GROWER_FULFILL_ORDER'),
 ('ROLE_GROWER', 'GROWER_READ_SHIPMENTS'),
-('ROLE_GROWER', 'GROWER_READ_REPORTS')
-ON CONFLICT DO NOTHING;
-
--- Also assign READ_CATALOG and READ_OWN_ORDER to ROLE_GROWER
-INSERT INTO role_permissions (role_id, permission_id) VALUES
+('ROLE_GROWER', 'GROWER_READ_REPORTS'),
 ('ROLE_GROWER', 'READ_CATALOG'),
-('ROLE_GROWER', 'READ_OWN_ORDER')
-ON CONFLICT DO NOTHING;
+('ROLE_GROWER', 'READ_OWN_ORDER');
 
 -- Create grower_profiles table
 CREATE TABLE IF NOT EXISTS grower_profiles (
@@ -72,29 +65,23 @@ CREATE INDEX IF NOT EXISTS idx_shipments_grower_id ON shipments(grower_id);
 
 -- Seed Default Test Grower Account
 INSERT INTO users (id, email, password_hash, first_name, last_name, role, status)
-VALUES ('grower-1', 'grower1@sporekart.com', '$2a$10$e4gRkGgM1L9X2V3Y4Z5W6u7V8W9X0Y1Z2A3B4C5D6E7F8G9H0I1J2', 'Spore', 'Grower', 'ROLE_GROWER', 'ACTIVE')
-ON CONFLICT (id) DO NOTHING;
+VALUES ('grower-1', 'grower@sporekart.com', '$2a$10$e4gRkGgM1L9X2V3Y4Z5W6u7V8W9X0Y1Z2A3B4C5D6E7F8G9H0I1J2', 'Spore', 'Grower', 'ROLE_GROWER', 'ACTIVE');
 
 INSERT INTO user_roles (user_id, role_id)
-VALUES ('grower-1', 'ROLE_GROWER')
-ON CONFLICT DO NOTHING;
+VALUES ('grower-1', 'ROLE_GROWER');
 
 INSERT INTO grower_profiles (id, user_id, business_name, contact_email, contact_phone, farm_address, status)
-VALUES ('grower-profile-1', 'grower-1', 'Apex Spore Farms', 'grower1@sporekart.com', '+1-555-0199', '100 Mycology Way, Mushroom Valley, CA', 'ACTIVE')
-ON CONFLICT (id) DO NOTHING;
+VALUES ('grower-profile-1', 'grower-1', 'Apex Spore Farms', 'grower@sporekart.com', '+1-555-0199', '100 Mycology Way, Mushroom Valley, CA', 'ACTIVE');
 
 -- Seed Second Test Grower Account for Cross-Grower Isolation Tests
 INSERT INTO users (id, email, password_hash, first_name, last_name, role, status)
-VALUES ('grower-2', 'grower2@sporekart.com', '$2a$10$e4gRkGgM1L9X2V3Y4Z5W6u7V8W9X0Y1Z2A3B4C5D6E7F8G9H0I1J2', 'Fungi', 'Producer', 'ROLE_GROWER', 'ACTIVE')
-ON CONFLICT (id) DO NOTHING;
+VALUES ('grower-2', 'grower2@sporekart.com', '$2a$10$e4gRkGgM1L9X2V3Y4Z5W6u7V8W9X0Y1Z2A3B4C5D6E7F8G9H0I1J2', 'Fungi', 'Producer', 'ROLE_GROWER', 'ACTIVE');
 
 INSERT INTO user_roles (user_id, role_id)
-VALUES ('grower-2', 'ROLE_GROWER')
-ON CONFLICT DO NOTHING;
+VALUES ('grower-2', 'ROLE_GROWER');
 
 INSERT INTO grower_profiles (id, user_id, business_name, contact_email, contact_phone, farm_address, status)
-VALUES ('grower-profile-2', 'grower-2', 'BioMyco Cultivators', 'grower2@sporekart.com', '+1-555-0299', '200 Spore Lane, Fungi Ridge, OR', 'ACTIVE')
-ON CONFLICT (id) DO NOTHING;
+VALUES ('grower-profile-2', 'grower-2', 'BioMyco Cultivators', 'grower2@sporekart.com', '+1-555-0299', '200 Spore Lane, Fungi Ridge, OR', 'ACTIVE');
 
 -- Backfill legacy records to grower-1 so existing demo data remains populated
 UPDATE products SET grower_id = 'grower-1' WHERE grower_id IS NULL;

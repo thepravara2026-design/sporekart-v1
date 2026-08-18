@@ -64,6 +64,10 @@ public class ProductEntity {
         this.updatedAt = updatedAt;
     }
 
+    public ProductEntity(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, CategoryEntity category, Instant createdAt, Instant updatedAt) {
+        this(id, sku, name, description, price, currency, status, category, null, createdAt, updatedAt);
+    }
+
     public static ProductEntity fromDomain(Product product) {
         if (product == null) return null;
         CategoryEntity categoryEntity = product.getCategory() != null ? CategoryEntity.fromDomain(product.getCategory()) : null;

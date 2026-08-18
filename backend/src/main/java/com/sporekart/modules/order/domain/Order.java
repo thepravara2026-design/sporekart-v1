@@ -84,10 +84,32 @@ public final class Order {
             AddressSnapshot shippingAddress,
             String customerNotes,
             List<OrderItem> items,
+            Long version,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
     ) {
-        this(id, orderNumber, customerId, status, currency, subtotal, discountTotal, taxTotal, shippingFee, grandTotal, idempotencyKey, shippingAddress, customerNotes, items, 0L, createdAt, updatedAt);
+        this(id, orderNumber, customerId, status, currency, subtotal, discountTotal, taxTotal, shippingFee, grandTotal, idempotencyKey, shippingAddress, customerNotes, null, items, version, createdAt, updatedAt);
+    }
+
+    public Order(
+            UUID id,
+            String orderNumber,
+            String customerId,
+            OrderStatus status,
+            String currency,
+            BigDecimal subtotal,
+            BigDecimal discountTotal,
+            BigDecimal taxTotal,
+            BigDecimal shippingFee,
+            BigDecimal grandTotal,
+            String idempotencyKey,
+            AddressSnapshot shippingAddress,
+            String customerNotes,
+            List<OrderItem> items,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
+        this(id, orderNumber, customerId, status, currency, subtotal, discountTotal, taxTotal, shippingFee, grandTotal, idempotencyKey, shippingAddress, customerNotes, null, items, 0L, createdAt, updatedAt);
     }
 
     public static Order createNewOrder(
