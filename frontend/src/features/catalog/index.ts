@@ -36,6 +36,7 @@ export * from './components/CategoryCard';
 export * from './components/CategoryGrid';
 export * from './components/CatalogFilters';
 export * from './components/CatalogFilterBar';
+export * from './components/CatalogFiltersDrawer';
 export * from './components/CatalogSearch';
 export * from './components/CatalogSort';
 export * from './components/CatalogToolbar';

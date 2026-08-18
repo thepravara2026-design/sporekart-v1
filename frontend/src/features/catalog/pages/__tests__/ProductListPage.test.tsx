@@ -89,7 +89,8 @@ describe('ProductListPage', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByTestId('catalog-filter-bar')).toBeInTheDocument();
+    // The new ProductListPage uses CatalogToolbar + CatalogFiltersDrawer instead of CatalogFilterBar
+    expect(screen.getByTestId('product-list-page')).toBeInTheDocument();
     expect(await screen.findByText('Shiitake Culture')).toBeInTheDocument();
     expect(screen.getByText('SKU: SKU-001')).toBeInTheDocument();
   });

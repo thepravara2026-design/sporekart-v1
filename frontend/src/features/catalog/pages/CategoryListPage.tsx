@@ -14,8 +14,9 @@ import { Card } from '../../../components/ui/Card';
 export const CategoryListPage: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const page = parseInt(searchParams.get('page') || '0', 10);
-  const size = parseInt(searchParams.get('size') || '12', 10);
+  // ─── URL-driven state ────────────────────────────────────────────────────
+  const page = Math.max(0, parseInt(searchParams.get('page') || '0', 10));
+  const size = Math.max(1, parseInt(searchParams.get('size') || '12', 10));
   const sort = searchParams.get('sort') || 'name,asc';
   const search = searchParams.get('search') || '';
 
@@ -38,6 +39,7 @@ export const CategoryListPage: FC = () => {
       next.set('page', newPage.toString());
       return next;
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSearchChange = (value: string) => {
@@ -58,24 +60,38 @@ export const CategoryListPage: FC = () => {
 
   return (
     <PageShell
-      title="Catalog Categories"
-      subtitle="Explore mushroom product categories, cultivation tiers, and spawn classifications."
+      title="Browse Categories"
+      subtitle="Explore mushroom spawn categories — oyster, medicinal, gourmet, substrate, and more."
       className="catalog-page"
     >
       <div data-testid="category-list-page" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <div style={{ maxWidth: '400px' }}>
+        {/* Search */}
+        <div style={{ maxWidth: '420px' }}>
           <CatalogSearch
             value={search}
             onSearch={handleSearchChange}
             placeholder="Search categories..."
+            isLoading={isLoading && Boolean(search)}
           />
         </div>
 
+        {/* Result count */}
+        {!isLoading && !isError && (
+          <p
+            style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}
+            aria-live="polite"
+          >
+            {pageData?.totalElements ?? 0} {(pageData?.totalElements ?? 0) === 1 ? 'category' : 'categories'} found
+            {search && ` for "${search}"`}
+          </p>
+        )}
+
+        {/* Loading */}
         {isLoading && (
           <div className="loading-container" data-testid="categories-loading">
             <Grid minWidth="260px" gap="1.5rem">
               {Array.from({ length: 4 }).map((_, idx) => (
-                <Card key={idx}>
+                <Card key={idx} style={{ padding: '1.5rem' }}>
                   <Skeleton height="24px" width="60%" />
                   <Skeleton height="16px" width="40%" style={{ marginTop: '0.5rem' }} />
                   <Skeleton height="40px" style={{ marginTop: '1rem' }} />
@@ -85,6 +101,7 @@ export const CategoryListPage: FC = () => {
           </div>
         )}
 
+        {/* Error */}
         {isError && (
           <div data-testid="categories-error">
             <CatalogErrorState
@@ -94,15 +111,21 @@ export const CategoryListPage: FC = () => {
           </div>
         )}
 
+        {/* Empty */}
         {!isLoading && !isError && categories.length === 0 && (
           <div data-testid="categories-empty">
             <CatalogEmptyState
-              title="No Categories Found"
-              description="Try searching with a different category name."
+              title={search ? `No categories found for "${search}"` : 'No Categories Found'}
+              description={
+                search
+                  ? 'Try a different search term.'
+                  : 'Category data is not yet available. Check back soon.'
+              }
             />
           </div>
         )}
 
+        {/* Grid */}
         {!isLoading && !isError && categories.length > 0 && (
           <>
             <div data-testid="category-grid">

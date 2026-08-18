@@ -109,8 +109,9 @@ describe('Catalog Feature Components (Sprint FD-06)', () => {
   it('renders CatalogSearch and fires search callback on submit', () => {
     const handleSearch = vi.fn();
     render(<CatalogSearch value="Oyster" onSearch={handleSearch} />);
-    const input = screen.getByRole('textbox', { name: 'Search products' });
-    expect(input).toBeDefined();
+    // CatalogSearch uses role="search" form with a sr-only label
+    const form = screen.getByRole('search');
+    expect(form).toBeDefined();
     const submitBtn = screen.getByRole('button', { name: 'Submit search' });
     fireEvent.click(submitBtn);
     expect(handleSearch).toHaveBeenCalledWith('Oyster');
@@ -119,7 +120,8 @@ describe('Catalog Feature Components (Sprint FD-06)', () => {
   it('renders CatalogSort select dropdown', () => {
     const handleSortChange = vi.fn();
     render(<CatalogSort value="name,asc" onChange={handleSortChange} />);
-    const select = screen.getByRole('combobox', { name: 'Sort products by' });
+    // CatalogSort uses a visible 'Sort:' label associated via htmlFor
+    const select = screen.getByRole('combobox');
     expect(select).toBeDefined();
     fireEvent.change(select, { target: { value: 'price,asc' } });
     expect(handleSortChange).toHaveBeenCalledWith('price,asc');

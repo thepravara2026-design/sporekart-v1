@@ -1,16 +1,16 @@
 import { ProductStatus } from '../types/catalog';
 import { BadgeVariant } from '../../../components/ui/Badge';
 
-export const formatPrice = (amount: number, currency: string = 'USD'): string => {
+export const formatPrice = (amount: number, currency: string = 'INR'): string => {
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: currency.toUpperCase(),
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
   } catch {
-    return `$${amount.toFixed(2)}`;
+    return `₹${amount.toFixed(2)}`;
   }
 };
 
