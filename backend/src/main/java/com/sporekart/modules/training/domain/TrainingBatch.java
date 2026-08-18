@@ -128,7 +128,7 @@ public class TrainingBatch {
             throw new BatchFullException("Cannot allocate seat: Batch " + batchCode + " is FULL");
         }
         if (status == BatchStatus.CANCELLED || status == BatchStatus.COMPLETED) {
-            throw new IllegalStateException("Cannot allocate seat: Batch is " + status);
+            throw new InvalidBatchStateException("Cannot allocate seat: Batch is " + status);
         }
         this.capacity = this.capacity.allocateSeat();
         if (this.capacity.isFull()) {

@@ -49,6 +49,9 @@ public class TrainingCompletionService {
 
     @Transactional
     public BatchCompletionResult evaluateBatchCompletion(String batchId, Double minAttendancePercentage, String actor) {
+        if (minAttendancePercentage != null && (minAttendancePercentage < 0.0 || minAttendancePercentage > 100.0)) {
+            throw new IllegalArgumentException("Attendance percentage threshold must be between 0.0 and 100.0");
+        }
         double threshold = minAttendancePercentage != null ? minAttendancePercentage : 80.0;
         log.info("Evaluating completion for batchId={}, minAttendanceThreshold={}%, actor={}", batchId, threshold, actor);
 
