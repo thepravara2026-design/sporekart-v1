@@ -188,7 +188,8 @@ public class PaymentApplicationService {
         if (!validSig) {
             log.warn("Payment signature verification failed for ref {}", command.paymentReference());
             if (activeAttempt != null) {
-                recordPaymentFailure(payment.getId(), activeAttempt.getId(), "INVALID_SIGNATURE", "Cryptographic signature verification failed");
+                payment.markFailed(activeAttempt.getId(), "INVALID_SIGNATURE", "Cryptographic signature verification failed");
+                paymentRepository.save(payment);
             }
             throw new PaymentVerificationFailedException("Payment signature verification failed");
         }
@@ -197,7 +198,8 @@ public class PaymentApplicationService {
         if (activeAttempt != null && activeAttempt.getProviderOrderId() != null
                 && !activeAttempt.getProviderOrderId().equals(command.providerOrderId())) {
             log.warn("Provider order ID mismatch: expected {}, got {}", activeAttempt.getProviderOrderId(), command.providerOrderId());
-            recordPaymentFailure(payment.getId(), activeAttempt.getId(), "ORDER_ID_MISMATCH", "Provider order ID mismatch");
+            payment.markFailed(activeAttempt.getId(), "ORDER_ID_MISMATCH", "Provider order ID mismatch");
+            paymentRepository.save(payment);
             throw new PaymentVerificationFailedException("Provider order ID mismatch");
         }
 

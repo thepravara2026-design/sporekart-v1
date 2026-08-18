@@ -356,6 +356,7 @@ public class RealNotificationProviderIntegrationTest {
         );
 
         OutboxEvent outboxEvent = outboxService.publish("ORDER", orderId.toString(), "ORDER_PAID", eventPayload);
+        outboxWorker.setEnabled(true);
         outboxWorker.processOutbox();
 
         List<OutboxEvent> events = outboxService.findByAggregate("ORDER", orderId.toString());
