@@ -36,6 +36,7 @@ public class DevUserSeeder implements CommandLineRunner {
     public void run(String... args) {
         seedAdminIfMissing();
         seedCustomerIfMissing();
+        seedGrowerIfMissing();
     }
 
     private void seedAdminIfMissing() {
@@ -78,5 +79,30 @@ public class DevUserSeeder implements CommandLineRunner {
             log.debug("user_roles insert skipped: {}", e.getMessage());
         }
         log.info("Dev customer user seeded: user@sporekart.com");
+    }
+
+    private void seedGrowerIfMissing() {
+        Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM users WHERE email = 'grower@sporekart.com'", Integer.class);
+        if (count != null && count > 0) {
+            log.debug("Dev grower user already exists. Skipping.");
+            return;
+        }
+        String hash = passwordEncoder.encode("SporekartGrower@123");
+        jdbc.update(
+                "INSERT INTO users (id, email, password_hash, first_name, last_name, role, status) " +
+                "VALUES ('grower-1', 'grower@sporekart.com', ?, 'Spore', 'Grower', 'ROLE_GROWER', 'ACTIVE')",
+                hash
+        );
+        try {
+            jdbc.update("INSERT INTO user_roles (user_id, role_id) VALUES ('grower-1', 'ROLE_GROWER')");
+            jdbc.update(
+                    "INSERT INTO grower_profiles (id, user_id, business_name, contact_email, contact_phone, farm_address, status) " +
+                    "VALUES ('grower-profile-1', 'grower-1', 'Apex Spore Farms', 'grower@sporekart.com', '+1-555-0199', '100 Mycology Way, Mushroom Valley, CA', 'ACTIVE')"
+            );
+        } catch (Exception e) {
+            log.debug("grower user_roles / profiles insert skipped: {}", e.getMessage());
+        }
+        log.info("Dev grower user seeded: grower@sporekart.com");
     }
 }
