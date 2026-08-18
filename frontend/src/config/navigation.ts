@@ -37,6 +37,18 @@ export const ACCOUNT_NAVIGATION: NavItem[] = [
   { label: 'Support Tickets', path: '/account/support' },
 ];
 
+/** Grower Portal navigation */
+export const GROWER_NAVIGATION: NavItem[] = [
+  { label: 'Dashboard', path: '/grower' },
+  { label: 'Products', path: '/grower/products' },
+  { label: 'Inventory', path: '/grower/inventory' },
+  { label: 'Orders', path: '/grower/orders' },
+  { label: 'Shipments', path: '/grower/shipments' },
+  { label: 'Reports', path: '/grower/reports' },
+  { label: 'Profile', path: '/grower/profile' },
+  { label: 'Settings', path: '/grower/settings' },
+];
+
 /** Footer navigation columns */
 export const FOOTER_NAVIGATION: FooterNavGroup[] = [
   {

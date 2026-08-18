@@ -21,6 +21,17 @@ const OrdersPage = lazy(() => import('../features/orders/pages/OrdersPage').then
 const OrderDetailPage = lazy(() => import('../features/orders/pages/OrderDetailPage').then(module => ({ default: module.OrderDetailPage })));
 const ReturnRequestPage = lazy(() => import('../features/returns/pages/ReturnRequestPage').then(module => ({ default: module.ReturnRequestPage })));
 
+// Grower Portal Routes (FD-14)
+const GrowerLayout = lazy(() => import('../features/grower/components/GrowerLayout').then(module => ({ default: module.GrowerLayout })));
+const GrowerDashboardPage = lazy(() => import('../features/grower/pages/GrowerDashboardPage').then(module => ({ default: module.GrowerDashboardPage })));
+const GrowerProfilePage = lazy(() => import('../features/grower/pages/GrowerProfilePage').then(module => ({ default: module.GrowerProfilePage })));
+const GrowerProductsPage = lazy(() => import('../features/grower/pages/GrowerProductsPage').then(module => ({ default: module.GrowerProductsPage })));
+const GrowerInventoryPage = lazy(() => import('../features/grower/pages/GrowerInventoryPage').then(module => ({ default: module.GrowerInventoryPage })));
+const GrowerOrdersPage = lazy(() => import('../features/grower/pages/GrowerOrdersPage').then(module => ({ default: module.GrowerOrdersPage })));
+const GrowerShipmentsPage = lazy(() => import('../features/grower/pages/GrowerShipmentsPage').then(module => ({ default: module.GrowerShipmentsPage })));
+const GrowerReportsPage = lazy(() => import('../features/grower/pages/GrowerReportsPage').then(module => ({ default: module.GrowerReportsPage })));
+const GrowerSettingsPage = lazy(() => import('../features/grower/pages/GrowerSettingsPage').then(module => ({ default: module.GrowerSettingsPage })));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -44,6 +55,26 @@ export const App: FC = () => {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
+              {/* Grower Portal (FD-14) */}
+              <Route
+                path="grower"
+                element={
+                  <Suspense fallback={<RouteFallback />}>
+                    <GrowerLayout />
+                  </Suspense>
+                }
+              >
+                <Route index element={<GrowerDashboardPage />} />
+                <Route path="profile" element={<GrowerProfilePage />} />
+                <Route path="products" element={<GrowerProductsPage />} />
+                <Route path="inventory" element={<GrowerInventoryPage />} />
+                <Route path="orders" element={<GrowerOrdersPage />} />
+                <Route path="shipments" element={<GrowerShipmentsPage />} />
+                <Route path="reports" element={<GrowerReportsPage />} />
+                <Route path="settings" element={<GrowerSettingsPage />} />
+              </Route>
+
+              {/* Main Storefront Routes */}
               <Route path="/" element={<MainLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path="products" element={<ProductListPage />} />
