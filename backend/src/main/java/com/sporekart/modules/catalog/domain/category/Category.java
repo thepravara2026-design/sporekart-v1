@@ -44,9 +44,13 @@ public class Category {
         if (input == null || input.isBlank()) {
             throw new IllegalArgumentException("Input name for slug generation cannot be blank");
         }
-        return input.trim().toLowerCase()
+        String slug = input.trim().toLowerCase()
                 .replaceAll("[^a-z0-9\\s-]", "")
                 .replaceAll("[\\s-]+", "-");
+        if (slug.isBlank()) {
+            throw new IllegalArgumentException("Category name must contain at least one valid alphanumeric character for slug generation");
+        }
+        return slug;
     }
 
     private static String normalizeSlug(String slug) {

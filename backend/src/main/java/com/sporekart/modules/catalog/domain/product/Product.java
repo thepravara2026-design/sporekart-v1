@@ -56,7 +56,11 @@ public class Product {
         if (rawSku == null || rawSku.isBlank()) {
             throw new IllegalArgumentException("SKU cannot be blank");
         }
-        return rawSku.trim().toUpperCase().replaceAll("[^A-Z0-9-]", "");
+        String normalized = rawSku.trim().toUpperCase().replaceAll("[^A-Z0-9-]", "");
+        if (normalized.isBlank()) {
+            throw new IllegalArgumentException("SKU must contain at least one valid alphanumeric character or hyphen");
+        }
+        return normalized;
     }
 
     public void updateDetails(String name, String description, BigDecimal price, String currency, Category category) {

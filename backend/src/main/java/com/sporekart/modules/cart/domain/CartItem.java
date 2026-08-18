@@ -84,7 +84,12 @@ public class CartItem {
 
     public void incrementQuantity(int addQuantity, int maxQuantityPerItem) {
         validateQuantity(addQuantity);
-        int targetQuantity = this.quantity + addQuantity;
+        int targetQuantity;
+        try {
+            targetQuantity = Math.addExact(this.quantity, addQuantity);
+        } catch (ArithmeticException e) {
+            throw new InvalidQuantityException("Quantity overflow detected");
+        }
         if (targetQuantity > maxQuantityPerItem) {
             throw new InvalidQuantityException("Adding quantity " + addQuantity + " would cause line item total (" + targetQuantity + ") to exceed maximum allowed limit of " + maxQuantityPerItem);
         }
