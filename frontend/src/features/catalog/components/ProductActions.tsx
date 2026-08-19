@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Product } from '../types/catalog';
+import { Product, ProductVariant } from '../types/catalog';
 import { ProductQuantity } from './ProductQuantity';
 import { Button } from '../../../components/ui/Button';
 import { useAddToCart } from '../hooks/useAddToCart';
@@ -8,6 +8,7 @@ import { ShoppingCart } from 'lucide-react';
 
 export interface ProductActionsProps {
   product: Product;
+  selectedVariant?: ProductVariant | null;
   className?: string;
   /** Controlled quantity (lifted to the page so a mobile sticky action can share it). */
   quantity?: number;
@@ -18,6 +19,7 @@ export interface ProductActionsProps {
 
 export const ProductActions: FC<ProductActionsProps> = ({
   product,
+  selectedVariant,
   className = '',
   quantity: quantityProp,
   onQuantityChange: onQuantityChangeProp,
@@ -30,16 +32,21 @@ export const ProductActions: FC<ProductActionsProps> = ({
   const quantity = quantityProp ?? localQuantity;
   const setQuantity = onQuantityChangeProp ?? setLocalQuantity;
 
-  const purchasable = isProductPurchasable(product.status);
+  const currentStatus = selectedVariant ? selectedVariant.status : product.status;
+  const purchasable = isProductPurchasable(currentStatus);
   const isPending = mutation.isPending;
   const disabled = !purchasable || isPending;
 
   const handleAddToCart = () => {
     if (disabled) return;
-    mutation.mutate({
+    const payload: { productId: string; quantity: number; variantId?: string } = {
       productId: product.id,
       quantity,
-    });
+    };
+    if (selectedVariant?.id) {
+      payload.variantId = selectedVariant.id;
+    }
+    mutation.mutate(payload);
   };
 
   return (
@@ -63,7 +70,7 @@ export const ProductActions: FC<ProductActionsProps> = ({
           onClick={handleAddToCart}
           style={{ minWidth: '180px' }}
         >
-          {purchasable ? 'Add to Cart' : getStatusLabel(product.status)}
+          {purchasable ? 'Add to Cart' : getStatusLabel(currentStatus)}
         </Button>
       </div>
 

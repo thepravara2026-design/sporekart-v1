@@ -1,5 +1,7 @@
 import {
   Product,
+  ProductVariant,
+  QuantityUnit,
   Category,
   ProductStatus,
   CategoryStatus,
@@ -10,6 +12,8 @@ import { PageResponse, ApiResponse } from '../../../types/api';
 
 export type {
   Product,
+  ProductVariant,
+  QuantityUnit,
   Category,
   ProductStatus,
   CategoryStatus,

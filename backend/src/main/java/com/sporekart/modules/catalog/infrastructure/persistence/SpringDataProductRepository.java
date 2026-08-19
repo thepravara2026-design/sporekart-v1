@@ -8,17 +8,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface SpringDataProductRepository extends JpaRepository<ProductEntity, UUID> {
-    Optional<ProductEntity> findBySku(String sku);
-    boolean existsBySku(String sku);
-    long countByCategoryId(UUID categoryId);
-    java.util.List<ProductEntity> findAllByGrowerId(String growerId);
-    Optional<ProductEntity> findByIdAndGrowerId(UUID id, String growerId);
 
-    @Query(value = "SELECT p FROM ProductEntity p LEFT JOIN FETCH p.category WHERE " +
+    @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.variants WHERE p.sku = :sku")
+    Optional<ProductEntity> findBySku(@Param("sku") String sku);
+
+    boolean existsBySku(String sku);
+
+    long countByCategoryId(UUID categoryId);
+
+    @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.variants WHERE p.growerId = :growerId")
+    List<ProductEntity> findAllByGrowerId(@Param("growerId") String growerId);
+
+    @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.variants WHERE p.id = :id AND p.growerId = :growerId")
+    Optional<ProductEntity> findByIdAndGrowerId(@Param("id") UUID id, @Param("growerId") String growerId);
+
+    @Query(value = "SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.variants WHERE " +
            "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
            "(:status IS NULL OR p.status = :status) AND " +
            "(:minPrice IS NULL OR p.price >= :minPrice) AND " +

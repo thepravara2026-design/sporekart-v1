@@ -198,10 +198,24 @@ public class GrowerApplicationService {
         Product product = Product.create(dto.sku(), dto.name(), dto.description(), dto.price(), dto.strikeOutPrice(), dto.currency(), null);
         product.setGrowerId(userId);
         product.changeStatus(ProductStatus.ACTIVE);
+
+        com.sporekart.modules.catalog.domain.product.QuantityUnit defaultUnit = (dto.name().toLowerCase().contains("extract") || dto.name().toLowerCase().contains("liquid"))
+                ? com.sporekart.modules.catalog.domain.product.QuantityUnit.L : com.sporekart.modules.catalog.domain.product.QuantityUnit.KG;
+        com.sporekart.modules.catalog.domain.product.ProductVariant defaultVariant = com.sporekart.modules.catalog.domain.product.ProductVariant.create(
+                product.getId(),
+                Product.normalizeSku(dto.sku() + "-1" + defaultUnit.getSymbol()),
+                new BigDecimal("1.00"),
+                defaultUnit,
+                dto.price(),
+                dto.strikeOutPrice()
+        );
+        product.addVariant(defaultVariant);
+
         Product savedProduct = productRepository.save(product);
 
-        // Also create initial inventory item for the product
-        InventoryItem item = InventoryItem.createNew(savedProduct.getId(), null, savedProduct.getSku(), dto.initialStockQuantity() > 0 ? dto.initialStockQuantity() : 50);
+        // Also create initial inventory item for the product variant
+        UUID variantId = !savedProduct.getVariants().isEmpty() ? savedProduct.getVariants().get(0).getId() : null;
+        InventoryItem item = InventoryItem.createNew(savedProduct.getId(), variantId, savedProduct.getSku(), dto.initialStockQuantity() > 0 ? dto.initialStockQuantity() : 50);
         item.setGrowerId(userId);
         inventoryRepository.save(item);
 

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public record CreateProductCommand(
@@ -29,9 +30,15 @@ public record CreateProductCommand(
         @Size(min = 3, max = 3, message = "Currency code must be 3 characters")
         String currency,
 
-        UUID categoryId
+        UUID categoryId,
+
+        List<CreateProductVariantCommand> variants
 ) {
     public CreateProductCommand(String sku, String name, String description, BigDecimal price, String currency, UUID categoryId) {
-        this(sku, name, description, price, null, currency, categoryId);
+        this(sku, name, description, price, null, currency, categoryId, null);
+    }
+
+    public CreateProductCommand(String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, UUID categoryId) {
+        this(sku, name, description, price, strikeOutPrice, currency, categoryId, null);
     }
 }

@@ -3,10 +3,13 @@ package com.sporekart.modules.catalog.infrastructure.persistence;
 import com.sporekart.modules.catalog.domain.category.Category;
 import com.sporekart.modules.catalog.domain.product.Product;
 import com.sporekart.modules.catalog.domain.product.ProductStatus;
+import com.sporekart.modules.catalog.domain.product.ProductVariant;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -45,6 +48,9 @@ public class ProductEntity {
     @Column(name = "grower_id", length = 100)
     private String growerId;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductVariantEntity> variants = new ArrayList<>();
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -79,7 +85,7 @@ public class ProductEntity {
     public static ProductEntity fromDomain(Product product) {
         if (product == null) return null;
         CategoryEntity categoryEntity = product.getCategory() != null ? CategoryEntity.fromDomain(product.getCategory()) : null;
-        return new ProductEntity(
+        ProductEntity entity = new ProductEntity(
                 product.getId(),
                 product.getSku(),
                 product.getName(),
@@ -93,11 +99,21 @@ public class ProductEntity {
                 product.getCreatedAt(),
                 product.getUpdatedAt()
         );
+        if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+            List<ProductVariantEntity> variantEntities = product.getVariants().stream()
+                    .map(v -> ProductVariantEntity.fromDomain(v, entity))
+                    .toList();
+            entity.setVariants(variantEntities);
+        }
+        return entity;
     }
 
     public Product toDomain() {
         Category categoryDomain = category != null ? category.toDomain() : null;
-        return new Product(id, sku, name, description, price, strikeOutPrice, currency, status, categoryDomain, growerId, createdAt, updatedAt);
+        List<ProductVariant> domainVariants = variants.stream()
+                .map(ProductVariantEntity::toDomain)
+                .toList();
+        return new Product(id, sku, name, description, price, strikeOutPrice, currency, status, categoryDomain, growerId, domainVariants, createdAt, updatedAt);
     }
 
     public UUID getId() { return id; }
@@ -110,6 +126,16 @@ public class ProductEntity {
     public ProductStatus getStatus() { return status; }
     public CategoryEntity getCategory() { return category; }
     public String getGrowerId() { return growerId; }
+    public List<ProductVariantEntity> getVariants() { return variants; }
+    public void setVariants(List<ProductVariantEntity> variants) {
+        this.variants.clear();
+        if (variants != null) {
+            for (ProductVariantEntity v : variants) {
+                v.setProduct(this);
+                this.variants.add(v);
+            }
+        }
+    }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

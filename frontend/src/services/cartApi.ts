@@ -30,6 +30,7 @@ export interface CartDto {
 
 export interface AddCartItemCommand {
   productId: string;
+  variantId?: string | null;
   quantity: number;
 }
 

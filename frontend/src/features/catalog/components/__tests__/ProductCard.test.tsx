@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ProductCard } from '../ProductCard';
 import { Product } from '../../../../types/catalog';
@@ -59,5 +59,76 @@ describe('ProductCard', () => {
     expect(screen.getByTestId('strike-out-price')).toHaveTextContent(/₹\s*2,499\.00/);
     expect(screen.getByTestId('selling-price')).toHaveTextContent(/₹\s*1,999\.00/);
     expect(screen.getByTestId('discount-badge')).toHaveTextContent('20% OFF');
+  });
+
+  it('renders single card with interactive multi-unit variant pills and updates price when clicked', () => {
+    const variantProduct: Product = {
+      ...mockProduct,
+      variants: [
+        {
+          id: 'v-1',
+          productId: 'p-100',
+          sku: 'SKU-REISHI-100G',
+          quantityValue: 100,
+          quantityUnit: 'G',
+          formattedQuantity: '100 g',
+          sellingPrice: 799.00,
+          strikeOutPrice: 999.00,
+          status: 'ACTIVE',
+        },
+        {
+          id: 'v-2',
+          productId: 'p-100',
+          sku: 'SKU-REISHI-250G',
+          quantityValue: 250,
+          quantityUnit: 'G',
+          formattedQuantity: '250 g',
+          sellingPrice: 1499.00,
+          strikeOutPrice: 1799.00,
+          status: 'ACTIVE',
+        },
+        {
+          id: 'v-3',
+          productId: 'p-100',
+          sku: 'SKU-REISHI-1KG',
+          quantityValue: 1,
+          quantityUnit: 'KG',
+          formattedQuantity: '1 kg',
+          sellingPrice: 3999.00,
+          strikeOutPrice: null,
+          status: 'ACTIVE',
+        },
+      ],
+    };
+
+    const handleAddToCart = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <ProductCard product={variantProduct} onAddToCart={handleAddToCart} />
+      </MemoryRouter>
+    );
+
+    // Initial variant is 100 g
+    expect(screen.getByText('100 g')).toBeInTheDocument();
+    expect(screen.getByText('250 g')).toBeInTheDocument();
+    expect(screen.getByText('1 kg')).toBeInTheDocument();
+    expect(screen.getByTestId('selling-price')).toHaveTextContent(/₹\s*799\.00/);
+    expect(screen.getByText('SKU: SKU-REISHI-100G')).toBeInTheDocument();
+
+    // Click on 250 g variant pill
+    fireEvent.click(screen.getByText('250 g'));
+    expect(screen.getByTestId('selling-price')).toHaveTextContent(/₹\s*1,499\.00/);
+    expect(screen.getByText('SKU: SKU-REISHI-250G')).toBeInTheDocument();
+
+    // Click on 1 kg variant pill
+    fireEvent.click(screen.getByText('1 kg'));
+    expect(screen.getByTestId('selling-price')).toHaveTextContent(/₹\s*3,999\.00/);
+    expect(screen.getByText('SKU: SKU-REISHI-1KG')).toBeInTheDocument();
+
+    // Click Add to Cart
+    fireEvent.click(screen.getByRole('button', { name: /Add to Cart/i }));
+    expect(handleAddToCart).toHaveBeenCalledTimes(1);
+    expect(handleAddToCart).toHaveBeenCalledWith(variantProduct, expect.objectContaining({ id: 'v-3', formattedQuantity: '1 kg' }));
   });
 });

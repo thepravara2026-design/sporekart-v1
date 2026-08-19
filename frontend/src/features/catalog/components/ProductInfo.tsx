@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Product } from '../types/catalog';
+import { Product, ProductVariant } from '../types/catalog';
 import { ProductPrice } from './ProductPrice';
 import { ProductAvailability } from './ProductAvailability';
 import { ProductActions } from './ProductActions';
@@ -22,10 +22,23 @@ export const ProductInfo: FC<ProductInfoProps> = ({
   onQuantityChange,
   mutation,
 }) => {
+  const variants = product.variants || [];
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    variants.length > 0 ? variants[0].id : null
+  );
+
+  const selectedVariant: ProductVariant | null =
+    variants.find((v) => v.id === selectedVariantId) || (variants.length > 0 ? variants[0] : null);
+
+  const currentPrice = selectedVariant ? selectedVariant.sellingPrice : product.price;
+  const currentStrikeOutPrice = selectedVariant ? selectedVariant.strikeOutPrice : product.strikeOutPrice;
+  const currentStatus = selectedVariant ? selectedVariant.status : product.status;
+  const currentSku = selectedVariant ? selectedVariant.sku : product.sku;
+
   return (
     <div className={`product-info-wrapper ${className}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <ProductAvailability status={product.status} />
+        <ProductAvailability status={currentStatus} />
         {product.category && (
           <Link
             to={`/products?categoryId=${product.category.id}`}
@@ -41,14 +54,58 @@ export const ProductInfo: FC<ProductInfoProps> = ({
       </h1>
 
       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-        SKU: {product.sku}
+        SKU: {currentSku}
       </div>
+
+      {variants.length > 1 && (
+        <div style={{ marginTop: '0.5rem' }}>
+          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+            Select Size / Quantity:
+          </label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }} role="radiogroup" aria-label="Available variant sizes">
+            {variants.map((v) => {
+              const isSelected = selectedVariant?.id === v.id;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => setSelectedVariantId(v.id)}
+                  style={{
+                    display: 'inline-flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '0.5rem 0.85rem',
+                    borderRadius: '8px',
+                    border: isSelected ? '2px solid var(--accent-primary, #10b981)' : '1px solid rgba(255, 255, 255, 0.15)',
+                    backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                    color: isSelected ? 'var(--text-primary, #fff)' : 'var(--text-secondary, #9ca3af)',
+                    cursor: 'pointer',
+                    minWidth: '80px',
+                    transition: 'all 0.15s ease-in-out',
+                  }}
+                >
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{v.formattedQuantity}</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>₹{v.sellingPrice}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div style={{ marginTop: '0.5rem' }}>
-        <ProductPrice price={product.price} strikeOutPrice={product.strikeOutPrice} currency={product.currency} style={{ fontSize: '2rem' }} showDiscountBadge={true} />
+        <ProductPrice price={currentPrice} strikeOutPrice={currentStrikeOutPrice} currency={product.currency} style={{ fontSize: '2rem' }} showDiscountBadge={true} />
       </div>
 
-      <ProductActions product={product} quantity={quantity} onQuantityChange={onQuantityChange} mutation={mutation} />
+      <ProductActions
+        product={product}
+        selectedVariant={selectedVariant}
+        quantity={quantity}
+        onQuantityChange={onQuantityChange}
+        mutation={mutation}
+      />
 
       <ProductMetadata product={product} />
     </div>

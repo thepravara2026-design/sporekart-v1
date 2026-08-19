@@ -5,7 +5,11 @@ import com.sporekart.modules.catalog.domain.category.Category;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Product {
@@ -19,6 +23,7 @@ public class Product {
     private ProductStatus status;
     private Category category;
     private String growerId;
+    private final List<ProductVariant> variants = new ArrayList<>();
     private final Instant createdAt;
     private Instant updatedAt;
 
@@ -31,6 +36,10 @@ public class Product {
     }
 
     public Product(UUID id, String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, ProductStatus status, Category category, String growerId, Instant createdAt, Instant updatedAt) {
+        this(id, sku, name, description, price, strikeOutPrice, currency, status, category, growerId, null, createdAt, updatedAt);
+    }
+
+    public Product(UUID id, String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, ProductStatus status, Category category, String growerId, List<ProductVariant> variants, Instant createdAt, Instant updatedAt) {
         if (id == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
         }
@@ -69,6 +78,12 @@ public class Product {
         this.growerId = growerId;
         this.createdAt = createdAt != null ? createdAt : Instant.now();
         this.updatedAt = updatedAt != null ? updatedAt : this.createdAt;
+
+        if (variants != null) {
+            for (ProductVariant v : variants) {
+                addVariant(v);
+            }
+        }
     }
 
     public static Product create(String sku, String name, String description, BigDecimal price, String currency, Category category) {
@@ -90,6 +105,46 @@ public class Product {
             throw new IllegalArgumentException("SKU must contain at least one valid alphanumeric character or hyphen");
         }
         return normalized;
+    }
+
+    public void addVariant(ProductVariant variant) {
+        if (variant == null) {
+            throw new IllegalArgumentException("Variant cannot be null");
+        }
+        // Check duplicate quantity/unit invariant
+        for (ProductVariant existing : variants) {
+            if (existing.getQuantityValue().compareTo(variant.getQuantityValue()) == 0
+                    && existing.getQuantityUnit() == variant.getQuantityUnit()) {
+                throw new IllegalArgumentException("Duplicate variant for quantity " + variant.getFormattedQuantity() + " already exists on product " + name);
+            }
+        }
+        variants.add(variant);
+        recalculateBasePrice();
+    }
+
+    public Optional<ProductVariant> findVariantById(UUID variantId) {
+        if (variantId == null) return Optional.empty();
+        return variants.stream().filter(v -> v.getId().equals(variantId)).findFirst();
+    }
+
+    public void setVariants(List<ProductVariant> newVariants) {
+        this.variants.clear();
+        if (newVariants != null) {
+            for (ProductVariant v : newVariants) {
+                addVariant(v);
+            }
+        }
+        recalculateBasePrice();
+    }
+
+    private void recalculateBasePrice() {
+        if (!variants.isEmpty()) {
+            BigDecimal minSelling = variants.stream()
+                    .map(ProductVariant::getSellingPrice)
+                    .min(BigDecimal::compareTo)
+                    .orElse(this.price);
+            this.price = minSelling;
+        }
     }
 
     public void updateDetails(String name, String description, BigDecimal price, String currency, Category category) {
@@ -182,6 +237,10 @@ public class Product {
 
     public void setGrowerId(String growerId) {
         this.growerId = growerId;
+    }
+
+    public List<ProductVariant> getVariants() {
+        return Collections.unmodifiableList(variants);
     }
 
     public Instant getCreatedAt() {
