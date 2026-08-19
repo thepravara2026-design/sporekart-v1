@@ -43,7 +43,7 @@ class TrainingCertificateServiceTest {
         TrainingBatch batch = createTestBatch(BATCH_ID);
         TrainingProgram program = new TrainingProgram(
                 "PROG-1", "advanced-mycology", "Advanced Mycology", "Desc", "CAT", 5,
-                com.sporekart.modules.training.domain.ProgramStatus.ACTIVE, BigDecimal.valueOf(499), "USD", "ADMIN", "ADMIN", Instant.now(), Instant.now()
+                com.sporekart.modules.training.domain.ProgramStatus.ACTIVE, BigDecimal.valueOf(499), "INR", "ADMIN", "ADMIN", Instant.now(), Instant.now()
         );
 
         when(certificateRepository.findByEnrollmentId(ENROLLMENT_ID)).thenReturn(Optional.empty());
@@ -80,7 +80,7 @@ class TrainingCertificateServiceTest {
     private TrainingEnrollment createTestEnrollment(String id, String batchId, String traineeId) {
         return new TrainingEnrollment(
                 id, "ENR-001", batchId, traineeId, EnrollmentStatus.CONFIRMED, "PAY-REF-100",
-                BigDecimal.valueOf(499), "USD", Instant.now(), Instant.now(), null, null,
+                BigDecimal.valueOf(499), "INR", Instant.now(), Instant.now(), null, null,
                 Instant.now(), Instant.now(), "TRAINEE", "TRAINEE", "IDEMP-1"
         );
     }

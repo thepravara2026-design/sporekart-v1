@@ -10,7 +10,7 @@ const renderItem = (props: Partial<React.ComponentProps<typeof CartItem>> = {}) 
     <MemoryRouter>
       <CartItem
         item={item}
-        currency="USD"
+        currency="INR"
         onQuantityChange={vi.fn()}
         onRemove={vi.fn()}
         {...props}
@@ -26,9 +26,9 @@ describe('CartItem (FD-11)', () => {
     const nameLink = screen.getByRole('link', { name: 'Blue Oyster Mushroom Spawn' });
     expect(nameLink).toHaveAttribute('href', '/products/prod-1');
     expect(screen.getByText('SKU: SKU-OYSTER-01')).toBeInTheDocument();
-    expect(screen.getByText('$249.00')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*249\.00/)).toBeInTheDocument();
     expect(screen.getByText('each')).toBeInTheDocument();
-    expect(screen.getByText('Line total: $498.00')).toBeInTheDocument();
+    expect(screen.getByText(/Line total: ₹\s*498\.00/)).toBeInTheDocument();
     expect(screen.getByRole('spinbutton', { name: 'Quantity for Blue Oyster Mushroom Spawn' })).toHaveValue(2);
     expect(screen.getByRole('button', { name: 'Remove Blue Oyster Mushroom Spawn from cart' })).toBeInTheDocument();
   });

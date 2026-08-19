@@ -71,7 +71,7 @@ export const SellerOrderTable: React.FC<SellerOrderTableProps> = ({
               </td>
               <td className="px-4 py-3 text-slate-300">{order.itemsCount} items</td>
               <td className="px-4 py-3 font-semibold text-slate-100">
-                ${order.totalAmount.toFixed(2)}
+                ₹{order.totalAmount.toFixed(2)}
               </td>
               <td className="px-4 py-3">
                 <Badge variant={getBadgeVariant(order.status)}>{order.status}</Badge>

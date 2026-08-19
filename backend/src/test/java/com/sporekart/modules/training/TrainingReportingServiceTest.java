@@ -49,8 +49,8 @@ class TrainingReportingServiceTest {
         TrainingEnrollment e1 = createTestEnrollment("e-1", "b-1", EnrollmentStatus.CONFIRMED);
         TrainingEnrollment e2 = createTestEnrollment("e-2", "b-2", EnrollmentStatus.COMPLETED);
 
-        TrainingEnrollmentPayment p1 = new TrainingEnrollmentPayment("p-1", "TRN-PAY-1", "b-1", "trainee-1", "e-1", BigDecimal.valueOf(500), "USD", TrainingPaymentStatus.VERIFIED, Instant.now(), Instant.now(), "TRAINEE", "TRAINEE");
-        TrainingEnrollmentPayment p2 = new TrainingEnrollmentPayment("p-2", "TRN-PAY-2", "b-2", "trainee-1", "e-2", BigDecimal.valueOf(100), "USD", TrainingPaymentStatus.FAILED, Instant.now(), Instant.now(), "TRAINEE", "TRAINEE");
+        TrainingEnrollmentPayment p1 = new TrainingEnrollmentPayment("p-1", "TRN-PAY-1", "b-1", "trainee-1", "e-1", BigDecimal.valueOf(500), "INR", TrainingPaymentStatus.VERIFIED, Instant.now(), Instant.now(), "TRAINEE", "TRAINEE");
+        TrainingEnrollmentPayment p2 = new TrainingEnrollmentPayment("p-2", "TRN-PAY-2", "b-2", "trainee-1", "e-2", BigDecimal.valueOf(100), "INR", TrainingPaymentStatus.FAILED, Instant.now(), Instant.now(), "TRAINEE", "TRAINEE");
 
         when(batchRepository.findAll()).thenReturn(List.of(b1, b2));
         when(enrollmentRepository.findAll()).thenReturn(List.of(e1, e2));
@@ -79,7 +79,7 @@ class TrainingReportingServiceTest {
     private TrainingEnrollment createTestEnrollment(String id, String batchId, EnrollmentStatus status) {
         return new TrainingEnrollment(
                 id, "ENR-" + id, batchId, "trainee-1", status, "PAY-REF-100",
-                BigDecimal.valueOf(499), "USD", Instant.now(), Instant.now(), null, null,
+                BigDecimal.valueOf(499), "INR", Instant.now(), Instant.now(), null, null,
                 Instant.now(), Instant.now(), "TRAINEE", "TRAINEE", "IDEMP-1"
         );
     }

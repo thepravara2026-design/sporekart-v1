@@ -48,7 +48,7 @@ export const PayoutSummaryTable: React.FC<PayoutSummaryTableProps> = ({
               <td className="px-4 py-3 font-mono font-medium text-forest-400">{payout.payoutReference}</td>
               <td className="px-4 py-3 text-slate-300">{payout.period}</td>
               <td className="px-4 py-3 font-semibold text-slate-100">
-                ${payout.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                ₹{payout.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </td>
               <td className="px-4 py-3">
                 <Badge

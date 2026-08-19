@@ -79,7 +79,7 @@ class GrowerSecurityAcceptanceTest {
         );
         when(growerProfileRepository.findByUserId(growerA)).thenReturn(Optional.of(GrowerProfileEntity.fromDomain(profileA)));
 
-        Product prodA = Product.create("SKU-A", "Product A", "Desc A", new BigDecimal("25.00"), "USD", null);
+        Product prodA = Product.create("SKU-A", "Product A", "Desc A", new BigDecimal("25.00"), "INR", null);
         prodA.setGrowerId(growerA);
         when(productRepository.findAllByGrowerId(growerA)).thenReturn(List.of(prodA));
 
@@ -96,7 +96,7 @@ class GrowerSecurityAcceptanceTest {
     @DisplayName("SCENARIO #2: Grower A attempts to access Grower B product -> DENIED (AccessDeniedException)")
     void scenario2_growerA_accesses_growerB_product_denied() {
         UUID prodIdB = UUID.randomUUID();
-        Product prodB = Product.create("SKU-B", "Product B", "Desc B", new BigDecimal("35.00"), "USD", null);
+        Product prodB = Product.create("SKU-B", "Product B", "Desc B", new BigDecimal("35.00"), "INR", null);
         prodB.setGrowerId(growerB);
 
         when(productRepository.findById(prodIdB)).thenReturn(Optional.of(prodB));
@@ -162,7 +162,7 @@ class GrowerSecurityAcceptanceTest {
     @DisplayName("SCENARIO #6: Reporting data isolation — Grower A report contains only Grower A orders")
     void scenario6_reporting_data_isolation() {
         Order orderA = Order.createNewOrder(
-                "ORD-A-1", "cust-1", "USD", new BigDecimal("150.00"),
+                "ORD-A-1", "cust-1", "INR", new BigDecimal("150.00"),
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("150.00"),
                 "idemp-a1", new com.sporekart.modules.order.domain.AddressSnapshot("Alice", "555-0199", "Line1", "Line2", "City", "State", "12345", "USA"),
                 "Notes", List.of()
@@ -200,7 +200,7 @@ class GrowerSecurityAcceptanceTest {
     void scenario8_invalid_order_transition_throws() {
         UUID orderId = UUID.randomUUID();
         Order order = Order.createNewOrder(
-                "ORD-TRANS-1", "cust-1", "USD", new BigDecimal("50.00"),
+                "ORD-TRANS-1", "cust-1", "INR", new BigDecimal("50.00"),
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("50.00"),
                 "idemp-t1", new com.sporekart.modules.order.domain.AddressSnapshot("Bob", "555-0200", "Line1", "Line2", "City", "State", "12345", "USA"),
                 "Notes", List.of()

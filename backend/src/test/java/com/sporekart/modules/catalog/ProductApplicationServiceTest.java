@@ -33,7 +33,7 @@ class ProductApplicationServiceTest {
                 "Lions Mane Liquid Culture",
                 "10ml Lions Mane culture syringe",
                 new BigDecimal("22.50"),
-                "USD",
+                "INR",
                 category.id()
         );
 
@@ -50,17 +50,17 @@ class ProductApplicationServiceTest {
 
     @Test
     void shouldPreventDuplicateSkuCreation() {
-        CreateProductCommand command1 = new CreateProductCommand("SP-REI-001", "Reishi Spores", "Desc", new BigDecimal("30.00"), "USD", null);
+        CreateProductCommand command1 = new CreateProductCommand("SP-REI-001", "Reishi Spores", "Desc", new BigDecimal("30.00"), "INR", null);
         productApplicationService.createProduct(command1);
 
-        CreateProductCommand command2 = new CreateProductCommand("sp-rei-001", "Reishi Liquid Culture", "Desc 2", new BigDecimal("35.00"), "USD", null);
+        CreateProductCommand command2 = new CreateProductCommand("sp-rei-001", "Reishi Liquid Culture", "Desc 2", new BigDecimal("35.00"), "INR", null);
         assertThrows(DuplicateSkuException.class, () -> productApplicationService.createProduct(command2));
     }
 
     @Test
     void shouldGetPaginatedProductsWithValidation() {
-        CreateProductCommand command1 = new CreateProductCommand("SKU-PAG-001", "Alpha Product", "Desc", new BigDecimal("10.00"), "USD", null);
-        CreateProductCommand command2 = new CreateProductCommand("SKU-PAG-002", "Beta Product", "Desc", new BigDecimal("20.00"), "USD", null);
+        CreateProductCommand command1 = new CreateProductCommand("SKU-PAG-001", "Alpha Product", "Desc", new BigDecimal("10.00"), "INR", null);
+        CreateProductCommand command2 = new CreateProductCommand("SKU-PAG-002", "Beta Product", "Desc", new BigDecimal("20.00"), "INR", null);
         productApplicationService.createProduct(command1);
         productApplicationService.createProduct(command2);
 
@@ -76,9 +76,9 @@ class ProductApplicationServiceTest {
 
     @Test
     void shouldFilterProductsByPriceRange() {
-        CreateProductCommand p1 = new CreateProductCommand("SKU-PR-001", "Cheap Spores", "Desc", new BigDecimal("15.00"), "USD", null);
-        CreateProductCommand p2 = new CreateProductCommand("SKU-PR-002", "Mid Spores", "Desc", new BigDecimal("45.00"), "USD", null);
-        CreateProductCommand p3 = new CreateProductCommand("SKU-PR-003", "Expensive Spores", "Desc", new BigDecimal("95.00"), "USD", null);
+        CreateProductCommand p1 = new CreateProductCommand("SKU-PR-001", "Cheap Spores", "Desc", new BigDecimal("15.00"), "INR", null);
+        CreateProductCommand p2 = new CreateProductCommand("SKU-PR-002", "Mid Spores", "Desc", new BigDecimal("45.00"), "INR", null);
+        CreateProductCommand p3 = new CreateProductCommand("SKU-PR-003", "Expensive Spores", "Desc", new BigDecimal("95.00"), "INR", null);
         productApplicationService.createProduct(p1);
         productApplicationService.createProduct(p2);
         productApplicationService.createProduct(p3);

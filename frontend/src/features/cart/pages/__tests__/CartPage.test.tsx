@@ -97,9 +97,9 @@ describe('CartPage (FD-11)', () => {
     await screen.findByTestId('cart-item');
     expect(screen.getByRole('link', { name: 'Blue Oyster Mushroom Spawn' })).toBeInTheDocument();
     expect(screen.getByText('SKU: SKU-OYSTER-01')).toBeInTheDocument();
-    expect(screen.getByText('Line total: $498.00')).toBeInTheDocument();
+    expect(screen.getByText(/Line total: ₹\s*498\.00/)).toBeInTheDocument();
     expect(screen.getByTestId('cart-summary-item-count')).toHaveTextContent('2');
-    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent('$498.00');
+    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent(/₹\s*498\.00/);
     expect(screen.getByRole('link', { name: 'Proceed to Checkout' })).toHaveAttribute('href', '/checkout');
   });
 
@@ -123,8 +123,8 @@ describe('CartPage (FD-11)', () => {
       expect(cartApi.updateItemQuantity).toHaveBeenCalledWith('item-1', { quantity: 3 });
     });
     await waitFor(() => {
-      expect(screen.getByText('Line total: $747.00')).toBeInTheDocument();
-      expect(screen.getByTestId('cart-summary-total')).toHaveTextContent('$747.00');
+      expect(screen.getByText(/Line total: ₹\s*747\.00/)).toBeInTheDocument();
+      expect(screen.getByTestId('cart-summary-total')).toHaveTextContent(/₹\s*747\.00/);
     });
   });
 
@@ -141,7 +141,7 @@ describe('CartPage (FD-11)', () => {
     const error = await screen.findByText('Unable to update quantity. The requested quantity is not allowed.');
     expect(error).toBeInTheDocument();
     expect(screen.getByRole('spinbutton', { name: 'Quantity for Blue Oyster Mushroom Spawn' })).toHaveValue(2);
-    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent('$498.00');
+    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent(/₹\s*498\.00/);
   });
 
   it('flags a line as unavailable when the backend rejects its product, keeping remove available', async () => {

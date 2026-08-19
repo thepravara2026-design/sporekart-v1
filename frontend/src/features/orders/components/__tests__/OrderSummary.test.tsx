@@ -25,7 +25,7 @@ describe('OrderSummary (FD-13)', () => {
   });
 
   it('uses the order currency for formatting', () => {
-    render(<OrderSummary order={makeOrder({ currency: 'USD', grandTotal: 20 })} />);
-    expect(screen.getByText('$20.00')).toBeInTheDocument();
+    render(<OrderSummary order={makeOrder({ currency: 'INR', grandTotal: 20 })} />);
+    expect(screen.getByText(/₹\s*20\.00/)).toBeInTheDocument();
   });
 });

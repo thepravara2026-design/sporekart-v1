@@ -95,7 +95,7 @@ export const SellerProductManagementPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Price (USD)</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Price (INR)</label>
                 <Input
                   type="number"
                   step="0.01"

@@ -16,7 +16,7 @@ CREATE TABLE products (
     name VARCHAR(200) NOT NULL,
     description TEXT,
     price DECIMAL(12, 2) NOT NULL,
-    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    currency VARCHAR(3) NOT NULL DEFAULT 'INR',
     status VARCHAR(20) NOT NULL,
     category_id UUID REFERENCES categories(id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,

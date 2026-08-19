@@ -25,7 +25,7 @@ const mockProduct: Product = {
   name: 'Florida White Oyster Spawn',
   description: 'High-yielding oyster mushroom spawn on sterile grain.',
   price: 24.99,
-  currency: 'USD',
+  currency: 'INR',
   status: 'ACTIVE',
   category: {
     id: 'cat-1',
@@ -52,8 +52,8 @@ const mockCategory: Category = {
 
 describe('Catalog Feature Components (Sprint FD-06)', () => {
   it('renders ProductPrice formatted currency correctly', () => {
-    render(<ProductPrice price={24.99} currency="USD" />);
-    expect(screen.getByText('$24.99')).toBeDefined();
+    render(<ProductPrice price={24.99} currency="INR" />);
+    expect(screen.getByText(/₹\s*24\.99/)).toBeDefined();
   });
 
   it('renders ProductAvailability with badge mapping', () => {
@@ -75,7 +75,7 @@ describe('Catalog Feature Components (Sprint FD-06)', () => {
     );
 
     expect(screen.getByText('Florida White Oyster Spawn')).toBeDefined();
-    expect(screen.getByText('$24.99')).toBeDefined();
+    expect(screen.getByText(/₹\s*24\.99/)).toBeDefined();
     const cartBtn = screen.getByRole('button', { name: 'Add to Cart' });
     fireEvent.click(cartBtn);
     expect(handleAddToCart).toHaveBeenCalledWith(mockProduct);

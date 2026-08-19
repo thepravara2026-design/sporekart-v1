@@ -35,7 +35,7 @@ export interface CartItemProps {
  */
 export const CartItem: FC<CartItemProps> = ({
   item,
-  currency,
+  currency = 'INR',
   isUpdating = false,
   isRemoving = false,
   blocked = false,

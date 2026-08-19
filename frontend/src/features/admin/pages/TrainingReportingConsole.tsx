@@ -149,8 +149,8 @@ export const TrainingReportingConsole: React.FC = () => {
           </div>
           <div className="bg-gray-800 p-5 rounded-lg border border-gray-700">
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Net Training Revenue</span>
-            <div className="text-2xl font-bold text-indigo-400 mt-1">${overview.netRevenue}</div>
-            <div className="text-xs text-gray-400 mt-1">Gross: ${overview.grossRevenue} | Refunds: ${overview.totalRefunds}</div>
+            <div className="text-2xl font-bold text-indigo-400 mt-1">₹{overview.netRevenue}</div>
+            <div className="text-xs text-gray-400 mt-1">Gross: ₹{overview.grossRevenue} | Refunds: ₹{overview.totalRefunds}</div>
           </div>
           <div className="bg-gray-800 p-5 rounded-lg border border-gray-700">
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Certificates Issued</span>

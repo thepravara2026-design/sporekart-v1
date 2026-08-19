@@ -35,7 +35,7 @@ const mockProduct: Product = {
   name: 'Lions Mane Liquid Culture',
   description: 'Pure liquid culture syringe for lions mane cultivation.',
   price: 28.0,
-  currency: 'USD',
+  currency: 'INR',
   status: 'ACTIVE',
   category: {
     id: 'cat-70',
@@ -137,7 +137,7 @@ describe('Product Detail & Discovery Components (Sprint FD-07)', () => {
     );
 
     expect(screen.getByText('Lions Mane Liquid Culture')).toBeInTheDocument();
-    expect(screen.getByText('$28.00')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*28\.00/)).toBeInTheDocument();
     expect(screen.getByText('SKU: SPW-LION-001')).toBeInTheDocument();
   });
 

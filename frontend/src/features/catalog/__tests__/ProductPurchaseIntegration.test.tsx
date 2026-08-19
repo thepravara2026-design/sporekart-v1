@@ -64,7 +64,7 @@ const cartResponse = {
     id: 'cart-1',
     customerId: 'cust-1',
     status: 'ACTIVE',
-    currency: 'USD',
+    currency: 'INR',
     items: [
       {
         id: 'item-1',

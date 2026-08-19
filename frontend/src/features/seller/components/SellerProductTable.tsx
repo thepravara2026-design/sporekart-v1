@@ -51,7 +51,7 @@ export const SellerProductTable: React.FC<SellerProductTableProps> = ({
               <td className="px-4 py-3 font-mono text-xs text-forest-400">{product.sku}</td>
               <td className="px-4 py-3 text-slate-300">{product.category}</td>
               <td className="px-4 py-3 font-semibold text-slate-100">
-                ${product.price.toFixed(2)}
+                ₹{product.price.toFixed(2)}
               </td>
               <td className="px-4 py-3 font-mono text-slate-200">{product.onHandQuantity}</td>
               <td className="px-4 py-3">

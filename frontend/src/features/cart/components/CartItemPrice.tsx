@@ -11,7 +11,7 @@ export interface CartItemPriceProps {
  * CartItemPrice — formatted unit price for a cart line. Formatting only; the
  * backend remains the pricing authority for the amount itself.
  */
-export const CartItemPrice: FC<CartItemPriceProps> = ({ unitPrice, currency, className = '' }) => {
+export const CartItemPrice: FC<CartItemPriceProps> = ({ unitPrice, currency = 'INR', className = '' }) => {
   return (
     <span
       className={`cart-item-price ${className}`}

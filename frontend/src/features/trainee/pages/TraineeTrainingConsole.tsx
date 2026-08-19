@@ -454,7 +454,7 @@ export const TraineeTrainingConsole: React.FC = () => {
                           {e.status}
                         </span>
                       </td>
-                      <td style={{ padding: '12px 16px' }}>{e.currency || 'USD'} {e.priceAmount || 0}</td>
+                      <td style={{ padding: '12px 16px' }}>{e.currency || 'INR'} {e.priceAmount || 0}</td>
                       <td style={{ padding: '12px 16px', color: '#64748b' }}>{new Date(e.enrolledAt).toLocaleDateString()}</td>
                       <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                         <button

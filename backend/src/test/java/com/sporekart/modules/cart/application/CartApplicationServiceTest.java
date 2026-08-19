@@ -58,12 +58,12 @@ class CartApplicationServiceTest {
     @Test
     @DisplayName("Should add item to active cart after validating catalog product")
     void shouldAddItemToCart() {
-        Cart cart = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart = Cart.createNewActiveCart(customerId, "INR");
         when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> inv.getArgument(0));
 
         CatalogPort.CatalogProductDetails productDetails = new CatalogPort.CatalogProductDetails(
-                productId, "Lion's Mane Spore Culture", "LM-001", new BigDecimal("35.00"), "USD", true, "ACTIVE"
+                productId, "Lion's Mane Spore Culture", "LM-001", new BigDecimal("35.00"), "INR", true, "ACTIVE"
         );
         when(catalogPort.getProductForCart(productId)).thenReturn(productDetails);
 
@@ -80,7 +80,7 @@ class CartApplicationServiceTest {
     @Test
     @DisplayName("Should throw exception when adding non-existent catalog product")
     void shouldThrowExceptionWhenProductNotFound() {
-        Cart cart = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart = Cart.createNewActiveCart(customerId, "INR");
         when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(catalogPort.getProductForCart(productId)).thenThrow(new ProductNotFoundException(productId));
 
@@ -91,7 +91,7 @@ class CartApplicationServiceTest {
     @Test
     @DisplayName("Should throw exception when adding inactive catalog product")
     void shouldThrowExceptionWhenProductInactive() {
-        Cart cart = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart = Cart.createNewActiveCart(customerId, "INR");
         when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(catalogPort.getProductForCart(productId)).thenThrow(new ProductNotPurchasableException(productId, "Product status is DRAFT"));
 
@@ -102,7 +102,7 @@ class CartApplicationServiceTest {
     @Test
     @DisplayName("Should update cart item quantity successfully")
     void shouldUpdateCartItemQuantity() {
-        Cart cart = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart = Cart.createNewActiveCart(customerId, "INR");
         var item = cart.addItem(productId, null, "SKU-1", "Product", null, new BigDecimal("10.00"), 1, 50, 100);
         when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -117,7 +117,7 @@ class CartApplicationServiceTest {
     @Test
     @DisplayName("Should remove item and clear cart successfully")
     void shouldRemoveAndClearCart() {
-        Cart cart = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart = Cart.createNewActiveCart(customerId, "INR");
         var item = cart.addItem(productId, null, "SKU-1", "Product", null, new BigDecimal("10.00"), 2, 50, 100);
         when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> inv.getArgument(0));

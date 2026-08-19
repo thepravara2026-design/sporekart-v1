@@ -114,7 +114,7 @@ public class GrowerApplicationService {
                 profile.isAutoAcknowledgeOrders(),
                 profile.getPreferredCarrier(),
                 profile.getDefaultFulfillmentLocation(),
-                "USD"
+                "INR"
         );
     }
 

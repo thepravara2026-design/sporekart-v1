@@ -64,7 +64,7 @@ vi.mock('../../hooks/useGrowerProducts', () => ({
         name: "Lion's Mane Spawn",
         sku: 'SKU-LION-001',
         price: 35.0,
-        currency: 'USD',
+        currency: 'INR',
         status: 'ACTIVE',
         categoryName: 'Spawn',
       },
@@ -164,7 +164,7 @@ vi.mock('../../hooks/useGrowerSettings', () => ({
       lowStockAlertThreshold: 10,
       preferredCarrier: 'FedEx Express',
       defaultFulfillmentLocation: 'Portland Main Lab',
-      currency: 'USD',
+      currency: 'INR',
     },
     isLoading: false,
     isError: false,
@@ -223,7 +223,7 @@ describe('Grower Portal Pages', () => {
   it('renders GrowerReportsPage cleanly', () => {
     renderWithProviders(<GrowerReportsPage />);
     expect(screen.getByText('Grower Operational Analytics & Reporting')).toBeInTheDocument();
-    expect(screen.getByText('$18,450.00')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*18,450\.00/)).toBeInTheDocument();
   });
 
   it('renders GrowerSettingsPage cleanly', () => {

@@ -20,7 +20,7 @@ export const makeCart = (overrides: Partial<CartDto> = {}): CartDto => ({
   id: 'cart-1',
   customerId: 'cust-1',
   status: 'ACTIVE',
-  currency: 'USD',
+  currency: 'INR',
   subtotal: 498.0,
   itemCount: 2,
   items: [makeCartItem()],

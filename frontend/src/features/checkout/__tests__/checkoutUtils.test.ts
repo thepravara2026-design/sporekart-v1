@@ -111,7 +111,7 @@ describe('checkoutUtils (FD-11)', () => {
 
     it('detects a currency change between previews', () => {
       const previous = makePreview();
-      const next = makePreview({ breakdown: { ...previous.breakdown, currency: 'USD' } });
+      const next = makePreview({ breakdown: { ...previous.breakdown, currency: 'EUR' } });
       expect(hasPreviewChanged(previous, next)).toBe(true);
     });
 

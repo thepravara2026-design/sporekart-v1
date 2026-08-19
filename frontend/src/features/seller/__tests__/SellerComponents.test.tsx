@@ -12,14 +12,14 @@ describe('Seller Marketplace UI Components', () => {
     render(
       <SellerMetricsCard
         title="Total Revenue"
-        value="$34,250.00"
+        value="₹34,250.00"
         subtitle="Lifetime sales"
         trend={{ value: '14.2%', isPositive: true }}
       />
     );
 
     expect(screen.getByText('Total Revenue')).toBeInTheDocument();
-    expect(screen.getByText('$34,250.00')).toBeInTheDocument();
+    expect(screen.getByText('₹34,250.00')).toBeInTheDocument();
     expect(screen.getByText('Lifetime sales')).toBeInTheDocument();
     expect(screen.getByText(/14.2%/)).toBeInTheDocument();
   });
@@ -42,7 +42,7 @@ describe('Seller Marketplace UI Components', () => {
         payoutReference: 'PAY-2026-01',
         period: 'Jan 2026',
         amount: 1500.0,
-        currency: 'USD',
+        currency: 'INR',
         status: 'COMPLETED' as const,
         payoutDate: '2026-01-31',
         bankAccountLast4: '1234',
@@ -51,7 +51,7 @@ describe('Seller Marketplace UI Components', () => {
 
     rerender(<PayoutSummaryTable payouts={samplePayouts} />);
     expect(screen.getByText('PAY-2026-01')).toBeInTheDocument();
-    expect(screen.getByText('$1,500.00')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*1,500\.00/)).toBeInTheDocument();
   });
 
   it('renders SellerProductTable correctly', () => {
@@ -62,7 +62,7 @@ describe('Seller Marketplace UI Components', () => {
         sku: 'SKU-OYSTER-1',
         category: 'Grain Spawn',
         price: 25.0,
-        currency: 'USD',
+        currency: 'INR',
         onHandQuantity: 50,
         reservedQuantity: 5,
         syncStatus: 'SYNCED' as const,
@@ -74,7 +74,7 @@ describe('Seller Marketplace UI Components', () => {
     render(<SellerProductTable products={products} />);
     expect(screen.getByText('Oyster Spawn Bag')).toBeInTheDocument();
     expect(screen.getByText('SKU-OYSTER-1')).toBeInTheDocument();
-    expect(screen.getByText('$25.00')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*25\.00/)).toBeInTheDocument();
   });
 
   it('renders SellerInventoryTable with stock values', () => {
@@ -107,7 +107,7 @@ describe('Seller Marketplace UI Components', () => {
         customerEmail: 'john@example.com',
         itemsCount: 2,
         totalAmount: 50.0,
-        currency: 'USD',
+        currency: 'INR',
         status: 'PROCESSING' as const,
         orderDate: '2026-08-19',
       },

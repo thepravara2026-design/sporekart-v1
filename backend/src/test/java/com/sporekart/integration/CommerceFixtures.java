@@ -56,7 +56,7 @@ public class CommerceFixtures {
                 name,
                 name + " description",
                 price,
-                "USD",
+                "INR",
                 status,
                 category,
                 Instant.now(),

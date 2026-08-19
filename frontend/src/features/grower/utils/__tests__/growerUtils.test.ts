@@ -3,8 +3,9 @@ import { formatCurrency, getInventoryStatusMeta, getOrderStatusMeta, getProductS
 
 describe('growerUtils', () => {
   it('formats currency correctly', () => {
-    expect(formatCurrency(120)).toBe('$120.00');
-    expect(formatCurrency(45.5, 'USD')).toBe('$45.50');
+    expect(formatCurrency(120)).toContain('120.00');
+    expect(formatCurrency(120)).toContain('₹');
+    expect(formatCurrency(45.5, 'INR')).toContain('45.50');
   });
 
   it('resolves product status metadata', () => {

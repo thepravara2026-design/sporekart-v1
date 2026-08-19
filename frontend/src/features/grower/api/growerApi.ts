@@ -127,7 +127,7 @@ export const growerApi = {
         sku: (p.sku as string) || 'SKU-000',
         description: (p.description as string) || '',
         price: (p.price as number) || 0,
-        currency: (p.currency as string) || 'USD',
+        currency: (p.currency as string) || 'INR',
         status: (p.status as GrowerProduct['status']) || 'ACTIVE',
         categoryId: p.categoryId as string,
         categoryName: (p.categoryName as string) || 'Spawn & Cultures',
@@ -148,7 +148,7 @@ export const growerApi = {
         name: input.name,
         description: input.description,
         price: input.price,
-        currency: 'USD',
+        currency: 'INR',
         initialStockQuantity: 50,
       });
       const p = response.data?.data || response.data;
@@ -158,7 +158,7 @@ export const growerApi = {
         sku: p.sku || input.sku,
         description: p.description || input.description,
         price: p.price || input.price,
-        currency: 'USD',
+        currency: 'INR',
         status: 'ACTIVE',
         categoryId: input.categoryId,
         categoryName: 'Spawn & Cultures',
@@ -172,7 +172,7 @@ export const growerApi = {
         sku: input.sku,
         description: input.description,
         price: input.price,
-        currency: 'USD',
+        currency: 'INR',
         status: input.status || 'ACTIVE',
         categoryId: input.categoryId,
         categoryName: 'Spawn & Cultures',
@@ -321,7 +321,7 @@ export const growerApi = {
         autoAcknowledgeOrders: data.autoAcknowledgeOrders ?? false,
         preferredCarrier: data.preferredCarrier || 'Standard Express',
         defaultFulfillmentLocation: data.defaultFulfillmentLocation || 'Main Lab',
-        currency: data.currency || 'USD',
+        currency: data.currency || 'INR',
       };
     } catch {
       return {
@@ -330,7 +330,7 @@ export const growerApi = {
         autoAcknowledgeOrders: false,
         preferredCarrier: 'Standard Express',
         defaultFulfillmentLocation: 'Main Lab',
-        currency: 'USD',
+        currency: 'INR',
       };
     }
   },
@@ -345,7 +345,7 @@ export const growerApi = {
         autoAcknowledgeOrders: data.autoAcknowledgeOrders ?? false,
         preferredCarrier: data.preferredCarrier || 'Standard Express',
         defaultFulfillmentLocation: data.defaultFulfillmentLocation || 'Main Lab',
-        currency: data.currency || 'USD',
+        currency: data.currency || 'INR',
       };
     } catch {
       const current = await growerApi.getSettings();

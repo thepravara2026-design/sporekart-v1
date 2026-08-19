@@ -35,7 +35,7 @@ class CatalogPersistenceTest {
         assertNotNull(savedCategory.getId());
         assertTrue(categoryRepository.existsBySlug("gourmet"));
 
-        Product product = Product.create("SP-OYST-001", "Blue Oyster Spores", "Fresh Blue Oyster liquid culture", new BigDecimal("24.99"), "USD", savedCategory);
+        Product product = Product.create("SP-OYST-001", "Blue Oyster Spores", "Fresh Blue Oyster liquid culture", new BigDecimal("24.99"), "INR", savedCategory);
         Product savedProduct = productRepository.save(product);
 
         assertNotNull(savedProduct.getId());

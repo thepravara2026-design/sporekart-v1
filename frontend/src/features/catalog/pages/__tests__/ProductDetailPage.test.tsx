@@ -26,7 +26,7 @@ const mockProduct: Product = {
   name: 'Turkey Tail Extract',
   description: 'Immune support extract',
   price: 29.99,
-  currency: 'USD',
+  currency: 'INR',
   status: 'ACTIVE',
   category: {
     id: 'cat-1',
@@ -81,7 +81,7 @@ describe('ProductDetailPage (FD-10)', () => {
     expect(await screen.findByTestId('product-detail-card')).toBeInTheDocument();
     expect(screen.getAllByText('Turkey Tail Extract').length).toBeGreaterThan(0);
     expect(screen.getByText('SKU: SKU-TURKEY-001')).toBeInTheDocument();
-    expect(screen.getByText('$29.99')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*29\.99/)).toBeInTheDocument();
     expect(screen.getByText('Immune support extract')).toBeInTheDocument();
     expect(screen.getAllByText('In Stock').length).toBeGreaterThan(0);
   });
@@ -178,7 +178,7 @@ describe('ProductDetailPage (FD-10)', () => {
         id: 'cart-1',
         customerId: 'cust-1',
         status: 'ACTIVE',
-        currency: 'USD',
+        currency: 'INR',
         items: [{
           id: 'item-1',
           productId: 'prod-99',

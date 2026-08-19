@@ -29,7 +29,7 @@ export const SellerDashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <SellerMetricsCard
             title="Total Marketplace Revenue"
-            value={isMetricsLoading ? '...' : `$${(metrics?.totalSales || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+            value={isMetricsLoading ? '...' : `₹${(metrics?.totalSales || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
             subtitle="Lifetime settled revenue"
             trend={{ value: '14.2%', isPositive: true }}
             variant="highlight"
@@ -37,7 +37,7 @@ export const SellerDashboardPage: React.FC = () => {
           />
           <SellerMetricsCard
             title="Monthly Sales Revenue"
-            value={isMetricsLoading ? '...' : `$${(metrics?.monthlyRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+            value={isMetricsLoading ? '...' : `₹${(metrics?.monthlyRevenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
             subtitle="Current calendar month"
             trend={{ value: '8.1%', isPositive: true }}
             testId="metric-monthly-revenue"
@@ -62,7 +62,7 @@ export const SellerDashboardPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-slate-200">Payout & Settlement Summary</h3>
             <span className="text-xs text-slate-400 font-mono">
-              Pending Payout: ${metrics?.payoutPendingAmount?.toFixed(2) || '0.00'}
+              Pending Payout: ₹{metrics?.payoutPendingAmount?.toFixed(2) || '0.00'}
             </span>
           </div>
           <PayoutSummaryTable payouts={payouts || []} isLoading={isPayoutsLoading} />

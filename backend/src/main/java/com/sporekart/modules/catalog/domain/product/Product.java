@@ -44,7 +44,7 @@ public class Product {
         this.name = name.trim();
         this.description = description != null ? description.trim() : null;
         this.price = price.setScale(2, RoundingMode.HALF_UP);
-        this.currency = (currency != null && !currency.isBlank()) ? currency.trim().toUpperCase() : "USD";
+        this.currency = (currency != null && !currency.isBlank()) ? currency.trim().toUpperCase() : "INR";
         this.status = status != null ? status : ProductStatus.DRAFT;
         this.category = category;
         this.growerId = growerId;

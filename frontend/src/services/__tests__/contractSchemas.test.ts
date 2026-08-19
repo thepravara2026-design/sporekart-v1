@@ -102,7 +102,7 @@ describe('Zod Contract Schemas Validation', () => {
       id: 'cart-1',
       customerId: 'cust-10',
       status: 'ACTIVE',
-      currency: 'USD',
+      currency: 'INR',
       subtotal: 30.0,
       itemCount: 2,
       items: [

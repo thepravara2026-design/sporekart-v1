@@ -17,7 +17,7 @@ const baseProduct: Product = {
   name: 'Lions Mane Liquid Culture',
   description: 'Pure liquid culture syringe for lions mane cultivation.',
   price: 28.0,
-  currency: 'USD',
+  currency: 'INR',
   status: 'ACTIVE',
   category: {
     id: 'cat-70',

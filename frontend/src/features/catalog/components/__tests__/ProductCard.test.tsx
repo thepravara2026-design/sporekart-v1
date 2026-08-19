@@ -11,7 +11,7 @@ describe('ProductCard', () => {
     name: 'Red Reishi Spore Extract',
     description: 'High potency dual-extracted liquid',
     price: 34.50,
-    currency: 'USD',
+    currency: 'INR',
     status: 'ACTIVE',
     category: {
       id: 'c-200',
@@ -35,7 +35,7 @@ describe('ProductCard', () => {
 
     expect(screen.getByText('Red Reishi Spore Extract')).toBeInTheDocument();
     expect(screen.getByText('SKU: SKU-REISHI-001')).toBeInTheDocument();
-    expect(screen.getByText('$34.50')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*34\.50/)).toBeInTheDocument();
     expect(screen.getByText('Extracts')).toBeInTheDocument();
     expect(screen.getByText('In Stock')).toBeInTheDocument();
     expect(screen.getByText('High potency dual-extracted liquid')).toBeInTheDocument();

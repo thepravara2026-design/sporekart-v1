@@ -167,13 +167,13 @@ describe('Cart Purchase Integration Flows (FD-11)', () => {
     fireEvent.click(screen.getByRole('link', { name: 'View Cart' }));
     await screen.findByTestId('cart-layout');
     expect(screen.getByRole('link', { name: 'Blue Oyster Culture' })).toBeInTheDocument();
-    expect(screen.getByText('Line total: $249.00')).toBeInTheDocument();
+    expect(screen.getByText(/Line total: ₹\s*249\.00/)).toBeInTheDocument();
 
     // 5. Change quantity; line total, summary, and badge update.
     fireEvent.click(screen.getByRole('button', { name: 'Increase quantity for Blue Oyster Culture' }));
     await waitFor(() => {
-      expect(screen.getByText('Line total: $498.00')).toBeInTheDocument();
-      expect(screen.getByTestId('cart-summary-total')).toHaveTextContent('$498.00');
+      expect(screen.getByText(/Line total: ₹\s*498\.00/)).toBeInTheDocument();
+      expect(screen.getByTestId('cart-summary-total')).toHaveTextContent(/₹\s*498\.00/);
     });
     await waitFor(() => {
       expect(screen.getByTestId('cart-count-badge')).toHaveTextContent('2');
@@ -230,7 +230,7 @@ describe('Cart Purchase Integration Flows (FD-11)', () => {
     // Update product A (item-1).
     fireEvent.click(screen.getByRole('button', { name: 'Increase quantity for Blue Oyster Culture' }));
     await waitFor(() => {
-      expect(screen.getByText('Line total: $498.00')).toBeInTheDocument();
+      expect(screen.getByText(/Line total: ₹\s*498\.00/)).toBeInTheDocument();
       expect(screen.getByTestId('cart-summary-item-count')).toHaveTextContent('5');
     });
 
@@ -240,7 +240,7 @@ describe('Cart Purchase Integration Flows (FD-11)', () => {
       expect(screen.getAllByTestId('cart-item')).toHaveLength(1);
       expect(screen.queryByRole('link', { name: 'Lion\u2019s Mane Culture' })).not.toBeInTheDocument();
     });
-    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent('$498.00');
+    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent(/₹\s*498\.00/);
   });
 
   it('FLOW C — quantity update failure never falsely reports success and preserves totals', async () => {
@@ -259,7 +259,7 @@ describe('Cart Purchase Integration Flows (FD-11)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('not allowed');
     // Value and totals remain server-confirmed.
     expect(screen.getByRole('spinbutton', { name: 'Quantity for Blue Oyster Culture' })).toHaveValue(1);
-    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent('$249.00');
+    expect(screen.getByTestId('cart-summary-total')).toHaveTextContent(/₹\s*249\.00/);
     expect(screen.queryByText('Added to Cart')).not.toBeInTheDocument();
   });
 

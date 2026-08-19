@@ -46,11 +46,11 @@ public class CatalogDataSeeder implements CommandLineRunner {
         Category savedGourmet = categoryRepository.save(gourmet);
         Category savedCultivation = categoryRepository.save(cultivation);
 
-        createAndSaveProduct("SKU-LION-001", "Lion's Mane Extract", "Organic Lion's Mane mushroom extract for cognitive focus.", new BigDecimal("29.99"), "USD", ProductStatus.ACTIVE, savedMedicinal);
-        createAndSaveProduct("SKU-REISHI-001", "Reishi Mushroom Powder", "Calming Reishi dual extract powder for stress relief.", new BigDecimal("24.99"), "USD", ProductStatus.ACTIVE, savedMedicinal);
-        createAndSaveProduct("SKU-CORDY-001", "Cordyceps Energy Supplement", "Natural stamina and energy boost from Cordyceps militaris.", new BigDecimal("34.50"), "USD", ProductStatus.ACTIVE, savedMedicinal);
-        createAndSaveProduct("SKU-OYSTER-001", "Blue Oyster Growing Kit", "Easy to grow Blue Oyster mushrooms on your countertop.", new BigDecimal("19.95"), "USD", ProductStatus.ACTIVE, savedCultivation);
-        createAndSaveProduct("SKU-SHIITAKE-001", "Organic Dried Shiitake", "Premium grade whole dried Shiitake mushrooms for cooking.", new BigDecimal("14.99"), "USD", ProductStatus.ACTIVE, savedGourmet);
+        createAndSaveProduct("SKU-LION-001", "Lion's Mane Extract", "Organic Lion's Mane mushroom extract for cognitive focus.", new BigDecimal("2499.00"), "INR", ProductStatus.ACTIVE, savedMedicinal);
+        createAndSaveProduct("SKU-REISHI-001", "Reishi Mushroom Powder", "Calming Reishi dual extract powder for stress relief.", new BigDecimal("1999.00"), "INR", ProductStatus.ACTIVE, savedMedicinal);
+        createAndSaveProduct("SKU-CORDY-001", "Cordyceps Energy Supplement", "Natural stamina and energy boost from Cordyceps militaris.", new BigDecimal("2850.00"), "INR", ProductStatus.ACTIVE, savedMedicinal);
+        createAndSaveProduct("SKU-OYSTER-001", "Blue Oyster Growing Kit", "Easy to grow Blue Oyster mushrooms on your countertop.", new BigDecimal("1599.00"), "INR", ProductStatus.ACTIVE, savedCultivation);
+        createAndSaveProduct("SKU-SHIITAKE-001", "Organic Dried Shiitake", "Premium grade whole dried Shiitake mushrooms for cooking.", new BigDecimal("1199.00"), "INR", ProductStatus.ACTIVE, savedGourmet);
 
         log.info("Finished seeding Catalog data.");
     }

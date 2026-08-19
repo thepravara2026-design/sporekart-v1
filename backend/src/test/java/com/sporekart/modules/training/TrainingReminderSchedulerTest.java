@@ -109,7 +109,7 @@ class TrainingReminderSchedulerTest {
     private TrainingEnrollment createTestEnrollment(String id, String batchId, String traineeId, EnrollmentStatus status) {
         return new TrainingEnrollment(
                 id, "ENR-001", batchId, traineeId, status, "PAY-REF-100",
-                BigDecimal.valueOf(499), "USD", Instant.now(), Instant.now(), null, null,
+                BigDecimal.valueOf(499), "INR", Instant.now(), Instant.now(), null, null,
                 Instant.now(), Instant.now(), "TRAINEE", "TRAINEE", "IDEMP-1"
         );
     }

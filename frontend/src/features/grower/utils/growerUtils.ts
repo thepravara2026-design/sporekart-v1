@@ -2,8 +2,8 @@ import { INVENTORY_STATUS_CONFIG, ORDER_STATUS_CONFIG, PRODUCT_STATUS_CONFIG } f
 import { GrowerProductStatus } from '../types/growerProduct';
 import { GrowerOrderStatusType } from '../types/growerOrder';
 
-export const formatCurrency = (amount: number, currency = 'USD'): string => {
-  return new Intl.NumberFormat('en-US', {
+export const formatCurrency = (amount: number, currency = 'INR'): string => {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency,
   }).format(amount);

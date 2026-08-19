@@ -49,8 +49,8 @@ class MoneyTest {
     @DisplayName("Should reject arithmetic across different currencies")
     void shouldRejectCrossCurrencyOperations() {
         Money inr = Money.of(100.00, "INR");
-        Money usd = Money.of(100.00, "USD");
+        Money eur = Money.of(100.00, "EUR");
 
-        assertThrows(IllegalArgumentException.class, () -> inr.add(usd));
+        assertThrows(IllegalArgumentException.class, () -> inr.add(eur));
     }
 }

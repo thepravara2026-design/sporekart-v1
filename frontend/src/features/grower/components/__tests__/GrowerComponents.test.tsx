@@ -29,7 +29,7 @@ describe('Grower UI Components', () => {
       name: 'Organic Oyster Spawn',
       sku: 'SKU-OYST-001',
       price: 29.99,
-      currency: 'USD',
+      currency: 'INR',
       status: 'ACTIVE',
       categoryName: 'Spawn',
       createdAt: '2026-01-01T00:00:00Z',
@@ -38,7 +38,7 @@ describe('Grower UI Components', () => {
     render(<GrowerProductCard product={mockProduct} />);
     expect(screen.getByText('Organic Oyster Spawn')).toBeInTheDocument();
     expect(screen.getByText('SKU-OYST-001')).toBeInTheDocument();
-    expect(screen.getByText('$29.99')).toBeInTheDocument();
+    expect(screen.getByText(/₹\s*29\.99/)).toBeInTheDocument();
   });
 
   it('renders GrowerStockStatus indicator', () => {

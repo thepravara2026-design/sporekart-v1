@@ -110,7 +110,7 @@ class GrowerProductionReadinessTest {
         );
         when(growerProfileRepository.findByUserId(growerId)).thenReturn(Optional.of(GrowerProfileEntity.fromDomain(profile)));
 
-        var settingsDto = new GrowerSettingsDto(true, 10, true, "Express", "Lab A", "USD");
+        var settingsDto = new GrowerSettingsDto(true, 10, true, "Express", "Lab A", "INR");
         growerService.updateSettings(growerId, settingsDto);
 
         verify(auditService, times(1)).logEvent(
@@ -153,7 +153,7 @@ class GrowerProductionReadinessTest {
     void testOrderTransitionAuditLogging() {
         UUID orderId = UUID.randomUUID();
         Order order = Order.createNewOrder(
-                "ORD-AUDIT-1", "cust-1", "USD", new BigDecimal("100.00"),
+                "ORD-AUDIT-1", "cust-1", "INR", new BigDecimal("100.00"),
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("100.00"),
                 "idemp-1", new com.sporekart.modules.order.domain.AddressSnapshot("John", "555-0100", "Line1", "Line2", "City", "State", "12345", "USA"),
                 "Notes", List.of()

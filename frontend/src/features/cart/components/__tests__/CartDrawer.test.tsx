@@ -46,7 +46,7 @@ describe('CartDrawer (FD-11)', () => {
 
     expect(await screen.findByTestId('cart-drawer-item')).toBeInTheDocument();
     expect(screen.getByText('Blue Oyster Mushroom Spawn')).toBeInTheDocument();
-    expect(screen.getByTestId('cart-drawer-subtotal')).toHaveTextContent('$498.00');
+    expect(screen.getByTestId('cart-drawer-subtotal')).toHaveTextContent(/₹\s*498\.00/);
     expect(screen.getByRole('link', { name: 'View Cart' })).toHaveAttribute('href', '/cart');
   });
 

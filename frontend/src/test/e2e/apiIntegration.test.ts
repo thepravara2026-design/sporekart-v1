@@ -25,7 +25,7 @@ describe('Live E2E Frontend ↔ Backend REST Integration Suite (FD-22)', () => {
               name: 'Pink Oyster Spawn Bag 1kg',
               sku: 'SKU-PINK-1KG',
               price: 15.99,
-              currency: 'USD',
+              currency: 'INR',
               availableQuantity: 50,
               category: { id: 'cat-1', name: 'Grain Spawn' },
             },
