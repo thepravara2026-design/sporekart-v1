@@ -38,6 +38,15 @@ export const SellerMetricsCard: React.FC<SellerMetricsCardProps> = ({
     <Card
       data-testid={testId}
       className={`p-5 rounded-xl border transition-all duration-200 hover:border-slate-700 ${getBorderColor()}`}
+      style={{ boxShadow: 'var(--shadow-md)', transition: 'transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1), border-color 200ms cubic-bezier(0.4,0,0.2,1)' }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+      }}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">

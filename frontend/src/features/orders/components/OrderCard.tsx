@@ -15,13 +15,13 @@ export const OrderCard: FC<OrderCardProps> = ({ order }) => {
   const currency = order.currency || 'INR';
 
   return (
-    <Card data-testid="order-card" style={{ padding: '1.25rem' }}>
+    <Card data-testid="order-card" style={{ padding: '1.25rem', transition: 'transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal)', boxShadow: 'var(--shadow-md)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
           <Link
             to={`/orders/${order.orderNumber}`}
             data-testid="order-card-link"
-            style={{ fontWeight: 700, color: 'var(--accent-primary)', fontSize: '1rem' }}
+            style={{ fontWeight: 700, color: 'var(--accent-primary)', fontSize: '1rem', textDecoration: 'none' }}
           >
             {order.orderNumber}
           </Link>

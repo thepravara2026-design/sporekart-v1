@@ -160,7 +160,7 @@ export const CheckoutPage: FC = () => {
 
           <div
             className="checkout-layout"
-            style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 380px)', gap: '1.5rem', alignItems: 'start', marginTop: '1.25rem' }}
+            style={{ marginTop: '1.25rem' }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minWidth: 0 }}>
               {step === 0 && (

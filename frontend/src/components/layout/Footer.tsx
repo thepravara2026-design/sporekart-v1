@@ -23,7 +23,7 @@ export const Footer: FC = () => {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '1.5rem',
+            gap: '1.25rem',
             paddingBottom: '2.5rem',
             marginBottom: '2.5rem',
             borderBottom: '1px solid var(--border-color)',
@@ -53,12 +53,35 @@ export const Footer: FC = () => {
           ].map((item) => (
             <div
               key={item.title}
-              style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.85rem',
+                padding: '1rem 1.25rem',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'border-color var(--transition-fast), background-color var(--transition-fast)',
+              }}
             >
-              {item.icon}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '2.75rem',
+                  height: '2.75rem',
+                  flexShrink: 0,
+                  borderRadius: 'var(--radius-md)',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                }}
+              >
+                {item.icon}
+              </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{item.title}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.desc}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{item.desc}</div>
               </div>
             </div>
           ))}

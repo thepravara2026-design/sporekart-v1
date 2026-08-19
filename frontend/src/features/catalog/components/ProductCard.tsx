@@ -6,7 +6,7 @@ import { Button } from '../../../components/ui/Button';
 import { ProductImage } from './ProductImage';
 import { ProductPrice } from './ProductPrice';
 import { ProductAvailability } from './ProductAvailability';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart, Eye, Tag } from 'lucide-react';
 
 export interface ProductCardProps {
   product: Product;
@@ -40,7 +40,21 @@ export const ProductCard: FC<ProductCardProps> = ({ product, onAddToCart, classN
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <ProductAvailability status={currentStatus} availableStock={currentStock} />
           {product.category && (
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                fontSize: '0.72rem',
+                color: 'var(--accent-primary)',
+                fontWeight: 600,
+                padding: '0.2rem 0.6rem',
+                borderRadius: 'var(--radius-full)',
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+              }}
+            >
+              <Tag size={11} aria-hidden="true" />
               {product.category.name}
             </span>
           )}
@@ -50,7 +64,21 @@ export const ProductCard: FC<ProductCardProps> = ({ product, onAddToCart, classN
             {product.name}
           </CardTitle>
         </Link>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem', fontFamily: 'var(--font-mono)' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            fontSize: '0.7rem',
+            color: 'var(--text-secondary)',
+            marginTop: '0.2rem',
+            fontFamily: 'var(--font-mono)',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid var(--border-subtle)',
+            padding: '0.15rem 0.55rem',
+            borderRadius: 'var(--radius-full)',
+            letterSpacing: '0.02em',
+          }}
+        >
           SKU: {selectedVariant ? selectedVariant.sku : product.sku}
         </div>
       </CardHeader>
@@ -86,6 +114,17 @@ export const ProductCard: FC<ProductCardProps> = ({ product, onAddToCart, classN
                     color: isSelected ? 'var(--accent-primary, #10b981)' : 'var(--text-secondary, #9ca3af)',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease-in-out',
+                    boxShadow: isSelected ? '0 0 8px 0 rgba(16, 185, 129, 0.25)' : 'none',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                    }
                   }}
                 >
                   {v.formattedQuantity}

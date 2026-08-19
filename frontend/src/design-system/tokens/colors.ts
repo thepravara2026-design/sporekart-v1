@@ -52,7 +52,7 @@ export const semanticColors = {
     secondary: primitiveColors.forest[900],
     surface: primitiveColors.forest[850],
     card: 'rgba(19, 66, 51, 0.75)',
-    cardHover: 'rgba(19, 66, 51, 0.90)',
+    cardHover: 'rgba(25, 78, 60, 0.92)',
     overlay: 'rgba(5, 28, 20, 0.80)',
   },
   text: {

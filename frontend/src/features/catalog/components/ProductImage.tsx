@@ -68,13 +68,17 @@ export const ProductImage: FC<ProductImageProps> = ({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '0.5rem',
+            gap: '0.6rem',
             color: 'var(--accent-primary)',
-            opacity: 0.6,
+            opacity: 0.7,
+            background: 'radial-gradient(circle at 50% 35%, rgba(16, 185, 129, 0.18), transparent 65%)',
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
           }}
         >
-          <Sprout size={36} />
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <Sprout size={40} strokeWidth={1.5} style={{ filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.35))' }} />
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             Mushroom Spawn
           </span>
         </div>

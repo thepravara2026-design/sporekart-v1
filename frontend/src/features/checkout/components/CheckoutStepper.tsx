@@ -36,9 +36,17 @@ export const CheckoutStepper: FC<CheckoutStepperProps> = ({ currentStep }) => {
               style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
             >
               {index > 0 && (
-                <span aria-hidden="true" style={{ color: 'var(--text-muted)', margin: '0 0.25rem' }}>
-                  ›
-                </span>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: '2rem',
+                    height: '2px',
+                    margin: '0 0.35rem',
+                    borderRadius: 'var(--radius-full)',
+                    backgroundColor: isComplete ? 'var(--accent-primary)' : 'var(--border-color)',
+                    transition: 'background-color var(--transition-normal)',
+                  }}
+                />
               )}
               <span
                 data-testid={`checkout-step-${index}`}
@@ -47,7 +55,7 @@ export const CheckoutStepper: FC<CheckoutStepperProps> = ({ currentStep }) => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.4rem',
-                  padding: '0.35rem 0.75rem',
+                  padding: '0.4rem 0.9rem',
                   borderRadius: 'var(--radius-full)',
                   fontSize: '0.85rem',
                   fontWeight: 600,
@@ -56,8 +64,10 @@ export const CheckoutStepper: FC<CheckoutStepperProps> = ({ currentStep }) => {
                     : isComplete
                       ? 'var(--accent-primary)'
                       : 'var(--text-muted)',
-                  backgroundColor: isCurrent ? 'var(--accent-primary)' : 'transparent',
-                  border: isCurrent ? 'none' : '1px solid var(--border-color)',
+                  backgroundColor: isCurrent ? 'var(--accent-primary)' : isComplete ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
+                  border: isCurrent ? '1px solid var(--accent-primary)' : isComplete ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
+                  boxShadow: isCurrent ? '0 0 12px 0 rgba(16, 185, 129, 0.3)' : 'none',
+                  transition: 'all var(--transition-normal)',
                 }}
               >
                 {isComplete && <Check size={14} aria-hidden="true" />}

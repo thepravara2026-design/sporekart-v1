@@ -52,6 +52,7 @@ export const OrderTimeline: FC<OrderTimelineProps> = ({ timeline }) => {
                   borderRadius: '50%',
                   backgroundColor: index === 0 ? 'var(--accent-primary)' : 'var(--border-color)',
                   border: '2px solid var(--bg-surface)',
+                  boxShadow: index === 0 ? '0 0 8px 0 rgba(16, 185, 129, 0.6)' : 'none',
                 }}
               />
               <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>

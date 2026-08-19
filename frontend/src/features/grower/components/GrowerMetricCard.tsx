@@ -37,11 +37,22 @@ export const GrowerMetricCard: FC<GrowerMetricCardProps> = ({
     <Card
       style={{
         padding: '1.25rem',
-        borderRadius: '0.5rem',
-        backgroundColor: '#0d231a',
+        borderRadius: 'var(--radius-lg)',
+        backgroundColor: 'var(--bg-card)',
         border: `1px solid ${getBorderColor()}`,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.2s ease, border-color 0.2s ease',
+        boxShadow: 'var(--shadow-md)',
+        transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)';
+        e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+        e.currentTarget.style.backgroundColor = 'var(--bg-card)';
       }}
       onClick={onClick}
     >

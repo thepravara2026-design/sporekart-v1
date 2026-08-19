@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Package, Boxes, AlertTriangle, ClipboardList, Truck, IndianRupee } from 'lucide-react';
 import { useGrowerDashboard } from '../hooks/useGrowerDashboard';
 import { GrowerMetricCard } from '../components/GrowerMetricCard';
 import { GrowerSkeleton } from '../components/GrowerSkeleton';
@@ -52,6 +53,7 @@ export const GrowerDashboardPage: FC = () => {
           value={metrics.activeProductsCount}
           subtitle="Listed in Sporekart catalog"
           statusVariant="success"
+          icon={<Package size={20} />}
           onClick={() => navigate('/grower/products')}
         />
         <GrowerMetricCard
@@ -59,6 +61,7 @@ export const GrowerDashboardPage: FC = () => {
           value={metrics.totalInventoryOnHand}
           subtitle="Total units across batches"
           statusVariant="info"
+          icon={<Boxes size={20} />}
           onClick={() => navigate('/grower/inventory')}
         />
         <GrowerMetricCard
@@ -66,6 +69,7 @@ export const GrowerDashboardPage: FC = () => {
           value={metrics.lowStockItemsCount}
           subtitle="Items near reorder point"
           statusVariant={metrics.lowStockItemsCount > 0 ? 'warning' : 'success'}
+          icon={<AlertTriangle size={20} />}
           onClick={() => navigate('/grower/inventory')}
         />
         <GrowerMetricCard
@@ -73,6 +77,7 @@ export const GrowerDashboardPage: FC = () => {
           value={metrics.pendingOrdersCount}
           subtitle="Orders requiring action"
           statusVariant={metrics.pendingOrdersCount > 0 ? 'warning' : 'neutral'}
+          icon={<ClipboardList size={20} />}
           onClick={() => navigate('/grower/orders')}
         />
         <GrowerMetricCard
@@ -80,6 +85,7 @@ export const GrowerDashboardPage: FC = () => {
           value={metrics.activeShipmentsCount}
           subtitle="In transit to customers"
           statusVariant="info"
+          icon={<Truck size={20} />}
           onClick={() => navigate('/grower/shipments')}
         />
         <GrowerMetricCard
@@ -87,6 +93,7 @@ export const GrowerDashboardPage: FC = () => {
           value={formatCurrency(metrics.totalRevenue)}
           subtitle="30-day gross revenue"
           statusVariant="success"
+          icon={<IndianRupee size={20} />}
           onClick={() => navigate('/grower/reports')}
         />
       </div>

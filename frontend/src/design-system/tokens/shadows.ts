@@ -6,4 +6,6 @@ export const shadows = {
   xl: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4)',
   glow: '0 0 20px 0 rgba(16, 185, 129, 0.35)',
   card: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+  cardHover: '0 14px 28px -4px rgba(0, 0, 0, 0.45), 0 0 18px 0 rgba(16, 185, 129, 0.2)',
+  cardActive: '0 8px 16px -4px rgba(0, 0, 0, 0.4), 0 0 10px 0 rgba(16, 185, 129, 0.12)',
 };

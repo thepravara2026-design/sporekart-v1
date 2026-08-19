@@ -25,7 +25,7 @@ export const CartSummary: FC<CartSummaryProps> = ({ cart, isClearing = false, on
   const currency = cart.currency || 'INR';
 
   return (
-    <Card className={`cart-summary ${className}`} data-testid="cart-summary" style={{ position: 'sticky', top: '1.5rem' }}>
+    <Card className={`cart-summary ${className}`} data-testid="cart-summary" style={{ position: 'sticky', top: '1.5rem', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-xl)' }}>
       <CardHeader>
         <CardTitle>Order Summary</CardTitle>
       </CardHeader>

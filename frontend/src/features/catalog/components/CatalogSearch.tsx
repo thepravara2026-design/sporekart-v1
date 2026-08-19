@@ -93,14 +93,17 @@ export const CatalogSearch: FC<CatalogSearchProps> = ({
             fontSize: '0.9rem',
             outline: 'none',
             boxSizing: 'border-box',
-            transition: 'border-color var(--transition-fast)',
+            transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+            boxShadow: '0 0 0 0 transparent',
           }}
-          onFocus={(e) =>
-            (e.currentTarget.style.borderColor = 'var(--accent-primary)')
-          }
-          onBlur={(e) =>
-            (e.currentTarget.style.borderColor = 'var(--border-primary)')
-          }
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = 'var(--accent-primary)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.18), 0 0 12px 0 rgba(16, 185, 129, 0.25)';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border-primary)';
+            e.currentTarget.style.boxShadow = '0 0 0 0 transparent';
+          }}
         />
         {/* loading spinner when search active */}
         {isLoading && term && (

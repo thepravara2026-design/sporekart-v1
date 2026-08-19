@@ -79,13 +79,14 @@ export const ProductInfo: FC<ProductInfoProps> = ({
                     display: 'inline-flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    padding: '0.5rem 0.85rem',
-                    borderRadius: '8px',
+                    padding: '0.55rem 0.95rem',
+                    borderRadius: 'var(--radius-md)',
                     border: isSelected ? '2px solid var(--accent-primary, #10b981)' : '1px solid rgba(255, 255, 255, 0.15)',
                     backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
                     color: isSelected ? 'var(--text-primary, #fff)' : 'var(--text-secondary, #9ca3af)',
                     cursor: 'pointer',
-                    minWidth: '80px',
+                    minWidth: '88px',
+                    boxShadow: isSelected ? '0 0 12px 0 rgba(16, 185, 129, 0.2)' : 'none',
                     transition: 'all 0.15s ease-in-out',
                   }}
                 >

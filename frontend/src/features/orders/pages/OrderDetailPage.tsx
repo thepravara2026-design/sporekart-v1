@@ -85,7 +85,7 @@ export const OrderDetailPage: FC = () => {
   return (
     <PageShell title={`Order ${order.orderNumber}`} breadcrumbs={breadcrumbs}>
       <div data-testid="order-detail-page" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <Card data-testid="order-detail-header">
+        <Card data-testid="order-detail-header" style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-xl)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>

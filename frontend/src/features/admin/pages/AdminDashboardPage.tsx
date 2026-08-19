@@ -33,13 +33,13 @@ export const AdminDashboardPage: FC = () => {
           const Icon = mod.icon;
           return (
             <Link key={mod.path} to={mod.path} style={{ textDecoration: 'none' }}>
-              <Card style={{ height: '100%', transition: 'all 0.2s ease', cursor: 'pointer', border: '1px solid #e2e8f0' }}>
+              <Card className="admin-module-card" style={{ height: '100%', transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease', cursor: 'pointer', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)' }}>
                 <CardHeader>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ padding: '10px', background: '#f1f5f9', borderRadius: '8px', color: '#0f172a' }}>
+                    <div style={{ padding: '10px', background: '#f1f5f9', borderRadius: '10px', color: '#0f172a', transition: 'background-color 0.2s ease, color 0.2s ease' }}>
                       <Icon size={24} />
                     </div>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', background: '#f8fafc', padding: '4px 8px', borderRadius: '4px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', background: '#f8fafc', padding: '4px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                       {mod.count}
                     </span>
                   </div>

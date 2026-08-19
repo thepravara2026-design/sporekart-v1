@@ -55,9 +55,19 @@ export const CartItem: FC<CartItemProps> = ({
       style={{
         display: 'flex',
         gap: '1rem',
-        padding: '1rem 0',
-        borderBottom: '1px solid var(--border-color)',
+        padding: '1.25rem 1rem',
+        borderBottom: '1px solid var(--border-subtle)',
+        borderLeft: '3px solid transparent',
         flexWrap: 'wrap',
+        transition: 'background-color var(--transition-fast), border-left-color var(--transition-fast)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+        e.currentTarget.style.borderLeftColor = 'rgba(16, 185, 129, 0.4)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.borderLeftColor = 'transparent';
       }}
     >
       <CartItemImage productName={item.productName} />

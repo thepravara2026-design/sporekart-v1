@@ -17,7 +17,9 @@ export const Header: FC = () => {
     <header className="navbar" role="banner">
       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         <Link to="/" className="brand" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Sprout style={{ color: 'var(--accent-primary)', width: '28px', height: '28px' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+            <Sprout style={{ color: 'var(--accent-primary)', width: '22px', height: '22px' }} />
+          </span>
           <span>SPOREKART</span>
         </Link>
 
@@ -60,13 +62,18 @@ export const Header: FC = () => {
                 borderRadius: 'var(--radius-full)',
                 fontSize: '0.7rem',
                 fontWeight: 700,
-                minWidth: '1.15rem',
-                height: '1.15rem',
+                minWidth: '1.25rem',
+                height: '1.25rem',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '0 0.3rem',
                 lineHeight: 1,
+                border: '2px solid rgba(5, 28, 20, 0.9)',
+                boxShadow: '0 0 0 1px rgba(16, 185, 129, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35)',
+                position: 'absolute',
+                top: '-0.45rem',
+                right: '-0.45rem',
               }}
             >
               {cartCount}

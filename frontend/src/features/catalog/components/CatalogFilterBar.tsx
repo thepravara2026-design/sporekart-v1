@@ -4,6 +4,7 @@ import { FormField } from '../../../components/ui/FormField';
 import { Input } from '../../../components/ui/Input';
 import { Select } from '../../../components/ui/Select';
 import { Button } from '../../../components/ui/Button';
+import { Search, X } from 'lucide-react';
 
 export interface CatalogFilterBarProps {
   categories: Category[];
@@ -76,12 +77,46 @@ export const CatalogFilterBar: FC<CatalogFilterBarProps> = ({
       }}
     >
       <FormField label="Search" htmlFor="search-input">
-        <Input
-          id="search-input"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
-        />
+        <div style={{ position: 'relative' }}>
+          <Search
+            size={16}
+            aria-hidden="true"
+            style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}
+          />
+          <Input
+            id="search-input"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
+            style={{ paddingLeft: '2.4rem', paddingRight: search ? '2.4rem' : '1rem' }}
+          />
+          {search && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={() => onSearchChange('')}
+              style={{
+                position: 'absolute',
+                right: '0.5rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '1.6rem',
+                height: '1.6rem',
+                borderRadius: 'var(--radius-full)',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'background-color var(--transition-fast), color var(--transition-fast)',
+              }}
+            >
+              <X size={13} aria-hidden="true" />
+            </button>
+          )}
+        </div>
       </FormField>
 
       <FormField label="Category" htmlFor="category-select">
@@ -109,7 +144,7 @@ export const CatalogFilterBar: FC<CatalogFilterBarProps> = ({
             type="number"
             min="0"
             step="0.01"
-            placeholder="Min $"
+            placeholder="Min ₹"
             value={minPrice}
             onChange={(e: ChangeEvent<HTMLInputElement>) => onMinPriceChange(e.target.value)}
           />
@@ -123,7 +158,7 @@ export const CatalogFilterBar: FC<CatalogFilterBarProps> = ({
             type="number"
             min="0"
             step="0.01"
-            placeholder="Max $"
+            placeholder="Max ₹"
             value={maxPrice}
             onChange={(e: ChangeEvent<HTMLInputElement>) => onMaxPriceChange(e.target.value)}
           />
