@@ -20,6 +20,69 @@ export const formatPrice = (amount: number, currency: string = 'INR'): string =>
   }
 };
 
+export type StockAvailabilityState = 'NORMAL' | 'LIMITED' | 'ORDER_NOW' | 'OUT_OF_STOCK';
+
+export interface StockAvailabilityInfo {
+  state: StockAvailabilityState;
+  label: string;
+  badgeVariant: BadgeVariant;
+  isPurchasable: boolean;
+}
+
+export const getStockAvailabilityInfo = (
+  status: ProductStatus,
+  availableStock?: number | null
+): StockAvailabilityInfo => {
+  if (status === 'OUT_OF_STOCK' || status === 'DISCONTINUED' || status === 'ARCHIVED') {
+    return {
+      state: 'OUT_OF_STOCK',
+      label: status === 'DISCONTINUED' ? 'Discontinued' : 'Out of Stock',
+      badgeVariant: 'danger',
+      isPurchasable: false,
+    };
+  }
+
+  if (typeof availableStock === 'number') {
+    if (availableStock <= 0) {
+      return {
+        state: 'OUT_OF_STOCK',
+        label: 'Out of Stock',
+        badgeVariant: 'danger',
+        isPurchasable: false,
+      };
+    }
+    if (availableStock < 5) {
+      return {
+        state: 'ORDER_NOW',
+        label: 'Order Now',
+        badgeVariant: 'warning',
+        isPurchasable: status === 'ACTIVE',
+      };
+    }
+    if (availableStock < 10) {
+      return {
+        state: 'LIMITED',
+        label: 'Limited Stock',
+        badgeVariant: 'warning',
+        isPurchasable: status === 'ACTIVE',
+      };
+    }
+    return {
+      state: 'NORMAL',
+      label: 'In Stock',
+      badgeVariant: 'success',
+      isPurchasable: status === 'ACTIVE',
+    };
+  }
+
+  return {
+    state: status === 'ACTIVE' ? 'NORMAL' : 'OUT_OF_STOCK',
+    label: getStatusLabel(status),
+    badgeVariant: getStatusBadgeVariant(status),
+    isPurchasable: status === 'ACTIVE',
+  };
+};
+
 export const getStatusBadgeVariant = (status: ProductStatus): BadgeVariant => {
   switch (status) {
     case 'ACTIVE':

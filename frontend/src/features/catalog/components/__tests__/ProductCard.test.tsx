@@ -131,4 +131,78 @@ describe('ProductCard', () => {
     expect(handleAddToCart).toHaveBeenCalledTimes(1);
     expect(handleAddToCart).toHaveBeenCalledWith(variantProduct, expect.objectContaining({ id: 'v-3', formattedQuantity: '1 kg' }));
   });
+
+  it('updates stock indicator dynamically when switching variants (In Stock -> Order Now -> Out of Stock)', () => {
+    const stockVariantProduct: Product = {
+      ...mockProduct,
+      variants: [
+        {
+          id: 'v-normal',
+          productId: 'p-100',
+          sku: 'SKU-REISHI-100G',
+          quantityValue: 100,
+          quantityUnit: 'G',
+          formattedQuantity: '100 g',
+          sellingPrice: 799.00,
+          status: 'ACTIVE',
+          availableQuantity: 25,
+        },
+        {
+          id: 'v-limited',
+          productId: 'p-100',
+          sku: 'SKU-REISHI-250G',
+          quantityValue: 250,
+          quantityUnit: 'G',
+          formattedQuantity: '250 g',
+          sellingPrice: 1499.00,
+          status: 'ACTIVE',
+          availableQuantity: 8,
+        },
+        {
+          id: 'v-order-now',
+          productId: 'p-100',
+          sku: 'SKU-REISHI-500G',
+          quantityValue: 500,
+          quantityUnit: 'G',
+          formattedQuantity: '500 g',
+          sellingPrice: 2499.00,
+          status: 'ACTIVE',
+          availableQuantity: 3,
+        },
+        {
+          id: 'v-out',
+          productId: 'p-100',
+          sku: 'SKU-REISHI-1KG',
+          quantityValue: 1,
+          quantityUnit: 'KG',
+          formattedQuantity: '1 kg',
+          sellingPrice: 3999.00,
+          status: 'OUT_OF_STOCK',
+          availableQuantity: 0,
+        },
+      ],
+    };
+
+    render(
+      <MemoryRouter>
+        <ProductCard product={stockVariantProduct} />
+      </MemoryRouter>
+    );
+
+    // Initial variant 100 g has stock 25 -> "In Stock"
+    expect(screen.getByText('In Stock')).toBeInTheDocument();
+
+    // Select 250 g variant (stock = 8) -> "Limited Stock"
+    fireEvent.click(screen.getByText('250 g'));
+    expect(screen.getByText('Limited Stock')).toBeInTheDocument();
+
+    // Select 500 g variant (stock = 3) -> "Order Now"
+    fireEvent.click(screen.getByText('500 g'));
+    expect(screen.getByText('Order Now')).toBeInTheDocument();
+
+    // Select 1 kg variant (stock = 0) -> "Out of Stock"
+    fireEvent.click(screen.getByText('1 kg'));
+    expect(screen.getAllByText('Out of Stock').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole('button', { name: /Out of Stock/i })).toBeDisabled();
+  });
 });

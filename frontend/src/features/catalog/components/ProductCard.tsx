@@ -25,7 +25,10 @@ export const ProductCard: FC<ProductCardProps> = ({ product, onAddToCart, classN
   const currentPrice = selectedVariant ? selectedVariant.sellingPrice : product.price;
   const currentStrikeOutPrice = selectedVariant ? selectedVariant.strikeOutPrice : product.strikeOutPrice;
   const currentStatus = selectedVariant ? selectedVariant.status : product.status;
-  const isOutOfStock = currentStatus === 'OUT_OF_STOCK' || product.status === 'OUT_OF_STOCK' || product.status === 'DISCONTINUED';
+  const currentStock = selectedVariant && typeof selectedVariant.availableQuantity === 'number'
+    ? selectedVariant.availableQuantity
+    : undefined;
+  const isOutOfStock = currentStatus === 'OUT_OF_STOCK' || product.status === 'OUT_OF_STOCK' || product.status === 'DISCONTINUED' || (typeof currentStock === 'number' && currentStock <= 0);
 
   return (
     <Card className={`product-card ${className}`} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -35,7 +38,7 @@ export const ProductCard: FC<ProductCardProps> = ({ product, onAddToCart, classN
 
       <CardHeader style={{ marginTop: '0.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <ProductAvailability status={currentStatus} />
+          <ProductAvailability status={currentStatus} availableStock={currentStock} />
           {product.category && (
             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
               {product.category.name}

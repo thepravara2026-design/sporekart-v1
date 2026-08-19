@@ -34,11 +34,14 @@ export const ProductInfo: FC<ProductInfoProps> = ({
   const currentStrikeOutPrice = selectedVariant ? selectedVariant.strikeOutPrice : product.strikeOutPrice;
   const currentStatus = selectedVariant ? selectedVariant.status : product.status;
   const currentSku = selectedVariant ? selectedVariant.sku : product.sku;
+  const currentStock = selectedVariant && typeof selectedVariant.availableQuantity === 'number'
+    ? selectedVariant.availableQuantity
+    : undefined;
 
   return (
     <div className={`product-info-wrapper ${className}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <ProductAvailability status={currentStatus} />
+        <ProductAvailability status={currentStatus} availableStock={currentStock} />
         {product.category && (
           <Link
             to={`/products?categoryId=${product.category.id}`}
