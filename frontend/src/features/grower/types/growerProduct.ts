@@ -12,6 +12,7 @@ export interface GrowerProduct {
   categoryId?: string;
   categoryName?: string;
   imageUrl?: string;
+  images?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -35,4 +36,5 @@ export interface CreateGrowerProductInput {
   categoryId?: string;
   status?: GrowerProductStatus;
   imageUrl?: string;
+  imageUrls?: string[];
 }

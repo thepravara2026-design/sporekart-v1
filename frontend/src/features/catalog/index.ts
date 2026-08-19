@@ -21,6 +21,7 @@ export * from './components/ProductCard';
 export * from './components/ProductGrid';
 export * from './components/ProductList';
 export * from './components/ProductImage';
+export * from './components/ProductImageCarousel';
 export * from './components/ProductPrice';
 export * from './components/ProductAvailability';
 export * from './components/ProductQuantity';

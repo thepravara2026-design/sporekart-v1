@@ -4,6 +4,7 @@ import com.sporekart.modules.catalog.domain.product.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -45,4 +46,13 @@ public interface SpringDataProductRepository extends JpaRepository<ProductEntity
                                       @Param("minPrice") BigDecimal minPrice,
                                       @Param("maxPrice") BigDecimal maxPrice,
                                       Pageable pageable);
+
+    /**
+     * Deletes all images of a product. Called before a save that replaces the
+     * image set so the unique (product_id, display_order) constraint is not
+     * violated by insert-before-orphan-removal flush ordering.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM ProductImageEntity img WHERE img.product.id = :productId")
+    void deleteImagesByProductId(@Param("productId") UUID productId);
 }

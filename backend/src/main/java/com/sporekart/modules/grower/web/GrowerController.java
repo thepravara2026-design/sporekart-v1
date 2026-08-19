@@ -113,6 +113,17 @@ public class GrowerController {
         return ResponseEntity.ok(ApiResponse.success(updated));
     }
 
+    @PutMapping("/products/{id}/images")
+    public ResponseEntity<ApiResponse<Product>> updateProductImages(
+            @AuthenticationPrincipal Object principal,
+            @PathVariable("id") UUID id,
+            @RequestBody UpdateProductImagesRequestDto dto
+    ) {
+        boolean isAdmin = principal instanceof UserPrincipal up && up.getRole() == com.sporekart.modules.security.domain.UserRole.ROLE_ADMIN;
+        Product updated = growerService.updateProductImages(resolveUserId(principal), id, dto.imageUrls(), isAdmin);
+        return ResponseEntity.ok(ApiResponse.success(updated));
+    }
+
     @GetMapping("/inventory")
     public ResponseEntity<ApiResponse<List<InventoryItem>>> getInventory(@AuthenticationPrincipal Object principal) {
         List<InventoryItem> inventory = growerService.getInventory(resolveUserId(principal));

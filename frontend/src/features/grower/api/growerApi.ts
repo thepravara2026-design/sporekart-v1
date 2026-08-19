@@ -133,6 +133,7 @@ export const growerApi = {
         categoryId: p.categoryId as string,
         categoryName: (p.categoryName as string) || 'Spawn & Cultures',
         imageUrl: p.imageUrl as string,
+        images: (Array.isArray(p.images) ? p.images.map((img: Record<string, unknown>) => img.imageUrl as string).filter(Boolean) : []),
         createdAt: (p.createdAt as string) || new Date().toISOString(),
         updatedAt: (p.updatedAt as string) || new Date().toISOString(),
       }));
@@ -152,6 +153,7 @@ export const growerApi = {
         strikeOutPrice: input.strikeOutPrice,
         currency: 'INR',
         initialStockQuantity: 50,
+        ...(input.imageUrls && input.imageUrls.length > 0 ? { imageUrls: input.imageUrls } : {}),
       });
       const p = response.data?.data || response.data;
       return {

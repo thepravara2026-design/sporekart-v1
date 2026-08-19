@@ -41,6 +41,12 @@ export const CategorySchema = z.object({
   updatedAt: z.string(),
 });
 
+export const ProductImageSchema = z.object({
+  id: z.string(),
+  imageUrl: z.string(),
+  displayOrder: z.number(),
+});
+
 export const ProductSchema = z.object({
   id: z.string(),
   sku: z.string(),
@@ -50,6 +56,8 @@ export const ProductSchema = z.object({
   currency: z.string(),
   status: z.enum(['DRAFT', 'ACTIVE', 'OUT_OF_STOCK', 'DISCONTINUED', 'ARCHIVED']),
   category: CategorySchema.nullable().optional(),
+  imageUrl: z.string().nullable().optional(),
+  images: z.array(ProductImageSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

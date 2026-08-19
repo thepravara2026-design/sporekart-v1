@@ -22,6 +22,11 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Product save(Product product) {
+        // Clear existing images before saving so the unique (product_id,
+        // display_order) constraint is not violated when a replacement set is
+        // written in the same transaction (Hibernate flushes inserts before
+        // orphan removals).
+        springDataProductRepository.deleteImagesByProductId(product.getId());
         ProductEntity entity = ProductEntity.fromDomain(product);
         ProductEntity saved = springDataProductRepository.save(entity);
         return saved.toDomain();

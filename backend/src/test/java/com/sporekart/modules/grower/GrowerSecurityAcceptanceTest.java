@@ -213,4 +213,76 @@ class GrowerSecurityAcceptanceTest {
                 growerService.transitionOrder(growerA, orderId, OrderStatus.CREATED)
         );
     }
+
+    @Test
+    @DisplayName("SCENARIO #9: Grower can replace images of an owned product")
+    void scenario9_grower_updates_own_product_images() {
+        UUID productId = UUID.randomUUID();
+        Product product = Product.create("SKU-IMG-A", "Product A", "Desc A", new BigDecimal("25.00"), "INR", null);
+        product.setGrowerId(growerA);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Product updated = growerService.updateProductImages(growerA, productId, List.of(
+                "https://cdn.example.com/1.jpg",
+                "https://cdn.example.com/2.jpg"
+        ), false);
+
+        assertEquals(2, updated.getImages().size());
+        assertEquals("https://cdn.example.com/1.jpg", updated.getImageUrl());
+        assertEquals(1, updated.getImages().get(0).getDisplayOrder());
+        assertEquals(2, updated.getImages().get(1).getDisplayOrder());
+    }
+
+    @Test
+    @DisplayName("SCENARIO #10: Grower A cannot replace images of Grower B product -> DENIED")
+    void scenario10_growerA_updates_growerB_product_images_denied() {
+        UUID productId = UUID.randomUUID();
+        Product product = Product.create("SKU-IMG-B", "Product B", "Desc B", new BigDecimal("35.00"), "INR", null);
+        product.setGrowerId(growerB);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+        assertThrows(AccessDeniedException.class, () ->
+                growerService.updateProductImages(growerA, productId, List.of("https://cdn.example.com/1.jpg"), false)
+        );
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    @DisplayName("SCENARIO #11: Admin can replace images of any product")
+    void scenario11_admin_updates_any_product_images() {
+        UUID productId = UUID.randomUUID();
+        Product product = Product.create("SKU-IMG-C", "Product C", "Desc C", new BigDecimal("40.00"), "INR", null);
+        product.setGrowerId(growerB);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Product updated = growerService.updateProductImages("admin-1", productId, List.of("https://cdn.example.com/1.jpg"), true);
+
+        assertEquals(1, updated.getImages().size());
+        assertEquals("https://cdn.example.com/1.jpg", updated.getImageUrl());
+    }
+
+    @Test
+    @DisplayName("SCENARIO #12: Image update rejects more than four images")
+    void scenario12_image_update_rejects_more_than_four() {
+        UUID productId = UUID.randomUUID();
+        Product product = Product.create("SKU-IMG-D", "Product D", "Desc D", new BigDecimal("45.00"), "INR", null);
+        product.setGrowerId(growerA);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                growerService.updateProductImages(growerA, productId, List.of(
+                        "https://cdn.example.com/1.jpg",
+                        "https://cdn.example.com/2.jpg",
+                        "https://cdn.example.com/3.jpg",
+                        "https://cdn.example.com/4.jpg",
+                        "https://cdn.example.com/5.jpg"
+                ), false)
+        );
+    }
 }

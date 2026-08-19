@@ -211,6 +211,10 @@ public class GrowerApplicationService {
         );
         product.addVariant(defaultVariant);
 
+        if (dto.imageUrls() != null && !dto.imageUrls().isEmpty()) {
+            product.setImages(com.sporekart.modules.catalog.domain.product.ProductImage.listFromUrls(product.getId(), dto.imageUrls()));
+        }
+
         Product savedProduct = productRepository.save(product);
 
         // Also create initial inventory item for the product variant
@@ -235,6 +239,9 @@ public class GrowerApplicationService {
     public Product updateProduct(String userId, UUID productId, CreateGrowerProductRequestDto dto) {
         Product product = getProductById(userId, productId);
         product.updateDetails(dto.name(), dto.description(), dto.price(), dto.strikeOutPrice(), dto.currency(), null);
+        if (dto.imageUrls() != null) {
+            product.setImages(com.sporekart.modules.catalog.domain.product.ProductImage.listFromUrls(productId, dto.imageUrls()));
+        }
         Product updated = productRepository.save(product);
         log.info("GROWER_AUDIT: Product updated for userId={}, productId={}", userId, productId);
         if (auditService != null) {
@@ -243,6 +250,30 @@ public class GrowerApplicationService {
                     userId, productId.toString(), null, null,
                     AuditStatus.SUCCESS,
                     "Updated product details for " + productId
+            );
+        }
+        return updated;
+    }
+
+    /**
+     * Replaces the full ordered image set of a product. Growers may only manage
+     * images of products they own; admins may manage any product.
+     */
+    public Product updateProductImages(String userId, UUID productId, List<String> imageUrls, boolean isAdmin) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException("Product not found with id: " + productId));
+        if (!isAdmin && product.getGrowerId() != null && !product.getGrowerId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own product " + productId);
+        }
+        product.setImages(com.sporekart.modules.catalog.domain.product.ProductImage.listFromUrls(productId, imageUrls));
+        Product updated = productRepository.save(product);
+        log.info("GROWER_AUDIT: Product images updated for userId={}, productId={}, count={}", userId, productId, imageUrls == null ? 0 : imageUrls.size());
+        if (auditService != null) {
+            auditService.logEvent(
+                    AuditEventType.GROWER_PRODUCT_UPDATED,
+                    userId, productId.toString(), null, null,
+                    AuditStatus.SUCCESS,
+                    "Updated product images for " + productId
             );
         }
         return updated;

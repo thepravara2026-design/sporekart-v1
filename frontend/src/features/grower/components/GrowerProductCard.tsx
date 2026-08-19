@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Card } from '../../../components/ui/Card';
 import { GrowerProduct } from '../types/growerProduct';
 import { GrowerStatusBadge } from './GrowerStatusBadge';
+import { ProductImageCarousel } from '../../catalog/components/ProductImageCarousel';
 import { formatCurrency, getProductStatusMeta } from '../utils/growerUtils';
 
 export interface GrowerProductCardProps {
@@ -10,6 +11,10 @@ export interface GrowerProductCardProps {
 
 export const GrowerProductCard: FC<GrowerProductCardProps> = ({ product }) => {
   const statusMeta = getProductStatusMeta(product.status);
+  const carouselImages = [
+    ...(product.images || []),
+    ...(product.imageUrl ? [product.imageUrl] : []),
+  ].filter(Boolean);
 
   return (
     <Card
@@ -23,6 +28,9 @@ export const GrowerProductCard: FC<GrowerProductCardProps> = ({ product }) => {
         gap: '0.75rem',
       }}
     >
+      {carouselImages.length > 0 && (
+        <ProductImageCarousel images={carouselImages} alt={product.name} loading="lazy" />
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>

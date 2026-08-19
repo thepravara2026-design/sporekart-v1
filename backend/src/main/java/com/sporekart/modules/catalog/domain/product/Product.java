@@ -13,6 +13,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Product {
+
+    /** Maximum number of product images surfaced by the carousel. */
+    public static final int MAX_PRODUCT_IMAGES = 4;
+
     private final UUID id;
     private String sku;
     private String name;
@@ -24,6 +28,7 @@ public class Product {
     private Category category;
     private String growerId;
     private final List<ProductVariant> variants = new ArrayList<>();
+    private final List<ProductImage> images = new ArrayList<>();
     private final Instant createdAt;
     private Instant updatedAt;
 
@@ -40,6 +45,10 @@ public class Product {
     }
 
     public Product(UUID id, String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, ProductStatus status, Category category, String growerId, List<ProductVariant> variants, Instant createdAt, Instant updatedAt) {
+        this(id, sku, name, description, price, strikeOutPrice, currency, status, category, growerId, variants, List.of(), createdAt, updatedAt);
+    }
+
+    public Product(UUID id, String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, ProductStatus status, Category category, String growerId, List<ProductVariant> variants, List<ProductImage> images, Instant createdAt, Instant updatedAt) {
         if (id == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
         }
@@ -82,6 +91,11 @@ public class Product {
         if (variants != null) {
             for (ProductVariant v : variants) {
                 addVariant(v);
+            }
+        }
+        if (images != null) {
+            for (ProductImage img : images) {
+                addImage(img);
             }
         }
     }
@@ -135,6 +149,41 @@ public class Product {
             }
         }
         recalculateBasePrice();
+    }
+
+    public void addImage(ProductImage image) {
+        if (image == null) {
+            throw new IllegalArgumentException("Product image cannot be null");
+        }
+        if (images.size() >= MAX_PRODUCT_IMAGES) {
+            throw new IllegalArgumentException("A product can have at most " + MAX_PRODUCT_IMAGES + " images");
+        }
+        if (images.stream().anyMatch(img -> img.getDisplayOrder() == image.getDisplayOrder())) {
+            throw new IllegalArgumentException("Duplicate product image display order " + image.getDisplayOrder());
+        }
+        images.add(image);
+        images.sort(java.util.Comparator.comparingInt(ProductImage::getDisplayOrder));
+    }
+
+    public void setImages(List<ProductImage> newImages) {
+        this.images.clear();
+        if (newImages != null) {
+            if (newImages.size() > MAX_PRODUCT_IMAGES) {
+                throw new IllegalArgumentException("A product can have at most " + MAX_PRODUCT_IMAGES + " images");
+            }
+            for (ProductImage img : newImages) {
+                addImage(img);
+            }
+        }
+    }
+
+    public List<ProductImage> getImages() {
+        return Collections.unmodifiableList(images);
+    }
+
+    /** Primary image URL (first image), or null when the product has no images. */
+    public String getImageUrl() {
+        return images.isEmpty() ? null : images.get(0).getImageUrl();
     }
 
     private void recalculateBasePrice() {

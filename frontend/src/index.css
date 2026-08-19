@@ -368,6 +368,46 @@ html {
   color: var(--accent-primary);
 }
 
+/* Product Image Carousel */
+.product-image-carousel .product-carousel-slide .product-image-container {
+  background-color: transparent;
+}
+
+.product-image-carousel:hover .product-carousel-arrow,
+.product-image-carousel:focus-within .product-carousel-arrow,
+.product-carousel-arrow:focus-visible {
+  opacity: 1;
+}
+
+.product-carousel-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.product-carousel-arrow:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.product-image-carousel .product-carousel-indicators button:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .product-carousel-arrow {
+    opacity: 1;
+  }
+}
+
+/* Mobile touch devices: hide tap-only controls that would obscure the image */
+@media (hover: none) {
+  .product-carousel-arrow {
+    opacity: 1;
+    width: 28px;
+    height: 28px;
+  }
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

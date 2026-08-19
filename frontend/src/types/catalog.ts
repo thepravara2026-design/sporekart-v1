@@ -17,6 +17,12 @@ export interface ProductVariant {
   updatedAt?: string;
 }
 
+export interface ProductImage {
+  id: string;
+  imageUrl: string;
+  displayOrder: number;
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -38,6 +44,8 @@ export interface Product {
   status: ProductStatus;
   category: Category | null;
   variants?: ProductVariant[];
+  imageUrl?: string | null;
+  images?: ProductImage[];
   createdAt: string;
   updatedAt: string;
 }

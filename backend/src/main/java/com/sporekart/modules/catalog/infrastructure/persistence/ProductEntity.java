@@ -2,6 +2,7 @@ package com.sporekart.modules.catalog.infrastructure.persistence;
 
 import com.sporekart.modules.catalog.domain.category.Category;
 import com.sporekart.modules.catalog.domain.product.Product;
+import com.sporekart.modules.catalog.domain.product.ProductImage;
 import com.sporekart.modules.catalog.domain.product.ProductStatus;
 import com.sporekart.modules.catalog.domain.product.ProductVariant;
 import jakarta.persistence.*;
@@ -50,6 +51,10 @@ public class ProductEntity {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductVariantEntity> variants = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    private List<ProductImageEntity> images = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -105,6 +110,12 @@ public class ProductEntity {
                     .toList();
             entity.setVariants(variantEntities);
         }
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            List<ProductImageEntity> imageEntities = product.getImages().stream()
+                    .map(img -> ProductImageEntity.fromDomain(img, entity))
+                    .toList();
+            entity.setImages(imageEntities);
+        }
         return entity;
     }
 
@@ -113,7 +124,10 @@ public class ProductEntity {
         List<ProductVariant> domainVariants = variants.stream()
                 .map(ProductVariantEntity::toDomain)
                 .toList();
-        return new Product(id, sku, name, description, price, strikeOutPrice, currency, status, categoryDomain, growerId, domainVariants, createdAt, updatedAt);
+        List<ProductImage> domainImages = images.stream()
+                .map(ProductImageEntity::toDomain)
+                .toList();
+        return new Product(id, sku, name, description, price, strikeOutPrice, currency, status, categoryDomain, growerId, domainVariants, domainImages, createdAt, updatedAt);
     }
 
     public UUID getId() { return id; }
@@ -133,6 +147,16 @@ public class ProductEntity {
             for (ProductVariantEntity v : variants) {
                 v.setProduct(this);
                 this.variants.add(v);
+            }
+        }
+    }
+    public List<ProductImageEntity> getImages() { return images; }
+    public void setImages(List<ProductImageEntity> images) {
+        this.images.clear();
+        if (images != null) {
+            for (ProductImageEntity img : images) {
+                img.setProduct(this);
+                this.images.add(img);
             }
         }
     }

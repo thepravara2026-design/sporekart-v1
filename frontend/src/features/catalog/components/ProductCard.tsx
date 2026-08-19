@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { Product, ProductVariant } from '../types/catalog';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
-import { ProductImage } from './ProductImage';
+import { ProductImageCarousel } from './ProductImageCarousel';
 import { ProductPrice } from './ProductPrice';
 import { ProductAvailability } from './ProductAvailability';
+import { MAX_PRODUCT_IMAGES } from '../constants/catalogConstants';
 import { ShoppingCart, Eye, Tag } from 'lucide-react';
 
 export interface ProductCardProps {
@@ -30,10 +31,18 @@ export const ProductCard: FC<ProductCardProps> = ({ product, onAddToCart, classN
     : undefined;
   const isOutOfStock = currentStatus === 'OUT_OF_STOCK' || product.status === 'OUT_OF_STOCK' || product.status === 'DISCONTINUED' || (typeof currentStock === 'number' && currentStock <= 0);
 
+  const carouselImages = [
+    ...(product.images || []).map((img) => img.imageUrl),
+    ...(product.imageUrl ? [product.imageUrl] : []),
+  ]
+    .filter(Boolean)
+    .filter((url, index, arr) => arr.indexOf(url) === index)
+    .slice(0, MAX_PRODUCT_IMAGES);
+
   return (
     <Card className={`product-card ${className}`} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Link to={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-        <ProductImage alt={product.name} />
+        <ProductImageCarousel images={carouselImages} alt={product.name} />
       </Link>
 
       <CardHeader style={{ marginTop: '0.75rem' }}>

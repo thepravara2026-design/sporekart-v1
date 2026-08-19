@@ -110,7 +110,10 @@ export const ProductDetailPage: FC = () => {
               data-testid="product-detail-card"
               className="product-detail-layout"
             >
-              <ProductGallery productName={product.name} />
+              <ProductGallery
+                images={(product.images || []).map((img) => img.imageUrl).filter(Boolean)}
+                productName={product.name}
+              />
               <ProductInfo
                 product={product}
                 quantity={quantity}
