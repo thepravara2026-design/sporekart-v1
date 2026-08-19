@@ -28,7 +28,14 @@ export const GrowerProductTable: FC<GrowerProductTableProps> = ({ products }) =>
                 <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#10b981' }}>{p.sku}</td>
                 <td style={{ padding: '0.75rem 1rem', fontWeight: 500 }}>{p.name}</td>
                 <td style={{ padding: '0.75rem 1rem', color: '#9ca3af' }}>{p.categoryName || 'Mycology'}</td>
-                <td style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>{formatCurrency(p.price, p.currency)}</td>
+                <td style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>
+                  {p.strikeOutPrice != null && p.strikeOutPrice > p.price && (
+                    <span style={{ fontSize: '0.8rem', textDecoration: 'line-through', color: '#6b7280', marginRight: '0.35rem', fontWeight: 400 }}>
+                      {formatCurrency(p.strikeOutPrice, p.currency)}
+                    </span>
+                  )}
+                  <span>{formatCurrency(p.price, p.currency)}</span>
+                </td>
                 <td style={{ padding: '0.75rem 1rem' }}>
                   <GrowerStatusBadge label={meta.label} variant={meta.variant} />
                 </td>

@@ -28,6 +28,9 @@ public class ProductEntity {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
+    @Column(name = "strike_out_price", precision = 12, scale = 2)
+    private BigDecimal strikeOutPrice;
+
     @Column(nullable = false, length = 3)
     private String currency;
 
@@ -50,12 +53,13 @@ public class ProductEntity {
 
     public ProductEntity() {}
 
-    public ProductEntity(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, CategoryEntity category, String growerId, Instant createdAt, Instant updatedAt) {
+    public ProductEntity(UUID id, String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, ProductStatus status, CategoryEntity category, String growerId, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.sku = sku;
         this.name = name;
         this.description = description;
         this.price = price;
+        this.strikeOutPrice = strikeOutPrice;
         this.currency = currency;
         this.status = status;
         this.category = category;
@@ -64,8 +68,12 @@ public class ProductEntity {
         this.updatedAt = updatedAt;
     }
 
+    public ProductEntity(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, CategoryEntity category, String growerId, Instant createdAt, Instant updatedAt) {
+        this(id, sku, name, description, price, null, currency, status, category, growerId, createdAt, updatedAt);
+    }
+
     public ProductEntity(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, CategoryEntity category, Instant createdAt, Instant updatedAt) {
-        this(id, sku, name, description, price, currency, status, category, null, createdAt, updatedAt);
+        this(id, sku, name, description, price, null, currency, status, category, null, createdAt, updatedAt);
     }
 
     public static ProductEntity fromDomain(Product product) {
@@ -77,6 +85,7 @@ public class ProductEntity {
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
+                product.getStrikeOutPrice(),
                 product.getCurrency(),
                 product.getStatus(),
                 categoryEntity,
@@ -88,7 +97,7 @@ public class ProductEntity {
 
     public Product toDomain() {
         Category categoryDomain = category != null ? category.toDomain() : null;
-        return new Product(id, sku, name, description, price, currency, status, categoryDomain, growerId, createdAt, updatedAt);
+        return new Product(id, sku, name, description, price, strikeOutPrice, currency, status, categoryDomain, growerId, createdAt, updatedAt);
     }
 
     public UUID getId() { return id; }
@@ -96,6 +105,7 @@ public class ProductEntity {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public BigDecimal getPrice() { return price; }
+    public BigDecimal getStrikeOutPrice() { return strikeOutPrice; }
     public String getCurrency() { return currency; }
     public ProductStatus getStatus() { return status; }
     public CategoryEntity getCategory() { return category; }

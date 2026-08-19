@@ -18,8 +18,52 @@ class ProductDomainTest {
         assertEquals("SP-SHI-001", product.getSku());
         assertEquals("Shiitake Spores", product.getName());
         assertEquals(new BigDecimal("19.99"), product.getPrice());
+        assertNull(product.getStrikeOutPrice());
         assertEquals(ProductStatus.DRAFT, product.getStatus());
         assertNotNull(product.getCreatedAt());
+    }
+
+    @Test
+    void shouldCreateProductWithValidStrikeOutPrice() {
+        Product product = Product.create("SP-LION-001", "Lion's Mane", "Desc", new BigDecimal("1999.00"), new BigDecimal("2499.00"), "INR", null);
+
+        assertEquals(new BigDecimal("1999.00"), product.getPrice());
+        assertEquals(new BigDecimal("2499.00"), product.getStrikeOutPrice());
+    }
+
+    @Test
+    void shouldRejectStrikeOutPriceEqualToSellingPrice() {
+        assertThrows(IllegalArgumentException.class, () ->
+                Product.create("SP-SHI-001", "Shiitake", "Desc", new BigDecimal("1999.00"), new BigDecimal("1999.00"), "INR", null));
+    }
+
+    @Test
+    void shouldRejectStrikeOutPriceLessThanSellingPrice() {
+        assertThrows(IllegalArgumentException.class, () ->
+                Product.create("SP-SHI-001", "Shiitake", "Desc", new BigDecimal("1999.00"), new BigDecimal("1499.00"), "INR", null));
+    }
+
+    @Test
+    void shouldRejectNegativeStrikeOutPrice() {
+        assertThrows(IllegalArgumentException.class, () ->
+                Product.create("SP-SHI-001", "Shiitake", "Desc", new BigDecimal("1999.00"), new BigDecimal("-100.00"), "INR", null));
+    }
+
+    @Test
+    void shouldUpdateDetailsWithValidStrikeOutPrice() {
+        Product product = Product.create("SP-SHI-001", "Shiitake Spores", "Desc", new BigDecimal("1999.00"), "INR", null);
+        product.updateDetails("Updated Shiitake", "New Desc", new BigDecimal("1799.00"), new BigDecimal("2199.00"), "INR", null);
+
+        assertEquals("Updated Shiitake", product.getName());
+        assertEquals(new BigDecimal("1799.00"), product.getPrice());
+        assertEquals(new BigDecimal("2199.00"), product.getStrikeOutPrice());
+    }
+
+    @Test
+    void shouldRejectUpdateDetailsWithInvalidStrikeOutPrice() {
+        Product product = Product.create("SP-SHI-001", "Shiitake Spores", "Desc", new BigDecimal("1999.00"), "INR", null);
+        assertThrows(IllegalArgumentException.class, () ->
+                product.updateDetails("Updated Shiitake", "New Desc", new BigDecimal("1999.00"), new BigDecimal("1500.00"), "INR", null));
     }
 
     @Test

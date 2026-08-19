@@ -6,6 +6,7 @@ export interface GrowerProduct {
   sku: string;
   description?: string;
   price: number;
+  strikeOutPrice?: number | null;
   currency: string;
   status: GrowerProductStatus;
   categoryId?: string;
@@ -30,6 +31,7 @@ export interface CreateGrowerProductInput {
   sku: string;
   description?: string;
   price: number;
+  strikeOutPrice?: number | null;
   categoryId?: string;
   status?: GrowerProductStatus;
   imageUrl?: string;

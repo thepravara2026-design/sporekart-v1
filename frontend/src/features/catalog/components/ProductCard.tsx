@@ -48,7 +48,7 @@ export const ProductCard: FC<ProductCardProps> = ({ product, onAddToCart, classN
             {product.description}
           </p>
         )}
-        <ProductPrice price={product.price} currency={product.currency} />
+        <ProductPrice price={product.price} strikeOutPrice={product.strikeOutPrice} currency={product.currency} showDiscountBadge={true} />
       </CardContent>
 
       <CardFooter style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', gap: '0.5rem' }}>

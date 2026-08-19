@@ -59,6 +59,7 @@ public class ProductApplicationService {
                 command.name(),
                 command.description(),
                 command.price(),
+                command.strikeOutPrice(),
                 command.currency(),
                 category
         );
@@ -84,6 +85,7 @@ public class ProductApplicationService {
                 command.name(),
                 command.description(),
                 command.price(),
+                command.strikeOutPrice(),
                 command.currency(),
                 category
         );

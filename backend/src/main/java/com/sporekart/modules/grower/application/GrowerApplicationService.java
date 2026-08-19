@@ -195,7 +195,7 @@ public class GrowerApplicationService {
     }
 
     public Product createProduct(String userId, CreateGrowerProductRequestDto dto) {
-        Product product = Product.create(dto.sku(), dto.name(), dto.description(), dto.price(), dto.currency(), null);
+        Product product = Product.create(dto.sku(), dto.name(), dto.description(), dto.price(), dto.strikeOutPrice(), dto.currency(), null);
         product.setGrowerId(userId);
         product.changeStatus(ProductStatus.ACTIVE);
         Product savedProduct = productRepository.save(product);
@@ -220,7 +220,7 @@ public class GrowerApplicationService {
 
     public Product updateProduct(String userId, UUID productId, CreateGrowerProductRequestDto dto) {
         Product product = getProductById(userId, productId);
-        product.updateDetails(dto.name(), dto.description(), dto.price(), dto.currency(), null);
+        product.updateDetails(dto.name(), dto.description(), dto.price(), dto.strikeOutPrice(), dto.currency(), null);
         Product updated = productRepository.save(product);
         log.info("GROWER_AUDIT: Product updated for userId={}, productId={}", userId, productId);
         if (auditService != null) {

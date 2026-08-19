@@ -14,6 +14,7 @@ public class Product {
     private String name;
     private String description;
     private BigDecimal price;
+    private BigDecimal strikeOutPrice;
     private String currency;
     private ProductStatus status;
     private Category category;
@@ -22,10 +23,14 @@ public class Product {
     private Instant updatedAt;
 
     public Product(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, Category category, Instant createdAt, Instant updatedAt) {
-        this(id, sku, name, description, price, currency, status, category, null, createdAt, updatedAt);
+        this(id, sku, name, description, price, null, currency, status, category, null, createdAt, updatedAt);
     }
 
     public Product(UUID id, String sku, String name, String description, BigDecimal price, String currency, ProductStatus status, Category category, String growerId, Instant createdAt, Instant updatedAt) {
+        this(id, sku, name, description, price, null, currency, status, category, growerId, createdAt, updatedAt);
+    }
+
+    public Product(UUID id, String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, ProductStatus status, Category category, String growerId, Instant createdAt, Instant updatedAt) {
         if (id == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
         }
@@ -44,6 +49,20 @@ public class Product {
         this.name = name.trim();
         this.description = description != null ? description.trim() : null;
         this.price = price.setScale(2, RoundingMode.HALF_UP);
+
+        if (strikeOutPrice != null) {
+            BigDecimal scaledStrikeOut = strikeOutPrice.setScale(2, RoundingMode.HALF_UP);
+            if (scaledStrikeOut.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Strike-out price must be positive");
+            }
+            if (scaledStrikeOut.compareTo(this.price) <= 0) {
+                throw new IllegalArgumentException("Strike-out price must be strictly greater than actual selling price");
+            }
+            this.strikeOutPrice = scaledStrikeOut;
+        } else {
+            this.strikeOutPrice = null;
+        }
+
         this.currency = (currency != null && !currency.isBlank()) ? currency.trim().toUpperCase() : "INR";
         this.status = status != null ? status : ProductStatus.DRAFT;
         this.category = category;
@@ -53,9 +72,13 @@ public class Product {
     }
 
     public static Product create(String sku, String name, String description, BigDecimal price, String currency, Category category) {
+        return create(sku, name, description, price, null, currency, category);
+    }
+
+    public static Product create(String sku, String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, Category category) {
         UUID newId = UUID.randomUUID();
         Instant now = Instant.now();
-        return new Product(newId, sku, name, description, price, currency, ProductStatus.DRAFT, category, now, now);
+        return new Product(newId, sku, name, description, price, strikeOutPrice, currency, ProductStatus.DRAFT, category, null, now, now);
     }
 
     public static String normalizeSku(String rawSku) {
@@ -70,15 +93,35 @@ public class Product {
     }
 
     public void updateDetails(String name, String description, BigDecimal price, String currency, Category category) {
+        updateDetails(name, description, price, null, currency, category);
+    }
+
+    public void updateDetails(String name, String description, BigDecimal price, BigDecimal strikeOutPrice, String currency, Category category) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Product name cannot be blank");
         }
         if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Product price must be a non-negative decimal value");
         }
+
+        BigDecimal scaledPrice = price.setScale(2, RoundingMode.HALF_UP);
+        if (strikeOutPrice != null) {
+            BigDecimal scaledStrikeOut = strikeOutPrice.setScale(2, RoundingMode.HALF_UP);
+            if (scaledStrikeOut.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Strike-out price must be positive");
+            }
+            if (scaledStrikeOut.compareTo(scaledPrice) <= 0) {
+                throw new IllegalArgumentException("Strike-out price must be strictly greater than actual selling price");
+            }
+            this.strikeOutPrice = scaledStrikeOut;
+        } else {
+            this.strikeOutPrice = null;
+        }
+
         this.name = name.trim();
         this.description = description != null ? description.trim() : null;
-        this.price = price.setScale(2, RoundingMode.HALF_UP);
+        this.price = scaledPrice;
+
         if (currency != null && !currency.isBlank()) {
             this.currency = currency.trim().toUpperCase();
         }
@@ -115,6 +158,10 @@ public class Product {
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    public BigDecimal getStrikeOutPrice() {
+        return strikeOutPrice;
     }
 
     public String getCurrency() {

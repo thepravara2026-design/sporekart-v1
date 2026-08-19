@@ -43,8 +43,15 @@ export const GrowerProductCard: FC<GrowerProductCardProps> = ({ product }) => {
         <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
           Category: {product.categoryName || 'General'}
         </span>
-        <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#10b981' }}>
-          {formatCurrency(product.price, product.currency)}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          {product.strikeOutPrice != null && product.strikeOutPrice > product.price && (
+            <span style={{ fontSize: '0.85rem', textDecoration: 'line-through', color: '#6b7280', fontWeight: 500 }} data-testid="grower-strike-out-price">
+              {formatCurrency(product.strikeOutPrice, product.currency)}
+            </span>
+          )}
+          <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#10b981' }}>
+            {formatCurrency(product.price, product.currency)}
+          </span>
         </span>
       </div>
     </Card>

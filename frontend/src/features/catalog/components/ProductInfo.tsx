@@ -45,7 +45,7 @@ export const ProductInfo: FC<ProductInfoProps> = ({
       </div>
 
       <div style={{ marginTop: '0.5rem' }}>
-        <ProductPrice price={product.price} currency={product.currency} style={{ fontSize: '2rem' }} />
+        <ProductPrice price={product.price} strikeOutPrice={product.strikeOutPrice} currency={product.currency} style={{ fontSize: '2rem' }} showDiscountBadge={true} />
       </div>
 
       <ProductActions product={product} quantity={quantity} onQuantityChange={onQuantityChange} mutation={mutation} />

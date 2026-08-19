@@ -23,9 +23,15 @@ public record CreateProductCommand(
         @PositiveOrZero(message = "Price must be non-negative")
         BigDecimal price,
 
+        BigDecimal strikeOutPrice,
+
         @NotBlank(message = "Currency cannot be blank")
         @Size(min = 3, max = 3, message = "Currency code must be 3 characters")
         String currency,
 
         UUID categoryId
-) {}
+) {
+    public CreateProductCommand(String sku, String name, String description, BigDecimal price, String currency, UUID categoryId) {
+        this(sku, name, description, price, null, currency, categoryId);
+    }
+}

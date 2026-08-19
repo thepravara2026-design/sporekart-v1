@@ -17,6 +17,7 @@ export interface Product {
   name: string;
   description: string | null;
   price: number;
+  strikeOutPrice?: number | null;
   currency: string;
   status: ProductStatus;
   category: Category | null;

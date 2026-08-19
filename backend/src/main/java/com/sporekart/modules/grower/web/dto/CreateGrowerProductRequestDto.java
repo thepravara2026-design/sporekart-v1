@@ -8,7 +8,12 @@ public record CreateGrowerProductRequestDto(
         String name,
         String description,
         BigDecimal price,
+        BigDecimal strikeOutPrice,
         String currency,
         UUID categoryId,
         int initialStockQuantity
-) {}
+) {
+    public CreateGrowerProductRequestDto(String sku, String name, String description, BigDecimal price, String currency, UUID categoryId, int initialStockQuantity) {
+        this(sku, name, description, price, null, currency, categoryId, initialStockQuantity);
+    }
+}

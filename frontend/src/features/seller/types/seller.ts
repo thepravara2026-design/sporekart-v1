@@ -20,6 +20,7 @@ export interface SellerProductItem {
   sku: string;
   category: string;
   price: number;
+  strikeOutPrice?: number | null;
   currency: string;
   onHandQuantity: number;
   reservedQuantity: number;
@@ -68,6 +69,7 @@ export interface CreateSellerProductInput {
   sku: string;
   category: string;
   price: number;
+  strikeOutPrice?: number | null;
   initialStock: number;
 }
 

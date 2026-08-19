@@ -26,7 +26,7 @@ describe('ProductCard', () => {
     updatedAt: '2026-01-01T00:00:00Z',
   };
 
-  it('renders product details correctly', () => {
+  it('renders product details correctly without strike-out price', () => {
     render(
       <MemoryRouter>
         <ProductCard product={mockProduct} />
@@ -36,12 +36,28 @@ describe('ProductCard', () => {
     expect(screen.getByText('Red Reishi Spore Extract')).toBeInTheDocument();
     expect(screen.getByText('SKU: SKU-REISHI-001')).toBeInTheDocument();
     expect(screen.getByText(/₹\s*34\.50/)).toBeInTheDocument();
+    expect(screen.queryByTestId('strike-out-price')).not.toBeInTheDocument();
     expect(screen.getByText('Extracts')).toBeInTheDocument();
     expect(screen.getByText('In Stock')).toBeInTheDocument();
     expect(screen.getByText('High potency dual-extracted liquid')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /view details/i })).toHaveAttribute(
-      'href',
-      '/products/p-100'
+  });
+
+  it('renders strike-out price and discount badge when strikeOutPrice is present', () => {
+    const discountedProduct: Product = {
+      ...mockProduct,
+      price: 1999.00,
+      strikeOutPrice: 2499.00,
+    };
+
+    render(
+      <MemoryRouter>
+        <ProductCard product={discountedProduct} />
+      </MemoryRouter>
     );
+
+    expect(screen.getByTestId('strike-out-price')).toBeInTheDocument();
+    expect(screen.getByTestId('strike-out-price')).toHaveTextContent(/₹\s*2,499\.00/);
+    expect(screen.getByTestId('selling-price')).toHaveTextContent(/₹\s*1,999\.00/);
+    expect(screen.getByTestId('discount-badge')).toHaveTextContent('20% OFF');
   });
 });

@@ -16,18 +16,30 @@ export const SellerProductManagementPage: React.FC = () => {
   const [sku, setSku] = useState('');
   const [category, setCategory] = useState('Grain Spawn');
   const [price, setPrice] = useState('29.99');
+  const [strikeOutPrice, setStrikeOutPrice] = useState('');
   const [initialStock, setInitialStock] = useState('50');
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!name || !sku) return;
+
+    const numPrice = parseFloat(price) || 0;
+    const numStrikeOut = strikeOutPrice ? parseFloat(strikeOutPrice) : undefined;
+
+    if (numStrikeOut !== undefined && numStrikeOut <= numPrice) {
+      setFormError('Strike-out price must be strictly greater than actual selling price.');
+      return;
+    }
 
     createProductMutation.mutate(
       {
         name,
         sku,
         category,
-        price: parseFloat(price) || 0,
+        price: numPrice,
+        strikeOutPrice: numStrikeOut,
         initialStock: parseInt(initialStock, 10) || 50,
       },
       {
@@ -35,6 +47,8 @@ export const SellerProductManagementPage: React.FC = () => {
           setIsModalOpen(false);
           setName('');
           setSku('');
+          setStrikeOutPrice('');
+          setFormError(null);
         },
       }
     );
@@ -61,6 +75,12 @@ export const SellerProductManagementPage: React.FC = () => {
         {/* Create Product Modal */}
         <Dialog isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create Seller Product Listing">
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
+            {formError && (
+              <div className="p-3 text-xs rounded bg-red-900/40 border border-red-700 text-red-200" data-testid="seller-form-error">
+                {formError}
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">Product Title</label>
               <Input
@@ -93,15 +113,26 @@ export const SellerProductManagementPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Price (INR)</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Selling Price (INR)</label>
                 <Input
                   type="number"
                   step="0.01"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Strike-Out Price (INR)</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 39.99 (Optional)"
+                  value={strikeOutPrice}
+                  onChange={(e) => setStrikeOutPrice(e.target.value)}
                 />
               </div>
 
