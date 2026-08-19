@@ -117,9 +117,9 @@ export const growerApi = {
     }
   },
 
-  getProducts: async (_filters?: GrowerProductFilter): Promise<{ items: GrowerProduct[]; total: number }> => {
+  getProducts: async (filters?: GrowerProductFilter): Promise<{ items: GrowerProduct[]; total: number }> => {
     try {
-      const response = await axiosInstance.get(ENDPOINTS.GROWER_PRODUCTS);
+      const response = await axiosInstance.get(ENDPOINTS.GROWER_PRODUCTS, { params: filters });
       const data = response.data?.data || response.data || [];
       const items: GrowerProduct[] = (Array.isArray(data) ? data : data.content || []).map((p: Record<string, unknown>) => ({
         id: (p.id as string) || `prod-${Date.now()}`,

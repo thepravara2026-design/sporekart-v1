@@ -57,8 +57,9 @@ export const AdminTrainingOperationsConsole: React.FC = () => {
     try {
       const data = await fetchAdminDashboard();
       setDashboard(data);
-    } catch (err: any) {
-      setDashboardError(err?.response?.data?.message || 'Failed to load training operations dashboard');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load training operations dashboard';
+      setDashboardError(msg);
     } finally {
       setDashboardLoading(false);
     }
@@ -69,7 +70,7 @@ export const AdminTrainingOperationsConsole: React.FC = () => {
     try {
       const data = await fetchAdminPaymentExceptions();
       setExceptions(data.content || []);
-    } catch (err) {
+    } catch {
       // Ignore exceptions fetch error quietly
     } finally {
       setExceptionsLoading(false);
@@ -87,8 +88,9 @@ export const AdminTrainingOperationsConsole: React.FC = () => {
       });
       setEnrollments(data.content || []);
       setEnrollmentTotalPages(data.totalPages || 1);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to search enrollments');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to search enrollments';
+      setActionError(msg);
     } finally {
       setEnrollmentsLoading(false);
     }
@@ -105,8 +107,9 @@ export const AdminTrainingOperationsConsole: React.FC = () => {
       });
       setDemands(data.content || []);
       setDemandTotalPages(data.totalPages || 1);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to search demand records');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to search demand records';
+      setActionError(msg);
     } finally {
       setDemandsLoading(false);
     }
@@ -138,8 +141,9 @@ export const AdminTrainingOperationsConsole: React.FC = () => {
       loadDashboard();
       loadExceptions();
       if (activeTab === 'enrollments') loadEnrollments();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to trigger enrollment recovery');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to trigger enrollment recovery';
+      setActionError(msg);
     }
   };
 
@@ -150,8 +154,9 @@ export const AdminTrainingOperationsConsole: React.FC = () => {
       setSelectedEnrollment(details);
       const hist = await fetchMyEnrollmentHistory(enrollmentId);
       setEnrollmentHistory(hist);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to fetch enrollment details');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch enrollment details';
+      setActionError(msg);
     } finally {
       setHistoryLoading(false);
     }

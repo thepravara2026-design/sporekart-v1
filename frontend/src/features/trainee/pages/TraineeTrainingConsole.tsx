@@ -76,8 +76,8 @@ export const TraineeTrainingConsole: React.FC = () => {
     try {
       const data = await fetchTraineeDashboard();
       setDashboard(data);
-    } catch (err: any) {
-      console.error('Failed to load trainee dashboard:', err);
+    } catch {
+      // Quiet fallback
     }
   };
 
@@ -86,8 +86,9 @@ export const TraineeTrainingConsole: React.FC = () => {
     try {
       const data = await fetchTraineeUpcomingTraining();
       setUpcoming(data.content || []);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to load upcoming training');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load upcoming training';
+      setActionError(msg);
     } finally {
       setUpcomingLoading(false);
     }
@@ -99,8 +100,9 @@ export const TraineeTrainingConsole: React.FC = () => {
       const data = await fetchMyEnrollments({ page: enrollmentPage, size: 10 });
       setEnrollments(data.content || []);
       setEnrollmentTotalPages(data.totalPages || 1);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to load enrollments');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load enrollments';
+      setActionError(msg);
     } finally {
       setEnrollmentsLoading(false);
     }
@@ -111,8 +113,9 @@ export const TraineeTrainingConsole: React.FC = () => {
     try {
       const data = await fetchMyDemands();
       setDemands(data.content || []);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to load demand requests');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load demand requests';
+      setActionError(msg);
     } finally {
       setDemandsLoading(false);
     }
@@ -122,8 +125,8 @@ export const TraineeTrainingConsole: React.FC = () => {
     try {
       const count = await fetchUnreadNotificationCount();
       setUnreadCount(count);
-    } catch (err: any) {
-      console.error('Failed to fetch unread count', err);
+    } catch {
+      // Quiet fallback
     }
   };
 
@@ -133,8 +136,9 @@ export const TraineeTrainingConsole: React.FC = () => {
       const data = await fetchTraineeNotifications();
       setNotifications(data.content || []);
       loadUnreadCount();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to load notifications');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load notifications';
+      setActionError(msg);
     } finally {
       setNotificationsLoading(false);
     }
@@ -145,8 +149,9 @@ export const TraineeTrainingConsole: React.FC = () => {
     try {
       const data = await fetchMyCertificates();
       setCertificates(data);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to load earned certificates');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load earned certificates';
+      setActionError(msg);
     } finally {
       setCertificatesLoading(false);
     }
@@ -183,8 +188,9 @@ export const TraineeTrainingConsole: React.FC = () => {
       setSelectedDetail(detail);
       const history = await fetchMyEnrollmentHistory(enrollmentId);
       setHistoryList(history || []);
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to fetch enrollment details');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch enrollment details';
+      setActionError(msg);
     } finally {
       setDetailLoading(false);
     }
@@ -201,8 +207,9 @@ export const TraineeTrainingConsole: React.FC = () => {
       setActionSuccess('Demand request successfully withdrawn');
       loadDemands();
       loadDashboard();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to withdraw demand request');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to withdraw demand request';
+      setActionError(msg);
     }
   };
 
@@ -221,8 +228,9 @@ export const TraineeTrainingConsole: React.FC = () => {
       loadUpcoming();
       loadUnreadCount();
       if (activeTab === 'enrollments') loadEnrollments();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to cancel enrollment. Note: Trainees may only cancel up to 2 days before training starts.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to cancel enrollment. Note: Trainees may only cancel up to 2 days before training starts.';
+      setActionError(msg);
     } finally {
       setCancelSubmitting(false);
     }
@@ -243,8 +251,9 @@ export const TraineeTrainingConsole: React.FC = () => {
       loadUpcoming();
       loadUnreadCount();
       if (activeTab === 'enrollments') loadEnrollments();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.message || 'Failed to reschedule enrollment. Note: Trainees may only reschedule up to 2 days before training starts.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to reschedule enrollment. Note: Trainees may only reschedule up to 2 days before training starts.';
+      setActionError(msg);
     } finally {
       setRescheduleSubmitting(false);
     }
@@ -254,7 +263,7 @@ export const TraineeTrainingConsole: React.FC = () => {
     try {
       await markNotificationRead(notificationId);
       loadNotifications();
-    } catch (err: any) {
+    } catch {
       // Quiet fail
     }
   };
@@ -263,7 +272,7 @@ export const TraineeTrainingConsole: React.FC = () => {
     try {
       await markAllNotificationsRead();
       loadNotifications();
-    } catch (err: any) {
+    } catch {
       // Quiet fail
     }
   };

@@ -47,7 +47,7 @@ describe('BatchManagementConsole Component', () => {
   };
 
   it('renders BatchManagementConsole title and batch table', async () => {
-    (axiosInstance.get as any).mockResolvedValue(mockBatches);
+    vi.mocked(axiosInstance.get).mockResolvedValue(mockBatches);
 
     render(<BatchManagementConsole />);
 
@@ -60,7 +60,7 @@ describe('BatchManagementConsole Component', () => {
   });
 
   it('opens Schedule New Batch modal when clicking "+ Schedule New Batch"', async () => {
-    (axiosInstance.get as any).mockResolvedValue(mockBatches);
+    vi.mocked(axiosInstance.get).mockResolvedValue(mockBatches);
 
     render(<BatchManagementConsole />);
 
@@ -71,8 +71,8 @@ describe('BatchManagementConsole Component', () => {
   });
 
   it('handles activation toggle click for active batch', async () => {
-    (axiosInstance.get as any).mockResolvedValue(mockBatches);
-    (axiosInstance.post as any).mockResolvedValue({
+    vi.mocked(axiosInstance.get).mockResolvedValue(mockBatches);
+    vi.mocked(axiosInstance.post).mockResolvedValue({
       data: {
         data: { ...mockBatches.data.data.content[0], status: 'PLANNED' },
       },

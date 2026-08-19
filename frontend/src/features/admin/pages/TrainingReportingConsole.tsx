@@ -41,8 +41,12 @@ export const TrainingReportingConsole: React.FC = () => {
       setBatchReports(batchData || []);
       setAuditLogs(auditData || []);
       setExceptions(excData || []);
-    } catch (err: any) {
-      console.error('Failed to load reporting dashboard:', err);
+      setOverview(ovData);
+      setBatchReports(batchData || []);
+      setAuditLogs(auditData || []);
+      setExceptions(excData || []);
+    } catch {
+      // Quiet fallback for dashboard load
     } finally {
       setLoading(false);
     }
@@ -53,7 +57,7 @@ export const TrainingReportingConsole: React.FC = () => {
     try {
       const logs = await fetchAuditHistory({ actor: actorFilter, enrollmentId: enrollmentIdFilter });
       setAuditLogs(logs || []);
-    } catch (err: any) {
+    } catch {
       setActionMessage({ type: 'error', text: 'Failed to filter audit logs.' });
     }
   };
@@ -63,7 +67,7 @@ export const TrainingReportingConsole: React.FC = () => {
       await retryFailedNotificationControl(notificationId);
       setActionMessage({ type: 'success', text: `Notification ${notificationId} retried successfully.` });
       loadDashboardData();
-    } catch (err: any) {
+    } catch {
       setActionMessage({ type: 'error', text: 'Failed to retry notification.' });
     }
   };
@@ -73,7 +77,7 @@ export const TrainingReportingConsole: React.FC = () => {
       await retryCertificateGenerationControl(enrollmentId);
       setActionMessage({ type: 'success', text: `Certificate generation retried for enrollment ${enrollmentId}.` });
       loadDashboardData();
-    } catch (err: any) {
+    } catch {
       setActionMessage({ type: 'error', text: 'Failed to retry certificate generation.' });
     }
   };

@@ -54,8 +54,9 @@ export const BatchManagementConsole: React.FC = () => {
       });
       setBatches(data.content || []);
       setTotalPages(data.totalPages || 1);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to load training batches');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load training batches';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -111,8 +112,9 @@ export const BatchManagementConsole: React.FC = () => {
       setCapacityBatch(null);
       setActionSuccess(`Capacity updated for batch ${capacityBatch.batchCode}`);
       loadBatches();
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || 'Failed to update capacity');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update capacity';
+      setFormError(msg);
     }
   };
 
@@ -151,8 +153,9 @@ export const BatchManagementConsole: React.FC = () => {
       setIsCreateOpen(false);
       setActionSuccess('Training batch created successfully');
       loadBatches();
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || 'Failed to create training batch');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to create training batch';
+      setFormError(msg);
     }
   };
 
@@ -178,8 +181,9 @@ export const BatchManagementConsole: React.FC = () => {
       setEditingBatch(null);
       setActionSuccess('Training batch updated successfully');
       loadBatches();
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || 'Failed to update training batch');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update training batch';
+      setFormError(msg);
     }
   };
 
@@ -193,8 +197,9 @@ export const BatchManagementConsole: React.FC = () => {
         setActionSuccess(`Batch ${batch.batchCode} activated`);
       }
       loadBatches();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to toggle batch status');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to toggle batch status';
+      setError(msg);
     }
   };
 
@@ -204,8 +209,9 @@ export const BatchManagementConsole: React.FC = () => {
       await cancelBatch(batch.id);
       setActionSuccess(`Batch ${batch.batchCode} cancelled`);
       loadBatches();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to cancel batch');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to cancel batch';
+      setError(msg);
     }
   };
 
@@ -487,7 +493,7 @@ export const BatchManagementConsole: React.FC = () => {
                   <label className="block text-zinc-400 mb-1">Delivery Mode</label>
                   <select
                     value={formDeliveryMode}
-                    onChange={(e) => setFormDeliveryMode(e.target.value as any)}
+                    onChange={(e) => setFormDeliveryMode(e.target.value as 'ONLINE' | 'OFFLINE' | 'HYBRID')}
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 focus:outline-none focus:border-emerald-500"
                   >
                     <option value="ONLINE">ONLINE</option>
@@ -587,7 +593,7 @@ export const BatchManagementConsole: React.FC = () => {
                   <label className="block text-zinc-400 mb-1">Delivery Mode</label>
                   <select
                     value={formDeliveryMode}
-                    onChange={(e) => setFormDeliveryMode(e.target.value as any)}
+                    onChange={(e) => setFormDeliveryMode(e.target.value as 'ONLINE' | 'OFFLINE' | 'HYBRID')}
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 focus:outline-none focus:border-emerald-500"
                   >
                     <option value="ONLINE">ONLINE</option>

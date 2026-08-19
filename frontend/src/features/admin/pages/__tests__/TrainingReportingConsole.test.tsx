@@ -88,7 +88,7 @@ describe('TrainingReportingConsole Component', () => {
   };
 
   it('renders TrainingReportingConsole title, KPI cards, and exception queue', async () => {
-    (axiosInstance.get as any).mockImplementation((url: string) => {
+    vi.mocked(axiosInstance.get).mockImplementation((url: string) => {
       if (url.includes('/reports/overview')) return Promise.resolve(mockOverview);
       if (url.includes('/reports/batches')) return Promise.resolve(mockBatches);
       if (url.includes('/reports/audit')) return Promise.resolve(mockAuditLogs);
@@ -106,7 +106,7 @@ describe('TrainingReportingConsole Component', () => {
   });
 
   it('handles notification retry action', async () => {
-    (axiosInstance.get as any).mockImplementation((url: string) => {
+    vi.mocked(axiosInstance.get).mockImplementation((url: string) => {
       if (url.includes('/reports/overview')) return Promise.resolve(mockOverview);
       if (url.includes('/reports/batches')) return Promise.resolve(mockBatches);
       if (url.includes('/reports/audit')) return Promise.resolve(mockAuditLogs);
@@ -114,7 +114,7 @@ describe('TrainingReportingConsole Component', () => {
       return Promise.reject(new Error('Unknown endpoint'));
     });
 
-    (axiosInstance.post as any).mockResolvedValue({ data: { data: true } });
+    vi.mocked(axiosInstance.post).mockResolvedValue({ data: { data: true } });
 
     render(<TrainingReportingConsole />);
 

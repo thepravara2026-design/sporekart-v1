@@ -47,8 +47,9 @@ export const TrainingProgramManagement: React.FC = () => {
       });
       setPrograms(data.content || []);
       setTotalPages(data.totalPages || 1);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to load training programs');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load training programs';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -99,8 +100,9 @@ export const TrainingProgramManagement: React.FC = () => {
       setIsCreateOpen(false);
       setActionSuccess('Training program created successfully');
       loadPrograms();
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || 'Failed to create training program');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to create training program';
+      setFormError(msg);
     }
   };
 
@@ -120,8 +122,9 @@ export const TrainingProgramManagement: React.FC = () => {
       setEditingProgram(null);
       setActionSuccess('Training program updated successfully');
       loadPrograms();
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || 'Failed to update training program');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update training program';
+      setFormError(msg);
     }
   };
 
@@ -135,8 +138,9 @@ export const TrainingProgramManagement: React.FC = () => {
         setActionSuccess(`Program '${program.title}' activated`);
       }
       loadPrograms();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to change program status');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to change program status';
+      setError(msg);
     }
   };
 

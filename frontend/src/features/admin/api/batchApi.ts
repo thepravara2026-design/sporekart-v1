@@ -542,7 +542,7 @@ export const bulkMarkAttendance = async (
 export const evaluateBatchCompletion = async (
   batchId: string,
   minAttendancePercentage?: number
-): Promise<any> => {
+): Promise<unknown> => {
   const response = await axiosInstance.post(`/api/v1/admin/batches/${batchId}/evaluate-completion`, { minAttendancePercentage });
   return response.data.data;
 };
@@ -661,12 +661,12 @@ export const fetchOperationalExceptions = async (): Promise<OperationalException
   return response.data.data;
 };
 
-export const retryFailedNotificationControl = async (notificationId: string): Promise<any> => {
+export const retryFailedNotificationControl = async (notificationId: string): Promise<unknown> => {
   const response = await axiosInstance.post(`/api/v1/admin/training/reports/controls/retry-notification/${notificationId}`);
   return response.data.data;
 };
 
-export const retryCertificateGenerationControl = async (enrollmentId: string): Promise<any> => {
+export const retryCertificateGenerationControl = async (enrollmentId: string): Promise<unknown> => {
   const response = await axiosInstance.post(`/api/v1/admin/training/reports/controls/retry-certificate/${enrollmentId}`);
   return response.data.data;
 };

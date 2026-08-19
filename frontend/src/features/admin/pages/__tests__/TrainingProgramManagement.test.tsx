@@ -43,7 +43,7 @@ describe('TrainingProgramManagement Component', () => {
   };
 
   it('renders TrainingProgramManagement title and program list table', async () => {
-    (axiosInstance.get as any).mockResolvedValue(mockPrograms);
+    vi.mocked(axiosInstance.get).mockResolvedValue(mockPrograms);
 
     render(<TrainingProgramManagement />);
 
@@ -56,7 +56,7 @@ describe('TrainingProgramManagement Component', () => {
   });
 
   it('opens Create Program modal when clicking "+ Create Program"', async () => {
-    (axiosInstance.get as any).mockResolvedValue(mockPrograms);
+    vi.mocked(axiosInstance.get).mockResolvedValue(mockPrograms);
 
     render(<TrainingProgramManagement />);
 
@@ -67,8 +67,8 @@ describe('TrainingProgramManagement Component', () => {
   });
 
   it('handles activation toggle click', async () => {
-    (axiosInstance.get as any).mockResolvedValue(mockPrograms);
-    (axiosInstance.post as any).mockResolvedValue({
+    vi.mocked(axiosInstance.get).mockResolvedValue(mockPrograms);
+    vi.mocked(axiosInstance.post).mockResolvedValue({
       data: {
         data: { ...mockPrograms.data.data.content[0], status: 'INACTIVE' },
       },
