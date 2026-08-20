@@ -28,8 +28,12 @@ export const ProductDetailPage: FC = () => {
   } = useProduct(productId);
 
   const product = response?.data;
+  const variants = product?.variants || [];
 
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    variants.length > 0 ? variants[0].id : null
+  );
   const addToCartMutation = useAddToCart();
   const purchasePanelRef = useRef<HTMLDivElement>(null);
   const stickyVisible = useStickyActionVisibility(purchasePanelRef);
@@ -61,7 +65,7 @@ export const ProductDetailPage: FC = () => {
 
   const handleStickyAddToCart = () => {
     if (!product || !purchasable || addToCartMutation.isPending) return;
-    addToCartMutation.mutate({ productId: product.id, quantity });
+    addToCartMutation.mutate({ productId: product.id, variantId: selectedVariantId, quantity });
   };
 
   return (
@@ -118,6 +122,8 @@ export const ProductDetailPage: FC = () => {
                 product={product}
                 quantity={quantity}
                 onQuantityChange={setQuantity}
+                selectedVariantId={selectedVariantId}
+                onSelectedVariantChange={setSelectedVariantId}
                 mutation={addToCartMutation}
               />
             </Card>

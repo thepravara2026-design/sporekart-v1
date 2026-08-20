@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
+import { useAddToCart } from '../hooks/useAddToCart';
 import { ProductGrid } from '../components/ProductGrid';
 import { ProductCardSkeleton } from '../components/ProductCardSkeleton';
 import { CatalogToolbar, ActiveFilterChip } from '../components/CatalogToolbar';
@@ -13,14 +14,15 @@ import { CatalogErrorState } from '../components/CatalogErrorState';
 import { PageShell } from '../../../components/layout/PageShell';
 import { Grid } from '../../../components/layout/Grid';
 import { ProductStatus } from '../../../types/catalog';
+import { Product, ProductVariant } from '../types/catalog';
 
 export const ProductListPage: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // ─── URL-driven state (single source of truth) ───────────────────────────
-  const page = Math.max(0, parseInt(searchParams.get('page') || '0', 10));
-  const size = Math.max(1, parseInt(searchParams.get('size') || '12', 10));
+  const page = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0);
+  const size = Math.max(1, parseInt(searchParams.get('size') || '12', 10) || 12);
   const sort = searchParams.get('sort') || 'createdAt,desc';
   const categoryId = searchParams.get('categoryId') || '';
   const status = (searchParams.get('status') as ProductStatus) || undefined;
@@ -53,6 +55,18 @@ export const ProductListPage: FC = () => {
 
   const pageData = productsResponse?.data;
   const products = pageData?.content || [];
+  const addToCart = useAddToCart();
+
+  const handleAddToCart = useCallback(
+    (product: Product, selectedVariant?: ProductVariant | null) => {
+      addToCart.mutate({
+        productId: product.id,
+        variantId: selectedVariant?.id ?? null,
+        quantity: 1,
+      });
+    },
+    [addToCart]
+  );
 
   // ─── URL mutation helpers ─────────────────────────────────────────────────
   const updateParam = useCallback(
@@ -237,7 +251,7 @@ export const ProductListPage: FC = () => {
         {!isLoading && !isError && products.length > 0 && (
           <>
             <div data-testid="products-grid">
-              <ProductGrid products={products} />
+              <ProductGrid products={products} onAddToCart={handleAddToCart} />
             </div>
 
             {/* Pagination */}

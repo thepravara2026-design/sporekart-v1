@@ -21,7 +21,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught exception caught in React Error Boundary:', error, errorInfo);
+    if (import.meta.env.DEV) {
+      console.error('Uncaught exception caught in React Error Boundary:', error, errorInfo);
+    }
   }
 
   private handleReset = () => {

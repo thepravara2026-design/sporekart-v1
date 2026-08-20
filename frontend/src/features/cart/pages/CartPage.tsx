@@ -1,4 +1,5 @@
 import { FC, useCallback, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useUpdateCartItem } from '../hooks/useUpdateCartItem';
 import { useRemoveCartItem } from '../hooks/useRemoveCartItem';
@@ -15,6 +16,7 @@ import { CartErrorState } from '../components/CartErrorState';
 import { CartValidationAlert } from '../components/CartValidationAlert';
 import { getCartErrorMessage, CART_ERROR_CODES } from '../utils/cartUtils';
 import { ApiError } from '../../../services/apiError';
+import { Alert } from '../../../components/ui/Alert';
 
 /**
  * CartPage — authenticated customer cart experience.
@@ -113,7 +115,14 @@ export const CartPage: FC = () => {
       {isLoading && <CartSkeleton />}
 
       {isError && (
-        <CartErrorState error={error} onRetry={() => refetch()} />
+        error instanceof ApiError && error.status === 401 ? (
+          <Alert variant="warning" title="Sign in required">
+            <p style={{ margin: '0 0 1rem' }}>Please sign in to view your cart.</p>
+            <Link to="/login" className="btn btn-primary btn-sm">Sign In</Link>
+          </Alert>
+        ) : (
+          <CartErrorState error={error} onRetry={() => refetch()} />
+        )
       )}
 
       {!isLoading && !isError && cart && items.length === 0 && <CartEmptyState />}

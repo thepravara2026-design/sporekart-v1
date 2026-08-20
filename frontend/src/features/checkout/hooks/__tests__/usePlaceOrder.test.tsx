@@ -137,7 +137,7 @@ describe('usePlaceOrder (FD-12)', () => {
       return (
         <div>
           <span data-testid="status">{placeOrder.isSuccess ? 'success' : 'idle'}</span>
-          <button onClick={() => placeOrder.mutate({ shippingAddress: makeAddress() })}>place</button>
+          <button onClick={() => placeOrder.mutate({ shippingAddress: makeAddress(), paymentMethod: 'UPI' })}>place</button>
         </div>
       );
     };
@@ -153,13 +153,13 @@ describe('usePlaceOrder (FD-12)', () => {
     expect(orderCall.customerNotes).toBeUndefined();
 
     expect(inventoryApi.reserveInventory).toHaveBeenCalledWith('order-1');
-    expect(paymentApi.initiatePayment).toHaveBeenCalledWith('order-1');
+    expect(paymentApi.initiatePayment).toHaveBeenCalledWith('order-1', 'UPI');
     expect(paymentApi.verifyPayment).toHaveBeenCalledWith(
       expect.objectContaining({
         paymentReference: 'PAY-ORD-2026-000001',
         providerOrderId: 'order_mock_123',
         providerPaymentId: 'pay_order_mock_123',
-        providerSignature: 'mock_provider_signature',
+        providerSignature: expect.any(String),
       })
     );
   });
@@ -178,7 +178,7 @@ describe('usePlaceOrder (FD-12)', () => {
       return (
         <div>
           <span data-testid="status">{placeOrder.isSuccess ? 'success' : 'idle'}</span>
-          <button onClick={() => placeOrder.mutate({ shippingAddress: makeAddress() })}>place</button>
+          <button onClick={() => placeOrder.mutate({ shippingAddress: makeAddress(), paymentMethod: 'UPI' })}>place</button>
         </div>
       );
     };
@@ -208,7 +208,7 @@ describe('usePlaceOrder (FD-12)', () => {
       return (
         <div>
           <span data-testid="status">{placeOrder.isError ? 'error' : 'idle'}</span>
-          <button onClick={() => placeOrder.mutate({ shippingAddress: makeAddress() })}>place</button>
+          <button onClick={() => placeOrder.mutate({ shippingAddress: makeAddress(), paymentMethod: 'UPI' })}>place</button>
         </div>
       );
     };

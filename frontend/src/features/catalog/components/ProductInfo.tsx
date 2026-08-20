@@ -12,6 +12,8 @@ export interface ProductInfoProps {
   className?: string;
   quantity?: number;
   onQuantityChange?: (newQuantity: number) => void;
+  selectedVariantId?: string | null;
+  onSelectedVariantChange?: (variantId: string | null) => void;
   mutation?: ReturnType<typeof useAddToCart>;
 }
 
@@ -20,12 +22,17 @@ export const ProductInfo: FC<ProductInfoProps> = ({
   className = '',
   quantity,
   onQuantityChange,
+  selectedVariantId: controlledVariantId,
+  onSelectedVariantChange,
   mutation,
 }) => {
   const variants = product.variants || [];
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+  const [internalVariantId, setInternalVariantId] = useState<string | null>(
     variants.length > 0 ? variants[0].id : null
   );
+
+  const selectedVariantId = controlledVariantId ?? internalVariantId;
+  const setSelectedVariantId = onSelectedVariantChange ?? setInternalVariantId;
 
   const selectedVariant: ProductVariant | null =
     variants.find((v) => v.id === selectedVariantId) || (variants.length > 0 ? variants[0] : null);

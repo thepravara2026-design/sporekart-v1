@@ -84,7 +84,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     try {
-      const savedToken = localStorage.getItem('token');
+      const savedToken = localStorage.getItem('accessToken');
       const savedUser = localStorage.getItem('sporekart_user');
       if (savedToken && savedUser) {
         setToken(savedToken);
@@ -92,7 +92,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }
     } catch {
       // Fallback cleanly on JSON error
-      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
       localStorage.removeItem('sporekart_user');
     } finally {
       setIsLoading(false);
@@ -102,7 +102,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const saveAuth = (newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
-    localStorage.setItem('token', newToken);
+    localStorage.setItem('accessToken', newToken);
     localStorage.setItem('sporekart_user', JSON.stringify(newUser));
   };
 
@@ -118,8 +118,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         roles: [res.role],
       };
       saveAuth(res.accessToken, userObj);
-    } catch {
-      // Fallback for dev mode login
+    } catch (err) {
+      if (!import.meta.env.DEV) {
+        throw err;
+      }
+      // Fallback for dev mode login — only active in development builds
       const matchedPreset = credentials.email.includes('admin')
         ? PRESET_USERS.admin
         : credentials.email.includes('grower')
@@ -143,6 +146,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('token');
     localStorage.removeItem('sporekart_user');
   };

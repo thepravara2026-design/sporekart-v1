@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sporekart.application.exception.ApiErrorResponse;
 import com.sporekart.application.web.RequestIdFilter;
 import com.sporekart.application.web.RateLimitingFilter;
+import com.sporekart.modules.security.infrastructure.jwt.DevJwtAuthenticationFilter;
 import com.sporekart.modules.security.infrastructure.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
@@ -42,17 +45,23 @@ public class SecurityConfig {
 
     private final RequestIdFilter requestIdFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final DevJwtAuthenticationFilter devJwtAuthenticationFilter;
     private final RateLimitingFilter rateLimitingFilter;
+    private final Environment environment;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public SecurityConfig(
             RequestIdFilter requestIdFilter,
             @Autowired(required = false) JwtAuthenticationFilter jwtAuthenticationFilter,
-            @Autowired(required = false) RateLimitingFilter rateLimitingFilter
+            @Autowired(required = false) DevJwtAuthenticationFilter devJwtAuthenticationFilter,
+            @Autowired(required = false) RateLimitingFilter rateLimitingFilter,
+            Environment environment
     ) {
         this.requestIdFilter = requestIdFilter;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.devJwtAuthenticationFilter = devJwtAuthenticationFilter;
         this.rateLimitingFilter = rateLimitingFilter;
+        this.environment = environment;
     }
 
     @Bean
@@ -62,6 +71,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        boolean devMode = environment.acceptsProfiles(Profiles.of("dev", "test"));
+
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -82,15 +93,17 @@ public class SecurityConfig {
         if (requestIdFilter != null) {
             http.addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class);
         }
-        if (jwtAuthenticationFilter != null) {
+
+        // Dev/test: use DevJwtAuthenticationFilter (accepts mock tokens, no signature validation)
+        // Prod: use real JwtAuthenticationFilter (validates JWT signature + session)
+        if (devMode && devJwtAuthenticationFilter != null) {
+            http.addFilterBefore(devJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        } else if (jwtAuthenticationFilter != null) {
             http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         }
+
         if (rateLimitingFilter != null) {
-            if (jwtAuthenticationFilter != null) {
-                http.addFilterAfter(rateLimitingFilter, JwtAuthenticationFilter.class);
-            } else {
-                http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
-            }
+            http.addFilterAfter(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
         }
 
         http.authorizeHttpRequests(auth -> auth
@@ -121,6 +134,7 @@ public class SecurityConfig {
                         "/actuator/metrics/**"
                 ).hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**").permitAll()
+                // Dev/test: skip admin role check so all authenticated users can access admin endpoints
                 .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .anyRequest().authenticated()
         );

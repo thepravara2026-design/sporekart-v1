@@ -42,7 +42,12 @@ export const useOrders = (page: number, size = 10, status?: string, enabled = tr
 const filterPage = (page: PageResponse<OrderSummaryDto>, status?: string): PageResponse<OrderSummaryDto> => {
   if (!status || status === 'ALL') return page;
   const content = page.content.filter((order) => order.status === status);
-  return { ...page, content };
+  return {
+    ...page,
+    content,
+    totalElements: content.length,
+    totalPages: content.length > 0 ? 1 : 0,
+  };
 };
 
 /** Order status event timeline for an order. */

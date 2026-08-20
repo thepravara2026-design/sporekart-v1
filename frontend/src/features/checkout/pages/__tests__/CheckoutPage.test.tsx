@@ -291,7 +291,7 @@ describe('CheckoutPage (FD-12)', () => {
       expect.objectContaining({ shippingAddress: expect.objectContaining({ postalCode: '560001' }) })
     );
     expect(inventoryApi.reserveInventory).toHaveBeenCalledWith('order-1');
-    expect(paymentApi.initiatePayment).toHaveBeenCalledWith('order-1');
+    expect(paymentApi.initiatePayment).toHaveBeenCalledWith('order-1', 'UPI');
     expect(paymentApi.verifyPayment).toHaveBeenCalledWith(
       expect.objectContaining({ paymentReference: 'PAY-ORD-2026-000001', providerOrderId: 'order_mock_123' })
     );

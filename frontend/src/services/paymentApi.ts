@@ -54,8 +54,11 @@ export interface PaymentVerificationCommand {
 }
 
 export const paymentApi = {
-  initiatePayment: async (orderId: string): Promise<ApiResponse<PaymentCheckoutDto>> => {
-    const response = await axiosInstance.post<ApiResponse<PaymentCheckoutDto>>(ENDPOINTS.PAYMENTS, { orderId });
+  initiatePayment: async (orderId: string, paymentMethod?: string): Promise<ApiResponse<PaymentCheckoutDto>> => {
+    const response = await axiosInstance.post<ApiResponse<PaymentCheckoutDto>>(ENDPOINTS.PAYMENTS, {
+      orderId,
+      ...(paymentMethod ? { paymentMethod } : {}),
+    });
     return response.data;
   },
 

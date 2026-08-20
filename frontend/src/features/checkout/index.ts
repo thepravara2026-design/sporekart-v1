@@ -12,7 +12,6 @@ export * from './hooks/useCheckoutValidation';
 export * from './hooks/useCustomerProfile';
 export * from './hooks/useShippingOptions';
 export * from './hooks/useOrder';
-export * from './hooks/usePayment';
 export * from './hooks/usePlaceOrder';
 
 // Checkout Components

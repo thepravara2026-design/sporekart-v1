@@ -7,6 +7,7 @@ import { orderApi, OrderDto } from '../../../../services/orderApi';
 import { shippingApi } from '../../../../services/shippingApi';
 import { returnApi } from '../../../../services/returnApi';
 import { ToastProvider } from '../../../../components/ui/Toast';
+import { AuthProvider } from '../../../../context/AuthContext';
 import { makeOrder, makeOrderTimeline, makeShipment, makeShipmentTracking, makeReturnEligibility } from '../../__tests__/fixtures';
 import { ApiError } from '../../../../services/apiError';
 
@@ -34,13 +35,15 @@ vi.mock('../../../../services/returnApi', () => ({
 const renderDetail = (queryClient: QueryClient, reference = 'ORD-2026-000001') =>
   render(
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[`/orders/${reference}`]}>
-          <Routes>
-            <Route path="/orders/:orderReference" element={<OrderDetailPage />} />
-          </Routes>
-        </MemoryRouter>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[`/orders/${reference}`]}>
+            <Routes>
+              <Route path="/orders/:orderReference" element={<OrderDetailPage />} />
+            </Routes>
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 
@@ -50,6 +53,13 @@ describe('OrderDetailPage (FD-13)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem('accessToken', 'jwt-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01',
+      name: 'Test Customer',
+      email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER',
+      roles: ['ROLE_CUSTOMER'],
+    }));
     vi.mocked(orderApi.getOrderByReference).mockResolvedValue({ success: true, data: makeOrder() });
     vi.mocked(orderApi.getOrderTimeline).mockResolvedValue({ success: true, data: makeOrderTimeline() });
     vi.mocked(returnApi.checkEligibility).mockResolvedValue(makeReturnEligibility({ eligible: false }));
@@ -57,6 +67,7 @@ describe('OrderDetailPage (FD-13)', () => {
 
   it('requires sign-in', () => {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('sporekart_user');
     renderDetail(newClient());
     expect(screen.getByText('Sign in required')).toBeInTheDocument();
     expect(orderApi.getOrderByReference).not.toHaveBeenCalled();

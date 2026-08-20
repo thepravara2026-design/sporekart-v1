@@ -6,9 +6,11 @@ import { orderApi, AddressDto, OrderDto } from '../../../services/orderApi';
 import { paymentApi, PaymentDto } from '../../../services/paymentApi';
 import { inventoryApi, ReservationDto } from '../../../services/inventoryApi';
 import { getCheckoutErrorMessage } from '../utils/checkoutUtils';
+import { PaymentMethod } from '../constants/checkoutConstants';
 
 export interface PlaceOrderInput {
   shippingAddress: AddressDto;
+  paymentMethod: PaymentMethod;
   customerNotes?: string;
 }
 
@@ -60,15 +62,18 @@ export const usePlaceOrder = () => {
       const reservation = reservationResponse.data;
 
       try {
-        const paymentCheckout = await paymentApi.initiatePayment(order.id);
+        const paymentCheckout = await paymentApi.initiatePayment(order.id, input.paymentMethod);
         const checkout = paymentCheckout.data;
 
         // Simulate the customer completing payment in the hosted provider flow.
+        // The mock signature is only used against the dev/test provider and is
+        // never validated in production.
+        const mockSignature = import.meta.env.VITE_MOCK_PAYMENT_SIGNATURE || 'mock_provider_signature';
         const paymentResponse = await paymentApi.verifyPayment({
           paymentReference: checkout.paymentReference,
           providerOrderId: checkout.providerOrderId,
           providerPaymentId: `pay_${checkout.providerOrderId}`,
-          providerSignature: 'mock_provider_signature',
+          providerSignature: mockSignature,
         });
 
         return { order, payment: paymentResponse.data, reservation };

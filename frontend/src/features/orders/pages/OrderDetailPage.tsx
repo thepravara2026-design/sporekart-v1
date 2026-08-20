@@ -17,7 +17,7 @@ import { ShipmentTracking } from '../components/ShipmentTracking';
 import { OrderActions } from '../components/OrderActions';
 import { OrderReturnHandoff, OrderSupportHandoff } from '../components/OrderReturnHandoff';
 import { getOrderErrorMessage, formatOrderDate } from '../utils/orderUtils';
-import { isAuthenticated } from '../../cart/utils/cartUtils';
+import { useAuth } from '../../../context/AuthContext';
 
 /** Order statuses for which a shipment record is expected to exist. */
 const SHIPMENT_RELEVANT_STATUSES = new Set(['SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'COMPLETED']);
@@ -28,7 +28,7 @@ const SHIPMENT_RELEVANT_STATUSES = new Set(['SHIPPED', 'OUT_FOR_DELIVERY', 'DELI
  */
 export const OrderDetailPage: FC = () => {
   const { orderReference = '' } = useParams<{ orderReference: string }>();
-  const authenticated = isAuthenticated();
+  const { isAuthenticated: authenticated } = useAuth();
 
   const { data: orderResponse, isLoading, isError, error } = useOrderByReference(orderReference, authenticated);
   const { data: timelineResponse } = useOrderTimeline(orderReference, authenticated);

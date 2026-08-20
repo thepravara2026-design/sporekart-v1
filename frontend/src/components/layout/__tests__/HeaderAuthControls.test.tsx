@@ -46,7 +46,7 @@ describe('Header auth controls', () => {
   });
 
   it('shows the signed-in user name and Sign Out button when authenticated', () => {
-    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('accessToken', 'mock-jwt-customer-token');
     localStorage.setItem(
       'sporekart_user',
       JSON.stringify({
@@ -65,7 +65,7 @@ describe('Header auth controls', () => {
   });
 
   it('logs the user out and clears the session when Sign Out is clicked', () => {
-    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('accessToken', 'mock-jwt-customer-token');
     localStorage.setItem(
       'sporekart_user',
       JSON.stringify({
@@ -80,7 +80,7 @@ describe('Header auth controls', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
 
-    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('accessToken')).toBeNull();
     expect(localStorage.getItem('sporekart_user')).toBeNull();
     expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument();
   });

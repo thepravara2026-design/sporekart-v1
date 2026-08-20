@@ -51,7 +51,6 @@ export const CartItem: FC<CartItemProps> = ({
     <div
       className="cart-item"
       data-testid="cart-item"
-      data-item-id={item.id}
       style={{
         display: 'flex',
         gap: '1rem',

@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi, AddCartItemCommand, CartDto } from '../../../services/cartApi';
+import { CART_KEYS } from '../../cart/hooks/useCart';
 import { useToast } from '../../../components/ui/Toast';
 import { ApiError } from '../../../services/apiError';
 import { ApiResponse } from '../../../types/api';
-
-const CART_QUERY_KEY = ['cart'] as const;
 
 /**
  * Add-to-cart mutation integrated with the shared cart API and TanStack Query.
@@ -22,8 +21,8 @@ export const useAddToCart = () => {
   return useMutation({
     mutationFn: (command: AddCartItemCommand) => cartApi.addItem(command),
     onSuccess: (response, variables) => {
-      queryClient.setQueryData<ApiResponse<CartDto>>(CART_QUERY_KEY, response);
-      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      queryClient.setQueryData<ApiResponse<CartDto>>(CART_KEYS.all, response);
+      queryClient.invalidateQueries({ queryKey: CART_KEYS.all });
       addToast({
         variant: 'success',
         title: 'Added to Cart',

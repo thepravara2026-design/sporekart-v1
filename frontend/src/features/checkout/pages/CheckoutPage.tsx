@@ -2,6 +2,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageShell } from '../../../components/layout/PageShell';
 import { Breadcrumb } from '../../../components/ui/Breadcrumb';
 import { Card, CardHeader, CardTitle } from '../../../components/ui/Card';
+import { Alert } from '../../../components/ui/Alert';
 import { CartValidationAlert } from '../../cart/components/CartValidationAlert';
 import { CartEmptyState } from '../../cart/components/CartEmptyState';
 import { useCart } from '../../cart/hooks/useCart';
@@ -42,7 +43,7 @@ import { ApiError } from '../../../services/apiError';
  */
 export const CheckoutPage: FC = () => {
   const { data: cartResponse, isLoading, isError, error, refetch } = useCart();
-  const { data: profile, isLoading: isProfileLoading } = useCustomerProfile();
+  const { data: profile, isLoading: isProfileLoading, isError: isProfileError } = useCustomerProfile();
   const previewMutation = useCheckoutPreview();
   const { revalidate, notice, setNotice } = useCheckoutValidation(previewMutation);
   const placeOrder = usePlaceOrder();
@@ -92,7 +93,6 @@ export const CheckoutPage: FC = () => {
 
   const handlePlaceOrder = useCallback(
     async (paymentMethod: PaymentMethod) => {
-      void paymentMethod;
       if (!shippingAddress) return;
       if (placeOrder.isPending) return;
 
@@ -108,7 +108,7 @@ export const CheckoutPage: FC = () => {
           return;
         }
         setNotice(null);
-        placeOrder.mutate({ shippingAddress });
+        placeOrder.mutate({ shippingAddress, paymentMethod });
       } catch (err) {
         setPreviewError(err instanceof ApiError ? err.message : 'We could not validate your order. Please try again.');
       }
@@ -133,6 +133,11 @@ export const CheckoutPage: FC = () => {
 
       {authenticated && !isLoading && !isError && cart && items.length > 0 && (
         <>
+          {isProfileError && (
+            <Alert variant="warning" title="Profile unavailable">
+              We could not load your profile. You can still proceed by entering your details manually.
+            </Alert>
+          )}
           <CheckoutPageHeader customerName={customerName} />
           <CheckoutStepper currentStep={step} />
 
