@@ -1,5 +1,4 @@
 import { FC, useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useUpdateCartItem } from '../hooks/useUpdateCartItem';
 import { useRemoveCartItem } from '../hooks/useRemoveCartItem';
@@ -14,7 +13,7 @@ import { CartEmptyState } from '../components/CartEmptyState';
 import { CartSkeleton } from '../components/CartSkeleton';
 import { CartErrorState } from '../components/CartErrorState';
 import { CartValidationAlert } from '../components/CartValidationAlert';
-import { isAuthenticated, getCartErrorMessage, CART_ERROR_CODES } from '../utils/cartUtils';
+import { getCartErrorMessage, CART_ERROR_CODES } from '../utils/cartUtils';
 import { ApiError } from '../../../services/apiError';
 
 /**
@@ -39,7 +38,6 @@ export const CartPage: FC = () => {
 
   const cart = cartResponse?.data;
   const items = cart?.items ?? [];
-  const authenticated = isAuthenticated();
 
   const pendingUpdateItemId = updateMutation.isPending ? updateMutation.variables?.itemId : undefined;
   const pendingRemoveItemId = removeMutation.isPending ? removeMutation.variables : undefined;
@@ -112,31 +110,15 @@ export const CartPage: FC = () => {
 
   return (
     <PageShell title="Your Cart" breadcrumbs={breadcrumbs} className="cart-page">
-      {!authenticated && (
-        <CartValidationAlert
-          variant="warning"
-          title="Sign in required"
-          message="Sign in to view and manage your cart. Your cart is tied to your authenticated account."
-        />
-      )}
+      {isLoading && <CartSkeleton />}
 
-      {!authenticated && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-          <Link to="/products" className="btn btn-secondary btn-sm">
-            Continue Shopping
-          </Link>
-        </div>
-      )}
-
-      {authenticated && isLoading && <CartSkeleton />}
-
-      {authenticated && isError && (
+      {isError && (
         <CartErrorState error={error} onRetry={() => refetch()} />
       )}
 
-      {authenticated && !isLoading && !isError && cart && items.length === 0 && <CartEmptyState />}
+      {!isLoading && !isError && cart && items.length === 0 && <CartEmptyState />}
 
-      {authenticated && !isLoading && !isError && cart && items.length > 0 && (
+      {!isLoading && !isError && cart && items.length > 0 && (
         <>
           {cartLevelError && <CartValidationAlert message={cartLevelError} />}
 

@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ProductActions } from '../ProductActions';
 import { Product } from '../../types/catalog';
 import { cartApi } from '../../../../services/cartApi';
 import { ApiError } from '../../../../services/apiError';
 import { ToastProvider } from '../../../../components/ui/Toast';
+import { AuthProvider } from '../../../../context/AuthContext';
 
 vi.mock('../../../../services/cartApi', () => ({
   cartApi: { addItem: vi.fn() },
@@ -36,9 +38,13 @@ const renderActions = (product: Product) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const view = render(
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <ProductActions product={product} />
-      </ToastProvider>
+      <MemoryRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <ProductActions product={product} />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>
     </QueryClientProvider>
   );
   return { queryClient, view };
@@ -47,6 +53,14 @@ const renderActions = (product: Product) => {
 describe('ProductActions — Add to Cart (FD-10)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01',
+      name: 'Mushroom Cultivator',
+      email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER',
+      roles: ['ROLE_CUSTOMER'],
+    }));
   });
 
   it('renders an enabled Add to Cart action for a purchasable product', () => {

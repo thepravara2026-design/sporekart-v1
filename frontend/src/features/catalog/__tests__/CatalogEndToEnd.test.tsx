@@ -11,6 +11,7 @@ import { CatalogFiltersDrawer } from '../components/CatalogFiltersDrawer';
 import { catalogApi } from '../../../services/catalogApi';
 import { Product, Category, PageResponse } from '../../../types/catalog';
 import { ToastProvider } from '../../../components/ui/Toast';
+import { AuthProvider } from '../../../context/AuthContext';
 
 vi.mock('../../../services/catalogApi');
 
@@ -85,11 +86,13 @@ function Wrapper({
 }) {
   return (
     <QueryClientProvider client={createQC()}>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[route]}>
-          {children}
-        </MemoryRouter>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[route]}>
+            {children}
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
@@ -99,6 +102,14 @@ function Wrapper({
 describe('ProductListPage (FD-09)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01',
+      name: 'Mushroom Cultivator',
+      email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER',
+      roles: ['ROLE_CUSTOMER'],
+    }));
     vi.mocked(catalogApi.getCategories).mockResolvedValue({ success: true, data: mockCategoriesPage });
     vi.mocked(catalogApi.getProducts).mockResolvedValue({ success: true, data: mockProductsPage });
   });
@@ -503,7 +514,17 @@ describe('CategoryListPage (FD-09)', () => {
 // ─── ProductDetailPage ───────────────────────────────────────────────────────
 
 describe('ProductDetailPage (FD-09)', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01',
+      name: 'Mushroom Cultivator',
+      email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER',
+      roles: ['ROLE_CUSTOMER'],
+    }));
+  });
 
   it('renders product detail loading skeleton', () => {
     vi.mocked(catalogApi.getProduct).mockReturnValue(new Promise(() => {}));
@@ -564,6 +585,14 @@ describe('ProductDetailPage (FD-09)', () => {
 describe('CatalogEndToEnd — retry and state flows (FD-09)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01',
+      name: 'Mushroom Cultivator',
+      email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER',
+      roles: ['ROLE_CUSTOMER'],
+    }));
     vi.mocked(catalogApi.getCategories).mockResolvedValue({ success: true, data: mockCategoriesPage });
   });
 

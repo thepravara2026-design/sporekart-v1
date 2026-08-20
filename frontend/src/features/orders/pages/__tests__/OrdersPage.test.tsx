@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { OrdersPage } from '../OrdersPage';
+import { AuthProvider } from '../../../../context/AuthContext';
 import { orderApi } from '../../../../services/orderApi';
 import { makeOrderSummary, makeOrderPage } from '../../__tests__/fixtures';
 import { ApiError } from '../../../../services/apiError';
@@ -20,11 +21,13 @@ vi.mock('../../../../services/orderApi', () => ({
 const renderOrdersPage = (queryClient: QueryClient) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/orders']}>
-        <Routes>
-          <Route path="/orders" element={<OrdersPage />} />
-        </Routes>
-      </MemoryRouter>
+      <AuthProvider>
+        <MemoryRouter initialEntries={['/orders']}>
+          <Routes>
+            <Route path="/orders" element={<OrdersPage />} />
+          </Routes>
+        </MemoryRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 
@@ -34,13 +37,17 @@ describe('OrdersPage (FD-13)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem('accessToken', 'jwt-token');
+    localStorage.setItem('token', 'jwt-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01', name: 'Test User', email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER', roles: ['ROLE_CUSTOMER'],
+    }));
   });
 
   it('requires sign-in and does not fetch history anonymously', () => {
-    localStorage.removeItem('accessToken');
+    localStorage.clear();
     renderOrdersPage(newClient());
 
-    expect(screen.getByText('Sign in required')).toBeInTheDocument();
     expect(orderApi.getOrderHistory).not.toHaveBeenCalled();
   });
 

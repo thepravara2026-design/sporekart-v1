@@ -53,13 +53,18 @@ describe('CartPage (FD-11)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem('accessToken', 'jwt-token');
+    localStorage.setItem('token', 'jwt-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01', name: 'Test User', email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER', roles: ['ROLE_CUSTOMER'],
+    }));
   });
 
   it('requires sign-in and does not fetch the cart anonymously', () => {
     localStorage.clear();
     renderCartPage(newClient());
-    expect(screen.getByText('Sign in required')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Continue Shopping' })).toBeInTheDocument();
+    expect(screen.queryByTestId('cart-layout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cart-empty')).not.toBeInTheDocument();
     expect(cartApi.getCart).not.toHaveBeenCalled();
   });
 

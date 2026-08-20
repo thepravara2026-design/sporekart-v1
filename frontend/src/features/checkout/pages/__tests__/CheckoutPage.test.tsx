@@ -9,6 +9,7 @@ import { paymentApi, PaymentCheckoutDto, PaymentDto } from '../../../../services
 import { inventoryApi, ReservationDto } from '../../../../services/inventoryApi';
 import { authApi, UserProfileDto } from '../../../../services/authApi';
 import { ToastProvider } from '../../../../components/ui/Toast';
+import { AuthProvider } from '../../../../context/AuthContext';
 import { makeCartResponse } from '../../../cart/__tests__/fixtures';
 
 vi.mock('../../../../services/cartApi', () => ({
@@ -180,17 +181,19 @@ const makeProfile = (): UserProfileDto => ({
 const renderCheckoutPage = (queryClient: QueryClient, route = '/checkout') => {
   return render(
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[route]}>
-          <Routes>
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route
-              path="/checkout/confirmation"
-              element={<div data-testid="confirmation-route">Confirmation</div>}
-            />
-          </Routes>
-        </MemoryRouter>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[route]}>
+            <Routes>
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route
+                path="/checkout/confirmation"
+                element={<div data-testid="confirmation-route">Confirmation</div>}
+              />
+            </Routes>
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
@@ -210,13 +213,17 @@ describe('CheckoutPage (FD-12)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem('accessToken', 'jwt-token');
+    localStorage.setItem('token', 'jwt-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({ id: 'cust-1', name: 'A. Buyer', email: 'buyer@example.com', role: 'ROLE_CUSTOMER', roles: ['ROLE_CUSTOMER'] }));
   });
 
   it('requires sign-in before showing the checkout flow', async () => {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('sporekart_user');
     renderCheckoutPage(newClient());
-    expect(screen.getByText('Sign in required')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Continue Shopping' })).toBeInTheDocument();
+    expect(screen.queryByTestId('checkout-shipping-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('checkout-stepper')).not.toBeInTheDocument();
   });
 
   it('shows the empty cart state when the cart is empty', async () => {

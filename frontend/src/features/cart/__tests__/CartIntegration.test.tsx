@@ -117,6 +117,11 @@ describe('Cart Purchase Integration Flows (FD-11)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem('accessToken', 'jwt-token');
+    localStorage.setItem('token', 'jwt-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01', name: 'Test User', email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER', roles: ['ROLE_CUSTOMER'],
+    }));
     vi.mocked(catalogApi.getCategories).mockResolvedValue({ success: true, data: categoryPages() });
     vi.mocked(catalogApi.getProducts).mockResolvedValue({ success: true, data: catalogPages() });
     vi.mocked(catalogApi.getProduct).mockResolvedValue({ success: true, data: mockProduct });

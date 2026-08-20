@@ -1,8 +1,10 @@
 import { FC, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Product, ProductVariant } from '../types/catalog';
 import { ProductQuantity } from './ProductQuantity';
 import { Button } from '../../../components/ui/Button';
 import { useAddToCart } from '../hooks/useAddToCart';
+import { useAuth } from '../../../context/AuthContext';
 import { isProductPurchasable, getStatusLabel } from '../utils/catalogUtils';
 import { ShoppingCart } from 'lucide-react';
 
@@ -28,6 +30,8 @@ export const ProductActions: FC<ProductActionsProps> = ({
   const [localQuantity, setLocalQuantity] = useState(1);
   const ownMutation = useAddToCart();
   const mutation = mutationProp ?? ownMutation;
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const quantity = quantityProp ?? localQuantity;
   const setQuantity = onQuantityChangeProp ?? setLocalQuantity;
@@ -39,6 +43,10 @@ export const ProductActions: FC<ProductActionsProps> = ({
 
   const handleAddToCart = () => {
     if (disabled) return;
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: window.location.pathname } } });
+      return;
+    }
     const payload: { productId: string; quantity: number; variantId?: string } = {
       productId: product.id,
       quantity,

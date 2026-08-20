@@ -1,12 +1,11 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { PageShell } from '../../../components/layout/PageShell';
 import { Breadcrumb } from '../../../components/ui/Breadcrumb';
 import { Card, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { CartValidationAlert } from '../../cart/components/CartValidationAlert';
 import { CartEmptyState } from '../../cart/components/CartEmptyState';
 import { useCart } from '../../cart/hooks/useCart';
-import { isAuthenticated } from '../../cart/utils/cartUtils';
+import { useAuth } from '../../../context/AuthContext';
 import { CheckoutStepper } from '../components/CheckoutStepper';
 import { CheckoutPageHeader } from '../components/CheckoutPageHeader';
 import { CustomerInformation } from '../components/CustomerInformation';
@@ -55,7 +54,7 @@ export const CheckoutPage: FC = () => {
 
   const cart = cartResponse?.data;
   const items = cart?.items ?? [];
-  const authenticated = isAuthenticated();
+  const { isAuthenticated: authenticated } = useAuth();
   const preview = previewMutation.data?.data;
 
   const customerName = useMemo(() => {
@@ -126,21 +125,6 @@ export const CheckoutPage: FC = () => {
 
   return (
     <PageShell title="Checkout" breadcrumbs={breadcrumbs} className="checkout-page">
-      {!authenticated && (
-        <>
-          <CartValidationAlert
-            variant="warning"
-            title="Sign in required"
-            message="Sign in to complete checkout. Orders are tied to your authenticated account."
-          />
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-            <Link to="/products" className="btn btn-secondary btn-sm">
-              Continue Shopping
-            </Link>
-          </div>
-        </>
-      )}
-
       {authenticated && isLoading && <CheckoutSkeleton />}
 
       {authenticated && isError && <CheckoutErrorState error={error} onRetry={() => refetch()} />}

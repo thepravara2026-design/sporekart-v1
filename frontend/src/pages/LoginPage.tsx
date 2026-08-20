@@ -118,6 +118,11 @@ export const LoginPage: FC = () => {
               Admin
             </Button>
 
+            <Button variant="outline" onClick={() => handlePresetSelect('customer')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
+              <UserCheck size={14} style={{ marginRight: '6px', color: '#059669' }} />
+              Customer
+            </Button>
+
             <Button variant="outline" onClick={() => handlePresetSelect('grower')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
               <UserCheck size={14} style={{ marginRight: '6px', color: '#16a34a' }} />
               Grower

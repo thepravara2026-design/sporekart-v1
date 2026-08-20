@@ -8,6 +8,7 @@ import { cartApi } from '../../../../services/cartApi';
 import { Product } from '../../../../types/catalog';
 import { ApiError } from '../../../../services/apiError';
 import { ToastProvider } from '../../../../components/ui/Toast';
+import { AuthProvider } from '../../../../context/AuthContext';
 
 vi.mock('../../../../services/catalogApi', () => ({
   catalogApi: {
@@ -47,13 +48,15 @@ const renderPage = (productId = 'prod-99') => {
   });
   const ui = (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[`/products/${productId}`]}>
-          <Routes>
-            <Route path="/products/:productId" element={<ProductDetailPage />} />
-          </Routes>
-        </MemoryRouter>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[`/products/${productId}`]}>
+            <Routes>
+              <Route path="/products/:productId" element={<ProductDetailPage />} />
+            </Routes>
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
   const view = render(ui);
@@ -63,6 +66,11 @@ const renderPage = (productId = 'prod-99') => {
 describe('ProductDetailPage (FD-10)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.setItem('token', 'jwt-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01', name: 'Test User', email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER', roles: ['ROLE_CUSTOMER'],
+    }));
   });
 
   it('renders the loading skeleton while the product query is pending', () => {

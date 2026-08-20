@@ -9,7 +9,6 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { CheckCircle2, Package, MapPin } from 'lucide-react';
 import { useOrderByReference } from '../hooks/useOrder';
 import { formatPrice } from '../../catalog/utils/catalogUtils';
-import { isAuthenticated } from '../../cart/utils/cartUtils';
 import { OrderStatus, getOrderStatusLabel } from '../utils/orderStatus';
 import { getCheckoutErrorMessage } from '../utils/checkoutUtils';
 
@@ -21,28 +20,12 @@ import { getCheckoutErrorMessage } from '../utils/checkoutUtils';
 export const OrderConfirmationPage: FC = () => {
   const [searchParams] = useSearchParams();
   const orderNumber = searchParams.get('orderNumber') ?? '';
-  const authenticated = isAuthenticated();
 
   const { data: orderResponse, isLoading, isError, error } = useOrderByReference(orderNumber);
 
   const breadcrumbs = (
     <Breadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Order Confirmation' }]} />
   );
-
-  if (!authenticated) {
-    return (
-      <PageShell title="Order Confirmation" breadcrumbs={breadcrumbs}>
-        <Alert variant="warning" title="Sign in required">
-          Sign in to view your order confirmation.
-        </Alert>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-          <Link to="/products" className="btn btn-secondary btn-sm">
-            Continue Shopping
-          </Link>
-        </div>
-      </PageShell>
-    );
-  }
 
   if (!orderNumber) {
     return (

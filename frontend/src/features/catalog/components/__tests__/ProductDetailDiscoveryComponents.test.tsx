@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   ProductQuantity,
@@ -16,6 +16,7 @@ import { Product } from '../../types/catalog';
 import { cartApi } from '../../../../services/cartApi';
 import { catalogApi } from '../../../../services/catalogApi';
 import { ToastProvider } from '../../../../components/ui/Toast';
+import { AuthProvider } from '../../../../context/AuthContext';
 
 vi.mock('../../../../services/cartApi', () => ({
   cartApi: {
@@ -55,6 +56,14 @@ describe('Product Detail & Discovery Components (Sprint FD-07)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01',
+      name: 'Mushroom Cultivator',
+      email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER',
+      roles: ['ROLE_CUSTOMER'],
+    }));
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -89,9 +98,13 @@ describe('Product Detail & Discovery Components (Sprint FD-07)', () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <ProductActions product={mockProduct} />
-        </ToastProvider>
+        <MemoryRouter>
+          <AuthProvider>
+            <ToastProvider>
+              <ProductActions product={mockProduct} />
+            </ToastProvider>
+          </AuthProvider>
+        </MemoryRouter>
       </QueryClientProvider>
     );
 
@@ -128,11 +141,13 @@ describe('Product Detail & Discovery Components (Sprint FD-07)', () => {
   it('renders ProductInfo composing product details and actions', () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <BrowserRouter>
-            <ProductInfo product={mockProduct} />
-          </BrowserRouter>
-        </ToastProvider>
+        <MemoryRouter>
+          <AuthProvider>
+            <ToastProvider>
+              <ProductInfo product={mockProduct} />
+            </ToastProvider>
+          </AuthProvider>
+        </MemoryRouter>
       </QueryClientProvider>
     );
 

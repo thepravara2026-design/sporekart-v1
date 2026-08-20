@@ -9,6 +9,7 @@ import { cartApi } from '../../../services/cartApi';
 import { ApiError } from '../../../services/apiError';
 import { Product, Category, PageResponse } from '../../../types/catalog';
 import { ToastProvider } from '../../../components/ui/Toast';
+import { AuthProvider } from '../../../context/AuthContext';
 
 vi.mock('../../../services/catalogApi');
 vi.mock('../../../services/cartApi', () => ({
@@ -94,11 +95,13 @@ function createQueryClient() {
 function Wrapper({ children, route = '/products' }: { children: React.ReactNode; route?: string }) {
   return (
     <QueryClientProvider client={createQueryClient()}>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[route]}>
-          {children}
-        </MemoryRouter>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[route]}>
+            {children}
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
@@ -113,6 +116,14 @@ const fullRoutes = (
 describe('Product Purchase Integration Flow (FD-10)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('sporekart_user', JSON.stringify({
+      id: 'usr-customer-01',
+      name: 'Mushroom Cultivator',
+      email: 'customer@sporekart.com',
+      role: 'ROLE_CUSTOMER',
+      roles: ['ROLE_CUSTOMER'],
+    }));
     vi.mocked(catalogApi.getCategories).mockResolvedValue({ success: true, data: mockCategoriesPage });
     vi.mocked(catalogApi.getProducts).mockResolvedValue({ success: true, data: mockProductsPage });
   });
@@ -124,9 +135,11 @@ describe('Product Purchase Integration Flow (FD-10)', () => {
     const queryClient = createQueryClient();
     render(
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <MemoryRouter initialEntries={['/products']}>{fullRoutes}</MemoryRouter>
-        </ToastProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <MemoryRouter initialEntries={['/products']}>{fullRoutes}</MemoryRouter>
+          </ToastProvider>
+        </AuthProvider>
       </QueryClientProvider>
     );
 

@@ -78,10 +78,15 @@ describe('OrderConfirmationPage (FD-11)', () => {
     localStorage.setItem('accessToken', 'jwt-token');
   });
 
-  it('requires sign-in', () => {
+  it('handles unauthenticated API failure gracefully', async () => {
     localStorage.removeItem('accessToken');
+    vi.mocked(orderApi.getOrderByReference).mockRejectedValue(
+      new ApiError('Unauthorized', 'UNAUTHORIZED', 401)
+    );
+
     renderConfirmation(newClient(), '/checkout/confirmation?orderNumber=ORD-2026-000001');
-    expect(screen.getByText('Sign in required')).toBeInTheDocument();
+
+    expect(await screen.findByText('Unable to load your order')).toBeInTheDocument();
   });
 
   it('shows a helpful state when no order number is present', () => {
