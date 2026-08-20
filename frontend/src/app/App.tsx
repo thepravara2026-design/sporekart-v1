@@ -178,73 +178,13 @@ export const App: FC = () => {
                   <Route path="products/:productId" element={<ProductDetailPage />} />
                   <Route path="categories" element={<CategoryListPage />} />
 
-                  {/* Customer Commerce Routes — Protected ROLE_CUSTOMER */}
-                  <Route
-                    path="cart"
-                    element={
-                      <ProtectedRoute>
-                        <RequireRole roles={['ROLE_CUSTOMER']}>
-                          <CartPage />
-                        </RequireRole>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="checkout"
-                    element={
-                      <ProtectedRoute>
-                        <RequireRole roles={['ROLE_CUSTOMER']}>
-                          <CheckoutPage />
-                        </RequireRole>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="checkout/confirmation"
-                    element={
-                      <ProtectedRoute>
-                        <RequireRole roles={['ROLE_CUSTOMER']}>
-                          <OrderConfirmationPage />
-                        </RequireRole>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="orders"
-                    element={
-                      <ProtectedRoute>
-                        <RequireRole roles={['ROLE_CUSTOMER']}>
-                          <Suspense fallback={<RouteFallback />}>
-                            <OrdersPage />
-                          </Suspense>
-                        </RequireRole>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="orders/:orderReference"
-                    element={
-                      <ProtectedRoute>
-                        <RequireRole roles={['ROLE_CUSTOMER']}>
-                          <Suspense fallback={<RouteFallback />}>
-                            <OrderDetailPage />
-                          </Suspense>
-                        </RequireRole>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="orders/:orderReference/return-request"
-                    element={
-                      <ProtectedRoute>
-                        <RequireRole roles={['ROLE_CUSTOMER']}>
-                          <Suspense fallback={<RouteFallback />}>
-                            <ReturnRequestPage />
-                          </Suspense>
-                        </RequireRole>
-                      </ProtectedRoute>
-                    }
-                  />
+                  {/* Customer Commerce Routes */}
+                  <Route path="cart" element={<CartPage />} />
+                  <Route path="checkout" element={<CheckoutPage />} />
+                  <Route path="checkout/confirmation" element={<OrderConfirmationPage />} />
+                  <Route path="orders" element={<Suspense fallback={<RouteFallback />}><OrdersPage /></Suspense>} />
+                  <Route path="orders/:orderReference" element={<Suspense fallback={<RouteFallback />}><OrderDetailPage /></Suspense>} />
+                  <Route path="orders/:orderReference/return-request" element={<Suspense fallback={<RouteFallback />}><ReturnRequestPage /></Suspense>} />
                   <Route
                     path="health"
                     element={
