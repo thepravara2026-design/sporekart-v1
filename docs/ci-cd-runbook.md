@@ -15,14 +15,14 @@ CHECKOUT ──> BACKEND BUILD & TEST ──> FRONTEND INSTALL & BUILD ──> M
 1. **Checkout**: Checks out source code from `main` or release tags.
 2. **Backend Build & Test**:
    - Sets up JDK 21 (Temurin).
-   - Runs `mvn clean test` (Enforces 295/295 tests passing).
+   - Runs `mvn clean test` (Enforces 835 tests passing).
    - Runs `mvn package -DskipTests` to produce `sporekart-backend-0.1.0-SNAPSHOT.jar`.
 3. **Frontend Build**:
    - Sets up Node.js 20.
    - Runs `npm ci` (Uses strict `package-lock.json`).
    - Runs `npm run build` to output production SPA bundle in `frontend/dist`.
 4. **Database Migration Verification**:
-   - Validates Flyway migration scripts `V1` through `V19` for SQL syntax and naming conventions.
+   - Validates Flyway migration scripts `V1` through `V45` for SQL syntax and naming conventions.
 5. **Docker Build & Security Scan**:
    - Builds `sporekart-backend:latest` using `infrastructure/docker/backend.Dockerfile`.
    - Builds `sporekart-frontend:latest` using `infrastructure/docker/frontend.Dockerfile`.

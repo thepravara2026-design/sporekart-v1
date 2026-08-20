@@ -11,31 +11,31 @@ The release manifest (`release-manifest.json`) provides immutable traceability f
 ```json
 {
   "application": "sporekart-platform",
-  "version": "3.0.0-RELEASE",
-  "gitCommit": "f0339a4",
-  "buildTimestamp": "2026-08-15T17:55:00Z",
+  "version": "3.0.0-SNAPSHOT",
+  "gitCommit": "b69e7c2",
+  "buildTimestamp": "2026-08-19T19:24:09Z",
   "environment": "production",
   "artifacts": {
     "backend": {
       "jarName": "sporekart-backend-0.1.0-SNAPSHOT.jar",
-      "dockerImage": "sporekart-backend:3.0.0-RELEASE"
+      "dockerImage": "sporekart-backend:3.0.0-SNAPSHOT"
     },
     "frontend": {
       "distFolder": "frontend/dist",
-      "dockerImage": "sporekart-frontend:3.0.0-RELEASE"
+      "dockerImage": "sporekart-frontend:3.0.0-SNAPSHOT"
     }
   },
   "database": {
     "engine": "PostgreSQL 16",
     "migrationTool": "Flyway",
-    "currentSchemaVersion": "19"
+    "currentSchemaVersion": "45"
   },
   "qualityGates": {
-    "backendTestStatus": "PASS (295/295 passing)",
+    "backendTestStatus": "PASS (835/835)",
     "frontendBuildStatus": "PASS",
-    "dockerBuildStatus": "PASS",
-    "containerSecurityStatus": "PASS (non-root sporekart user)",
-    "postDeploymentSmokeTestStatus": "PASS"
+    "dockerBuildStatus": "NOT VERIFIED",
+    "containerSecurityStatus": "NOT VERIFIED",
+    "postDeploymentSmokeTestStatus": "NOT VERIFIED"
   }
 }
 ```

@@ -50,5 +50,5 @@ Catalog DOES NOT own:
 
 ## 4. Verification & Testing Commands
 - **Backend Tests**: `mvn clean test` (50 tests passing)
-- **Frontend Tests**: `npm run test` (20 tests passing)
+- **Frontend Tests**: `npm run test` (451 tests passing)
 - **Frontend Build**: `npm run build` (`tsc && vite build`)

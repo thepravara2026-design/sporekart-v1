@@ -1,5 +1,7 @@
 # SPOREKART v3.0 — SPRINT 7A AUDIT REPORT
 
+> **STATUS: SUPERSEDED (historical audit record).** Figures below reflect the repository state at the time of this audit (Aug 17, 2026) and are **not** current. The Training Module gap noted below has since been implemented (migrations V31–V41). Current authoritative figures: backend test suite **835** tests, frontend **451** tests, Flyway schema **V45**. See `release-manifest.json`, `README.md`, and `docs/release-manifest.md` for live values.
+
 **Sprint:** 7A — Entry Audit, Architecture Reconciliation & Implementation Baseline  
 **Date:** August 17, 2026  
 **Status:** PASS WITH FINDINGS  
