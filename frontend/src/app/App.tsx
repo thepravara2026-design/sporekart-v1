@@ -2,8 +2,6 @@ import { FC, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
-import { ProtectedRoute } from '../components/auth/ProtectedRoute';
-import { RequireRole } from '../components/auth/RequireRole';
 
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ToastProvider } from '../components/ui/Toast';
@@ -88,18 +86,10 @@ export const App: FC = () => {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-                {/* Master Admin Portal (FD-16) — Protected ROLE_ADMIN */}
+                {/* Master Admin Portal (FD-16) */}
                 <Route
                   path="admin"
-                  element={
-                    <ProtectedRoute>
-                      <RequireRole roles={['ROLE_ADMIN']}>
-                        <Suspense fallback={<RouteFallback />}>
-                          <AdminLayout />
-                        </Suspense>
-                      </RequireRole>
-                    </ProtectedRoute>
-                  }
+                  element={<Suspense fallback={<RouteFallback />}><AdminLayout /></Suspense>}
                 >
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
@@ -111,35 +101,19 @@ export const App: FC = () => {
                   <Route path="notifications" element={<NotificationOperationsConsole />} />
                 </Route>
 
-                {/* Trainee Training Portal (FD-13) — Protected ROLE_TRAINEE / ROLE_GROWER / ROLE_ADMIN */}
+                {/* Trainee Training Portal (FD-13) */}
                 <Route
                   path="training"
-                  element={
-                    <ProtectedRoute>
-                      <RequireRole roles={['ROLE_TRAINEE', 'ROLE_GROWER', 'ROLE_ADMIN']}>
-                        <Suspense fallback={<RouteFallback />}>
-                          <TrainingLayout />
-                        </Suspense>
-                      </RequireRole>
-                    </ProtectedRoute>
-                  }
+                  element={<Suspense fallback={<RouteFallback />}><TrainingLayout /></Suspense>}
                 >
                   <Route index element={<TraineeTrainingConsole />} />
                   <Route path="console" element={<TraineeTrainingConsole />} />
                 </Route>
 
-                {/* Grower Portal (FD-14) — Protected ROLE_GROWER / ROLE_ADMIN */}
+                {/* Grower Portal (FD-14) */}
                 <Route
                   path="grower"
-                  element={
-                    <ProtectedRoute>
-                      <RequireRole roles={['ROLE_GROWER', 'ROLE_ADMIN']}>
-                        <Suspense fallback={<RouteFallback />}>
-                          <GrowerLayout />
-                        </Suspense>
-                      </RequireRole>
-                    </ProtectedRoute>
-                  }
+                  element={<Suspense fallback={<RouteFallback />}><GrowerLayout /></Suspense>}
                 >
                   <Route index element={<GrowerDashboardPage />} />
                   <Route path="profile" element={<GrowerProfilePage />} />
@@ -151,18 +125,10 @@ export const App: FC = () => {
                   <Route path="settings" element={<GrowerSettingsPage />} />
                 </Route>
 
-                {/* Seller Portal (FD-15) — Protected ROLE_SELLER / ROLE_GROWER / ROLE_ADMIN */}
+                {/* Seller Portal (FD-15) */}
                 <Route
                   path="seller"
-                  element={
-                    <ProtectedRoute>
-                      <RequireRole roles={['ROLE_SELLER', 'ROLE_GROWER', 'ROLE_ADMIN']}>
-                        <Suspense fallback={<RouteFallback />}>
-                          <SellerDashboardPage />
-                        </Suspense>
-                      </RequireRole>
-                    </ProtectedRoute>
-                  }
+                  element={<Suspense fallback={<RouteFallback />}><SellerDashboardPage /></Suspense>}
                 >
                   <Route index element={<SellerDashboardPage />} />
                   <Route path="dashboard" element={<SellerDashboardPage />} />
