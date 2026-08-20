@@ -135,6 +135,12 @@ export const LoginPage: FC = () => {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>New to Sporekart? </span>
+            <Link to="/register" style={{ fontSize: '0.875rem', color: '#059669', textDecoration: 'none', fontWeight: 600 }}>
+              Create an account
+            </Link>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
             <Link to="/" style={{ fontSize: '0.875rem', color: '#059669', textDecoration: 'none' }}>
               ← Return to Storefront
             </Link>

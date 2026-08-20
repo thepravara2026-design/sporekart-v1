@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { ApiResponse, HealthStatusData, VersionInfoData } from '../types/api';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { ApiResponse, HealthStatusData, VersionInfoData, ApiErrorResponse } from '../types/api';
 import { ApiError } from './apiError';
 import { ENDPOINTS } from './endpoints';
 
@@ -25,10 +25,75 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+interface RetriableConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+let refreshPromise: Promise<string> | null = null;
+
+const getRefreshToken = (): string | null =>
+  localStorage.getItem('refreshToken');
+
+const persistRefreshedSession = (accessToken: string, refreshToken?: string): void => {
+  localStorage.setItem('accessToken', accessToken);
+  if (refreshToken) {
+    localStorage.setItem('refreshToken', refreshToken);
+  }
+};
+
+const clearSession = (): void => {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('sporekart_user');
+};
+
+const performRefresh = async (): Promise<string> => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+  const response = await axiosInstance.post<{ accessToken: string; refreshToken?: string }>(
+    ENDPOINTS.AUTH_REFRESH,
+    { refreshToken },
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+  if (!response.data?.accessToken) {
+    throw new Error('Refresh response missing access token');
+  }
+  persistRefreshedSession(response.data.accessToken, response.data.refreshToken);
+  return response.data.accessToken;
+};
+
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    return Promise.reject(ApiError.fromAxiosError(error));
+  async (error: AxiosError<ApiErrorResponse>) => {
+    const original = error.config as RetriableConfig | undefined;
+    const status = error.response?.status;
+
+    if (status !== 401 || !original || original._retry || original.url === ENDPOINTS.AUTH_REFRESH) {
+      return Promise.reject(ApiError.fromAxiosError(error));
+    }
+
+    const hasSession = Boolean(getRefreshToken());
+    if (!hasSession) {
+      return Promise.reject(ApiError.fromAxiosError(error));
+    }
+
+    try {
+      refreshPromise = refreshPromise ?? performRefresh();
+      const newToken = await refreshPromise;
+      refreshPromise = null;
+
+      original._retry = true;
+      original.headers = original.headers ?? {};
+      original.headers.Authorization = `Bearer ${newToken}`;
+      return axiosInstance(original);
+    } catch {
+      refreshPromise = null;
+      clearSession();
+      return Promise.reject(ApiError.fromAxiosError(error));
+    }
   }
 );
 

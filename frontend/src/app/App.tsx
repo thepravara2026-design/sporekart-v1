@@ -10,6 +10,7 @@ import { ToastProvider } from '../components/ui/Toast';
 import { MainLayout } from '../layouts/MainLayout';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
+import { RegisterPage } from '../pages/RegisterPage';
 import { UnauthorizedPage } from '../pages/UnauthorizedPage';
 
 import { ProductListPage } from '../features/catalog/pages/ProductListPage';
@@ -84,6 +85,7 @@ export const App: FC = () => {
               <Routes>
                 {/* Public Auth Routes */}
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                 {/* Master Admin Portal (FD-16) — Protected ROLE_ADMIN */}

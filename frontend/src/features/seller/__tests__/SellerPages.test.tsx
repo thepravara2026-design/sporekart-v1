@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it } from 'vitest';
+import { AuthProvider } from '../../../context/AuthContext';
 import { SellerDashboardPage } from '../pages/SellerDashboardPage';
 import { SellerProductManagementPage } from '../pages/SellerProductManagementPage';
 import { SellerInventoryPage } from '../pages/SellerInventoryPage';
@@ -19,7 +20,9 @@ const renderWithProviders = (ui: React.ReactElement) => {
   const testQueryClient = createTestQueryClient();
   return render(
     <QueryClientProvider client={testQueryClient}>
-      <BrowserRouter>{ui}</BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>{ui}</BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

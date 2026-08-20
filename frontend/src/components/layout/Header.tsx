@@ -1,10 +1,11 @@
 import { FC, useState, useRef } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { Menu, ShoppingCart, Sprout } from 'lucide-react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Menu, ShoppingCart, Sprout, LogOut, UserRound } from 'lucide-react';
 import { MAIN_NAVIGATION } from '../../config/navigation';
 import { MobileNav } from './MobileNav';
 import { CartDrawer } from '../../features/cart/components/CartDrawer';
 import { useCartCount } from '../../features/cart/hooks/useCartCount';
+import { useAuth } from '../../context/AuthContext';
 
 export const Header: FC = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -12,6 +13,13 @@ export const Header: FC = () => {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const cartButtonRef = useRef<HTMLButtonElement>(null);
   const cartCount = useCartCount();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="navbar" role="banner">
@@ -80,6 +88,35 @@ export const Header: FC = () => {
             </span>
           )}
         </button>
+
+        {/* Auth Controls — sign in / register when logged out, user + logout when logged in */}
+        {isAuthenticated ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span
+              data-testid="header-user-name"
+              title={user?.email}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}
+            >
+              <UserRound size={16} style={{ color: 'var(--accent-primary)' }} />
+              {user?.name}
+            </span>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleLogout}
+              aria-label="Sign out"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <LogOut size={15} />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        ) : (
+          <Link to="/login" className="btn btn-outline btn-sm nav-signin" aria-label="Sign in">
+            <UserRound size={15} />
+            <span>Sign In</span>
+          </Link>
+        )}
 
         {/* Mobile Navigation Hamburger Trigger */}
         <button

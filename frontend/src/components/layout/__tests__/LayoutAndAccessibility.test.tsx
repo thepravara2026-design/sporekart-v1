@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '../../../context/AuthContext';
 import { SkipLink } from '../SkipLink';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -28,7 +29,9 @@ const renderWithProviders = (ui: React.ReactNode) => {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>{ui}</MemoryRouter>
+      <AuthProvider>
+        <MemoryRouter>{ui}</MemoryRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

@@ -61,6 +61,9 @@ export const authApi = {
     if (response.data?.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
     }
+    if (response.data?.refreshToken) {
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+    }
     return response.data;
   },
 
@@ -68,6 +71,9 @@ export const authApi = {
     const response = await axiosInstance.post<AuthTokenResponseDto>(ENDPOINTS.AUTH_REFRESH, payload);
     if (response.data?.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
+    }
+    if (response.data?.refreshToken) {
+      localStorage.setItem('refreshToken', response.data.refreshToken);
     }
     return response.data;
   },
@@ -78,6 +84,7 @@ export const authApi = {
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     }
   },
 
@@ -87,6 +94,7 @@ export const authApi = {
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     }
   },
 

@@ -6,6 +6,7 @@ import { MainLayout } from '../../../layouts/MainLayout';
 import { ProductListPage } from '../../catalog/pages/ProductListPage';
 import { ProductDetailPage } from '../../catalog/pages/ProductDetailPage';
 import { CartPage } from '../pages/CartPage';
+import { AuthProvider } from '../../../context/AuthContext';
 import { catalogApi } from '../../../services/catalogApi';
 import { cartApi } from '../../../services/cartApi';
 import { ApiError } from '../../../services/apiError';
@@ -92,17 +93,19 @@ const cartItemFixture = () => ({
 const renderApp = (queryClient: QueryClient, route = '/products') => {
   return render(
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[route]}>
-          <Routes>
-            <Route element={<MainLayout />}>
-              <Route path="/products" element={<ProductListPage />} />
-              <Route path="/products/:productId" element={<ProductDetailPage />} />
-              <Route path="/cart" element={<CartPage />} />
-            </Route>
-          </Routes>
-        </MemoryRouter>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[route]}>
+            <Routes>
+              <Route element={<MainLayout />}>
+                <Route path="/products" element={<ProductListPage />} />
+                <Route path="/products/:productId" element={<ProductDetailPage />} />
+                <Route path="/cart" element={<CartPage />} />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
