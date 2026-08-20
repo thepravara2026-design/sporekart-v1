@@ -48,7 +48,7 @@ class FinalSprint6CertificationTestSuite {
     @Test
     @DisplayName("6M-002: Secret exposure validation")
     void test6M002_secretExposureValidation() {
-        String jwtSecret = environment.getProperty("app.security.jwt.secret", "sporekart-v3-super-secure-production-jwt-secret-key-min-512-bits-for-hmac-sha512-signing-spec");
+        String jwtSecret = environment.getProperty("app.security.jwt.secret", "");
         assertNotNull(jwtSecret, "JWT secret key must be configured via environment or property fallback");
     }
 
@@ -62,7 +62,7 @@ class FinalSprint6CertificationTestSuite {
                 for (Path file : files) {
                     String content = Files.readString(file);
                     assertFalse(content.contains("CHANGE_ME_PRODUCTION"), "Frontend src must not contain production placeholder secrets in file: " + file);
-                    assertFalse(content.contains("sporekart-v3-super-secure"), "Frontend src must not contain JWT secret in file: " + file);
+                    assertFalse(content.contains("CHANGE_ME_MIN_64_CHAR_RANDOM_SECRET_KEY_FOR_HMAC_SHA512_SIGNING_SPEC"), "Frontend src must not contain JWT placeholder secret in file: " + file);
                 }
             }
         }

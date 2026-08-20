@@ -99,7 +99,7 @@ public class SecurityHardeningIntegrationTest {
     @DisplayName("7K-006: Expired JWT token rejected with 401")
     void test006_ExpiredJwtRejected() throws Exception {
         JwtTokenProvider shortLivedProvider = new JwtTokenProvider(
-                "sporekart-v3-super-secure-production-jwt-secret-key-min-512-bits-for-hmac-sha512-signing-spec",
+                System.getenv().getOrDefault("APP_SECURITY_JWT_SECRET", "CHANGE_ME_MIN_64_CHAR_RANDOM_SECRET_KEY_FOR_HMAC_SHA512_SIGNING_SPEC"),
                 -1000L,
                 "sporekart-platform"
         );
