@@ -79,13 +79,19 @@ public class ProductionConfigurationValidator {
             );
         }
 
-        // 3. Strict Production Provider Isolation
+        // 3. Strict Production Provider Isolation: Fail startup if provider is unconfigured or MOCK in prod
         if ("prod".equalsIgnoreCase(activeProfile)) {
-            if ("MOCK".equalsIgnoreCase(paymentProvider)) {
-                log.warn("PRODUCTION WARNING: sporekart.payment.provider is configured to MOCK. In live production environments, set PAYMENT_PROVIDER=RAZORPAY.");
+            if (paymentProvider == null || paymentProvider.isBlank() || "MOCK".equalsIgnoreCase(paymentProvider)) {
+                throw new IllegalStateException(
+                    "CRITICAL PRODUCTION CONFIGURATION ERROR: Active profile is 'prod' but sporekart.payment.provider is unconfigured or set to MOCK. " +
+                    "Set PAYMENT_PROVIDER environment variable (e.g. RAZORPAY)."
+                );
             }
-            if ("MOCK".equalsIgnoreCase(shippingProvider)) {
-                log.warn("PRODUCTION WARNING: sporekart.shipping.provider is configured to MOCK. In live production environments, set SHIPPING_PROVIDER=SHIPROCKET.");
+            if (shippingProvider == null || shippingProvider.isBlank() || "MOCK".equalsIgnoreCase(shippingProvider)) {
+                throw new IllegalStateException(
+                    "CRITICAL PRODUCTION CONFIGURATION ERROR: Active profile is 'prod' but sporekart.shipping.provider is unconfigured or set to MOCK. " +
+                    "Set SHIPPING_PROVIDER environment variable (e.g. SHIPROCKET)."
+                );
             }
         }
 
