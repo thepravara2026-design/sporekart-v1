@@ -61,6 +61,24 @@ public class SecurityConfig {
     }
 
     @Bean
+    @org.springframework.core.annotation.Order(1)
+    @org.springframework.context.annotation.Profile("dev")
+    public SecurityFilterChain h2ConsoleSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/h2-console/**")
+            .csrf(AbstractHttpConfigurer::disable)
+            .headers(headers -> {
+                headers.frameOptions(frame -> frame.sameOrigin());
+                headers.contentSecurityPolicy(csp -> csp.policyDirectives(
+                        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src 'self'; img-src 'self' data:;"
+                ));
+            })
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+        return http.build();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
@@ -101,6 +119,7 @@ public class SecurityConfig {
                         "/actuator/health/**",
                         "/actuator/info",
                         "/h2-console/**",
+                        "/favicon.ico",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html",

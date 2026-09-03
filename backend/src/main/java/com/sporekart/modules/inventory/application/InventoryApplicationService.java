@@ -460,7 +460,15 @@ public class InventoryApplicationService {
 
     @Transactional(readOnly = true)
     public List<InventoryItemDto> listAllInventory() {
+        return listAllInventory(org.springframework.data.domain.PageRequest.of(0, 50));
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryItemDto> listAllInventory(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Pageable p = pageable != null ? pageable : org.springframework.data.domain.PageRequest.of(0, 50);
         return inventoryRepository.findAll().stream()
+                .skip((long) p.getPageNumber() * p.getPageSize())
+                .limit(p.getPageSize())
                 .map(InventoryItemDto::fromDomain)
                 .toList();
     }

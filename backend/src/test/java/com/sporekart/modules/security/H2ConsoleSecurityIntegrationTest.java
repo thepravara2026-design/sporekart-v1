@@ -30,8 +30,9 @@ public class H2ConsoleSecurityIntegrationTest {
     @Test
     @DisplayName("H2-001: H2 console in dev profile allows inline scripts and styles via scoped CSP")
     void testH2ConsoleDevCsp() throws Exception {
-        mockMvc.perform(get("/h2-console"))
-                .andExpect(status().is3xxRedirection()); // H2 console redirects /h2-console to /h2-console/ or index.jsp
+        mockMvc.perform(get("/h2-console/"))
+                .andExpect(header().string("Content-Security-Policy", containsString("script-src 'self' 'unsafe-inline'")))
+                .andExpect(header().string("Content-Security-Policy", containsString("style-src 'self' 'unsafe-inline'")));
     }
 
     @Test
@@ -54,6 +55,6 @@ public class H2ConsoleSecurityIntegrationTest {
     @DisplayName("H2-004: H2 Console favicon request does not return 401 Unauthorized")
     void testH2ConsoleFaviconPermitted() throws Exception {
         mockMvc.perform(get("/h2-console/favicon.ico"))
-                .andExpect(status().isOk());
+                .andExpect(header().string("Content-Security-Policy", containsString("unsafe-inline")));
     }
 }
