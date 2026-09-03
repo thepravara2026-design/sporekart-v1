@@ -9,73 +9,17 @@ export interface User {
   roles: string[];
 }
 
-export type PresetRoleType = 'admin' | 'grower' | 'trainee' | 'customer' | 'dual';
-
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginRequestDto) => Promise<void>;
-  loginWithPreset: (preset: PresetRoleType) => void;
   logout: () => void;
   hasRole: (role: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const PRESET_USERS: Record<PresetRoleType, { user: User; token: string }> = {
-  admin: {
-    user: {
-      id: 'usr-admin-01',
-      name: 'System Admin',
-      email: 'admin@sporekart.com',
-      role: 'ROLE_ADMIN',
-      roles: ['ROLE_ADMIN'],
-    },
-    token: 'mock-jwt-admin-token',
-  },
-  grower: {
-    user: {
-      id: 'usr-grower-01',
-      name: 'Preetham Bio Farms',
-      email: 'grower@sporekart.com',
-      role: 'ROLE_GROWER',
-      roles: ['ROLE_GROWER', 'ROLE_SELLER'],
-    },
-    token: 'mock-jwt-grower-token',
-  },
-  trainee: {
-    user: {
-      id: 'usr-trainee-01',
-      name: 'Ramesh Trainee',
-      email: 'trainee@sporekart.com',
-      role: 'ROLE_TRAINEE',
-      roles: ['ROLE_TRAINEE'],
-    },
-    token: 'mock-jwt-trainee-token',
-  },
-  customer: {
-    user: {
-      id: 'usr-customer-01',
-      name: 'Mushroom Cultivator',
-      email: 'customer@sporekart.com',
-      role: 'ROLE_CUSTOMER',
-      roles: ['ROLE_CUSTOMER'],
-    },
-    token: 'mock-jwt-customer-token',
-  },
-  dual: {
-    user: {
-      id: 'usr-dual-01',
-      name: 'Grower & Trainee Combined',
-      email: 'grower.trainee@sporekart.com',
-      role: 'ROLE_GROWER',
-      roles: ['ROLE_GROWER', 'ROLE_TRAINEE', 'ROLE_SELLER'],
-    },
-    token: 'mock-jwt-dual-token',
-  },
-};
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -91,7 +35,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setUser(JSON.parse(savedUser));
       }
     } catch {
-      // Fallback cleanly on JSON error
       localStorage.removeItem('token');
       localStorage.removeItem('sporekart_user');
     } finally {
@@ -118,25 +61,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         roles: [res.role],
       };
       saveAuth(res.accessToken, userObj);
-    } catch {
-      // Fallback for dev mode login
-      const matchedPreset = credentials.email.includes('admin')
-        ? PRESET_USERS.admin
-        : credentials.email.includes('grower')
-        ? PRESET_USERS.grower
-        : credentials.email.includes('trainee')
-        ? PRESET_USERS.trainee
-        : PRESET_USERS.customer;
-      saveAuth(matchedPreset.token, matchedPreset.user);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loginWithPreset = (preset: PresetRoleType) => {
-    const data = PRESET_USERS[preset];
-    if (data) {
-      saveAuth(data.token, data.user);
     }
   };
 
@@ -150,7 +76,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const hasRole = (role: string): boolean => {
     if (!user) return false;
     if (user.role === role || user.roles?.includes(role)) return true;
-    // System admin inherits all permissions
     if (user.role === 'ROLE_ADMIN' || user.roles?.includes('ROLE_ADMIN')) return true;
     return false;
   };
@@ -163,7 +88,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         isAuthenticated: !!token && !!user,
         isLoading,
         login,
-        loginWithPreset,
         logout,
         hasRole,
       }}

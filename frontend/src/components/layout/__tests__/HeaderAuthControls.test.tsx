@@ -46,7 +46,7 @@ describe('Header auth controls', () => {
   });
 
   it('shows the signed-in user name and Sign Out button when authenticated', () => {
-    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('token', 'test-jwt-customer-token');
     localStorage.setItem(
       'sporekart_user',
       JSON.stringify({
@@ -65,7 +65,7 @@ describe('Header auth controls', () => {
   });
 
   it('logs the user out and clears the session when Sign Out is clicked', () => {
-    localStorage.setItem('token', 'mock-jwt-customer-token');
+    localStorage.setItem('token', 'test-jwt-customer-token');
     localStorage.setItem(
       'sporekart_user',
       JSON.stringify({

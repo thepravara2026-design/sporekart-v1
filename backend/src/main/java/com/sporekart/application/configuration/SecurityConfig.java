@@ -122,6 +122,9 @@ public class SecurityConfig {
                 ).hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                .requestMatchers("/api/v1/grower/**").hasAnyAuthority("GROWER", "ROLE_GROWER", "ADMIN", "ROLE_ADMIN")
+                .requestMatchers("/api/v1/seller/**").hasAnyAuthority("SELLER", "ROLE_SELLER", "ADMIN", "ROLE_ADMIN")
+                .requestMatchers("/api/v1/trainee/**").hasAnyAuthority("TRAINEE", "ROLE_TRAINEE", "ADMIN", "ROLE_ADMIN")
                 .anyRequest().authenticated()
         );
 

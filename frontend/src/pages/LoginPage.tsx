@@ -1,13 +1,13 @@
 import { FC, useState, FormEvent } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAuth, PresetRoleType } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Shield, KeyRound, UserCheck, AlertCircle } from 'lucide-react';
 
 export const LoginPage: FC = () => {
-  const { login, loginWithPreset, isAuthenticated } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,22 +34,25 @@ export const LoginPage: FC = () => {
       await login({ email, password });
       navigate(from, { replace: true });
     } catch {
-      setError('Authentication failed. Check your credentials or try a preset login.');
+      setError('Authentication failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePresetSelect = (preset: PresetRoleType) => {
-    loginWithPreset(preset);
-    const targetMap: Record<PresetRoleType, string> = {
-      admin: '/admin',
-      grower: '/grower',
-      trainee: '/training',
-      customer: '/products',
-      dual: '/grower',
-    };
-    navigate(targetMap[preset] || from, { replace: true });
+  const handleQuickFill = async (presetEmail: string) => {
+    setEmail(presetEmail);
+    setPassword('password123');
+    setError(null);
+    setLoading(true);
+    try {
+      await login({ email: presetEmail, password: 'password123' });
+      navigate(from, { replace: true });
+    } catch {
+      setError('Real backend login failed for quick fill.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,7 +63,7 @@ export const LoginPage: FC = () => {
             <Shield size={32} />
           </div>
           <CardTitle>Sign in to Sporekart</CardTitle>
-          <CardDescription>Enter your credentials or use quick development persona presets</CardDescription>
+          <CardDescription>Enter your credentials to access your portal</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -108,29 +111,29 @@ export const LoginPage: FC = () => {
 
           <div style={{ margin: '2rem 0 1rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Development Persona Presets
+              Seeded Dev Accounts
             </span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <Button variant="outline" onClick={() => handlePresetSelect('admin')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
+            <Button variant="outline" onClick={() => handleQuickFill('admin1@sporekart.com')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
               <UserCheck size={14} style={{ marginRight: '6px', color: '#dc2626' }} />
               Admin
             </Button>
 
-            <Button variant="outline" onClick={() => handlePresetSelect('grower')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
+            <Button variant="outline" onClick={() => handleQuickFill('grower@sporekart.com')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
               <UserCheck size={14} style={{ marginRight: '6px', color: '#16a34a' }} />
               Grower
             </Button>
 
-            <Button variant="outline" onClick={() => handlePresetSelect('trainee')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
-              <UserCheck size={14} style={{ marginRight: '6px', color: '#2563eb' }} />
-              Trainee
+            <Button variant="outline" onClick={() => handleQuickFill('seller@sporekart.com')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
+              <UserCheck size={14} style={{ marginRight: '6px', color: '#0284c7' }} />
+              Seller
             </Button>
 
-            <Button variant="outline" onClick={() => handlePresetSelect('dual')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
-              <UserCheck size={14} style={{ marginRight: '6px', color: '#9333ea' }} />
-              Grower+Trainee
+            <Button variant="outline" onClick={() => handleQuickFill('trainee@sporekart.com')} style={{ justifyContent: 'flex-start', fontSize: '0.8125rem' }}>
+              <UserCheck size={14} style={{ marginRight: '6px', color: '#2563eb' }} />
+              Trainee
             </Button>
           </div>
 

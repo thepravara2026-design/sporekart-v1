@@ -72,7 +72,7 @@ describe('Live E2E Frontend ↔ Backend REST Integration Suite (FD-22)', () => {
   it('handles authentication API response and token payload serialization', async () => {
     const mockAuthResponse = {
       data: {
-        accessToken: 'mock-jwt-bearer-token',
+        accessToken: 'test-jwt-bearer-token',
         tokenType: 'Bearer',
         expiresIn: 3600,
         userId: 'usr-001',
@@ -84,7 +84,7 @@ describe('Live E2E Frontend ↔ Backend REST Integration Suite (FD-22)', () => {
     vi.mocked(axiosInstance.post).mockResolvedValueOnce(mockAuthResponse);
 
     const authResult = await authApi.login({ email: 'admin@sporekart.com', password: 'password123' });
-    expect(authResult.accessToken).toBe('mock-jwt-bearer-token');
+    expect(authResult.accessToken).toBe('test-jwt-bearer-token');
     expect(authResult.role).toBe('ROLE_ADMIN');
   });
 
