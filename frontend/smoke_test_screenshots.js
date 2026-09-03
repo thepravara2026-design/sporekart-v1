@@ -2,8 +2,8 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 
-const BASE_URL = 'http://localhost:5173';
-const OUTPUT_DIR = 'C:/Users/admin/.gemini/antigravity-ide/brain/ef40e8ee-a635-4662-852f-421fccd3a622/screenshots';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
+const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(process.cwd(), 'screenshots');
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
