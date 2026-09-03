@@ -7,6 +7,10 @@ import com.sporekart.modules.training.domain.AttendanceStatus;
 import com.sporekart.modules.training.domain.TrainingAttendance;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,7 +51,7 @@ public class AdminAttendanceController {
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String batchId,
             @PathVariable String scheduleId,
-            @RequestBody BulkAttendanceRequest request) {
+            @Valid @RequestBody BulkAttendanceRequest request) {
         String actor = principal != null ? principal.getUsername() : "ADMIN";
         List<TrainingAttendanceService.AttendanceItem> items = request.items().stream()
                 .map(i -> new TrainingAttendanceService.AttendanceItem(i.enrollmentId(), i.status(), i.notes()))
@@ -76,8 +80,13 @@ public class AdminAttendanceController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    public record AttendanceItemRequest(String enrollmentId, AttendanceStatus status, String notes) {}
-    public record BulkAttendanceRequest(List<AttendanceItemRequest> items) {}
+    public record AttendanceItemRequest(
+            @NotBlank(message = "enrollmentId is required") String enrollmentId,
+            @NotNull(message = "status is required") AttendanceStatus status,
+            String notes
+    ) {}
+
+    public record BulkAttendanceRequest(@NotEmpty(message = "items list cannot be empty") List<@Valid AttendanceItemRequest> items) {}
 
     public record AttendanceDto(
             String id, String enrollmentId, String scheduleId, String batchId, String traineeId,

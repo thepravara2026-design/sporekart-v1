@@ -30,4 +30,29 @@ class SecurityConfigTest {
                 .andExpect(jsonPath("$.error.path").value("/api/v1/protected-resource"))
                 .andExpect(header().exists("X-Request-ID"));
     }
+
+    @Test
+    void shouldReturnUnauthorizedForUnauthenticatedBatchEnrollmentPost() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/v1/batches/batch-1001/enrollments")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldReturnUnauthorizedForUnauthenticatedBatchDemandPost() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/v1/batches/batch-1001/demand")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldPermitPublicGetBatchesAndTrainingPrograms() throws Exception {
+        mockMvc.perform(get("/api/v1/batches")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/training-programs")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 }

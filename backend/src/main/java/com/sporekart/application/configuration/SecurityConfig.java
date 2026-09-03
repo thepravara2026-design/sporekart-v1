@@ -62,7 +62,8 @@ public class SecurityConfig {
 
     @Bean
     @org.springframework.core.annotation.Order(1)
-    @org.springframework.context.annotation.Profile("dev")
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+            name = "spring.h2.console.enabled", havingValue = "true")
     public SecurityFilterChain h2ConsoleSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/h2-console/**")
@@ -128,12 +129,10 @@ public class SecurityConfig {
                         "/api/v1/auth/register",
                         "/api/v1/auth/login",
                         "/api/v1/auth/refresh",
-                        "/api/v1/training/health",
-                        "/api/v1/training-programs",
-                        "/api/v1/training-programs/**",
-                        "/api/v1/batches",
-                        "/api/v1/batches/**"
+                        "/api/v1/training/health"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/batches", "/api/v1/batches/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/training-programs", "/api/v1/training-programs/*").permitAll()
                 .requestMatchers(
                         "/actuator/prometheus",
                         "/actuator/metrics",

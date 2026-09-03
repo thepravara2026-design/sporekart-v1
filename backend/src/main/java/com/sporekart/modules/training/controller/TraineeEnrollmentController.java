@@ -6,6 +6,7 @@ import com.sporekart.modules.training.controller.dto.CreateEnrollmentRequest;
 import com.sporekart.modules.training.controller.dto.EnrollmentResponse;
 import com.sporekart.modules.training.domain.TrainingEnrollment;
 import jakarta.validation.Valid;
+import com.sporekart.modules.security.domain.exception.AuthenticationFailedException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -70,6 +71,6 @@ public class TraineeEnrollmentController {
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             return auth.getName();
         }
-        return "ANONYMOUS_TRAINEE";
+        throw new AuthenticationFailedException("Authentication required to access trainee enrollment resources");
     }
 }

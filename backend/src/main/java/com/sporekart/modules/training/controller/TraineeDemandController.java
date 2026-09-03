@@ -1,6 +1,7 @@
 package com.sporekart.modules.training.controller;
 
 import com.sporekart.application.exception.ApiResponse;
+import com.sporekart.modules.security.domain.exception.AuthenticationFailedException;
 import com.sporekart.modules.training.application.DemandApplicationService;
 import com.sporekart.modules.training.controller.dto.DemandResponse;
 import com.sporekart.modules.training.domain.TrainingDemandRequest;
@@ -28,10 +29,17 @@ public class TraineeDemandController {
         this.demandService = demandService;
     }
 
+    private String getAuthenticatedTraineeId(Authentication auth) {
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            return auth.getName();
+        }
+        throw new AuthenticationFailedException("Authentication required to access trainee demand resources");
+    }
+
     @PostMapping("/batches/{batchId}/demand")
     public ResponseEntity<ApiResponse<DemandResponse>> createDemand(@PathVariable String batchId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String traineeId = auth.getName();
+        String traineeId = getAuthenticatedTraineeId(auth);
 
         TrainingDemandRequest demand = demandService.createDemand(batchId, traineeId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(DemandResponse.fromDomain(demand)));
@@ -43,7 +51,7 @@ public class TraineeDemandController {
             @RequestParam(name = "size", defaultValue = "10") int size,
             Pageable pageable) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String traineeId = auth.getName();
+        String traineeId = getAuthenticatedTraineeId(auth);
 
         Page<DemandResponse> responsePage = demandService.getTraineeDemands(traineeId, pageable)
                 .map(DemandResponse::fromDomain);
@@ -53,8 +61,8 @@ public class TraineeDemandController {
     @DeleteMapping("/demands/{id}")
     public ResponseEntity<ApiResponse<DemandResponse>> withdrawDemand(@PathVariable String id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String requesterId = auth.getName();
-        boolean isAdmin = auth.getAuthorities().stream()
+        String requesterId = getAuthenticatedTraineeId(auth);
+        boolean isAdmin = auth.getAuthorities() != null && auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ADMIN") || a.getAuthority().equals("ROLE_ADMIN"));
 
         TrainingDemandRequest withdrawn = demandService.withdrawDemand(id, requesterId, isAdmin);
