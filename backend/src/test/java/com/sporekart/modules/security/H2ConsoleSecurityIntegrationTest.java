@@ -57,4 +57,24 @@ public class H2ConsoleSecurityIntegrationTest {
         mockMvc.perform(get("/h2-console/favicon.ico"))
                 .andExpect(header().string("Content-Security-Policy", containsString("unsafe-inline")));
     }
+
+    @org.junit.jupiter.api.Nested
+    @SpringBootTest
+    @AutoConfigureMockMvc
+    @TestPropertySource(properties = {
+            "spring.h2.console.enabled=false"
+    })
+    static class H2ConsoleDisabledTest {
+
+        @Autowired
+        private MockMvc mockMvc;
+
+        @Test
+        @DisplayName("H2-005: When spring.h2.console.enabled=false, /h2-console is not reachable and uses default strict CSP")
+        void testH2ConsoleDisabledReturns404WithStrictCsp() throws Exception {
+            mockMvc.perform(get("/h2-console/"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(header().string("Content-Security-Policy", "default-src 'self'"));
+        }
+    }
 }
