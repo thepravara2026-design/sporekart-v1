@@ -1,4 +1,5 @@
 import { FC, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import { X, Sprout } from 'lucide-react';
 import { NavItem } from '../../config/navigation';
@@ -40,7 +41,7 @@ export const MobileNav: FC<MobileNavProps> = ({ isOpen, onClose, items, triggerR
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className="mobile-nav-overlay"
       role="dialog"
@@ -112,6 +113,7 @@ export const MobileNav: FC<MobileNavProps> = ({ isOpen, onClose, items, triggerR
           ))}
         </nav>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

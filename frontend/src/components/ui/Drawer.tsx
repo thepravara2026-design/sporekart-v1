@@ -1,4 +1,5 @@
 import { FC, ReactNode, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export interface DrawerProps {
@@ -47,7 +48,7 @@ export const Drawer: FC<DrawerProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className="drawer-overlay"
       role="presentation"
@@ -103,6 +104,7 @@ export const Drawer: FC<DrawerProps> = ({
 
         <div style={{ flex: 1, overflowY: 'auto' }}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
