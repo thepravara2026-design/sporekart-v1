@@ -195,6 +195,33 @@ public class CommerceMetricsService {
                 .increment();
     }
 
+    public void recordCircuitOpen(String provider, String channel) {
+        Counter.builder("sporekart.notifications.circuit.open")
+                .description("Total circuit breaker OPEN events")
+                .tag("provider", provider != null ? provider : "unknown")
+                .tag("channel", channel != null ? channel : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordNotificationRetry(String channel, String provider) {
+        Counter.builder("sporekart.notifications.retried")
+                .description("Total notification delivery retries scheduled")
+                .tag("channel", channel != null ? channel : "unknown")
+                .tag("provider", provider != null ? provider : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordReconciliationAttempt(String channel, String provider) {
+        Counter.builder("sporekart.notifications.reconciled")
+                .description("Total notifications processed by reconciliation worker")
+                .tag("channel", channel != null ? channel : "unknown")
+                .tag("provider", provider != null ? provider : "unknown")
+                .register(meterRegistry)
+                .increment();
+    }
+
     public void recordProviderLatency(String provider, String operation, long durationMs) {
         io.micrometer.core.instrument.Timer.builder("sporekart.provider.latency")
                 .description("External provider call latency")

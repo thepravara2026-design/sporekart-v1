@@ -114,7 +114,7 @@ public class PaymentController {
     })
     public ResponseEntity<WebhookResponseDto> processRazorpayWebhook(
             @RequestBody String rawBody,
-            @Parameter(description = "Razorpay HMAC SHA256 signature") @RequestHeader(value = "X-Razorpay-Signature", required = false) String signatureHeader
+            @Parameter(description = "Razorpay HMAC SHA256 signature") @RequestHeader(value = "X-Razorpay-Signature", required = true) String signatureHeader
     ) {
         WebhookResponseDto response = paymentApplicationService.processWebhook(PaymentProviderType.RAZORPAY, rawBody, signatureHeader);
         return ResponseEntity.ok(response);

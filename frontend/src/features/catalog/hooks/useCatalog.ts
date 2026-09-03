@@ -4,10 +4,10 @@ import { ProductQueryParams, CategoryQueryParams } from '../../../types/catalog'
 
 export const CATALOG_KEYS = {
   allProducts: ['catalog', 'products'] as const,
-  productsList: (params?: ProductQueryParams) => ['catalog', 'products', 'list', params] as const,
+  productsList: (params?: ProductQueryParams) => ['catalog', 'products', params] as const,
   productDetail: (id: string) => ['catalog', 'products', 'detail', id] as const,
   allCategories: ['catalog', 'categories'] as const,
-  categoriesList: (params?: CategoryQueryParams) => ['catalog', 'categories', 'list', params] as const,
+  categoriesList: (params?: CategoryQueryParams) => ['catalog', 'categories', params] as const,
   categoryDetail: (id: string) => ['catalog', 'categories', 'detail', id] as const,
 };
 

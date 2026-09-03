@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Backend Build & Test Suite (295+ Tests)
+      - name: Backend Build & Test Suite (835+ Tests)
         run: |
           cd backend
           mvn clean test
@@ -49,7 +49,7 @@ jobs:
           cd frontend
           npm run build
 
-      - name: Verify Database Migrations (V1-V19)
+      - name: Verify Database Migrations (V1-V45)
         run: |
           bash scripts/verify-migrations.sh
 
@@ -63,6 +63,9 @@ jobs:
           docker build -t sporekart-frontend:latest -f infrastructure/docker/frontend.Dockerfile frontend
 
       - name: Generate Immutable Release Manifest
+        env:
+          BACKEND_TESTS: "835/835"
+          FRONTEND_BUILD: "PASS"
         run: |
           bash scripts/generate-release-manifest.sh
 

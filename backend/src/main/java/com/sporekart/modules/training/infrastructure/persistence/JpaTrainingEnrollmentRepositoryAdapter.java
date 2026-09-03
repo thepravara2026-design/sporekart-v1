@@ -1,0 +1,96 @@
+package com.sporekart.modules.training.infrastructure.persistence;
+
+import com.sporekart.modules.training.domain.TrainingEnrollment;
+import com.sporekart.modules.training.domain.port.TrainingEnrollmentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Component
+public class JpaTrainingEnrollmentRepositoryAdapter implements TrainingEnrollmentRepository {
+
+    private final SpringDataTrainingEnrollmentRepository springDataRepository;
+
+    public JpaTrainingEnrollmentRepositoryAdapter(SpringDataTrainingEnrollmentRepository springDataRepository) {
+        this.springDataRepository = springDataRepository;
+    }
+
+    @Override
+    public TrainingEnrollment save(TrainingEnrollment enrollment) {
+        TrainingEnrollmentEntity entity = TrainingEnrollmentEntity.fromDomain(enrollment);
+        TrainingEnrollmentEntity saved = springDataRepository.save(entity);
+        return saved.toDomain();
+    }
+
+    @Override
+    public Optional<TrainingEnrollment> findById(String id) {
+        return springDataRepository.findById(id).map(TrainingEnrollmentEntity::toDomain);
+    }
+
+    @Override
+    public Optional<TrainingEnrollment> findByBatchIdAndTraineeId(String batchId, String traineeId) {
+        return springDataRepository.findByBatchIdAndTraineeId(batchId, traineeId).map(TrainingEnrollmentEntity::toDomain);
+    }
+
+    @Override
+    public Optional<TrainingEnrollment> findByIdempotencyKey(String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            return Optional.empty();
+        }
+        return springDataRepository.findByIdempotencyKey(idempotencyKey).map(TrainingEnrollmentEntity::toDomain);
+    }
+
+    @Override
+    public List<TrainingEnrollment> findByBatchId(String batchId) {
+        return springDataRepository.findByBatchId(batchId).stream()
+                .map(TrainingEnrollmentEntity::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<TrainingEnrollment> findByBatchId(String batchId, Pageable pageable) {
+        return springDataRepository.findByBatchId(batchId, pageable).map(TrainingEnrollmentEntity::toDomain);
+    }
+
+    @Override
+    public List<TrainingEnrollment> findByTraineeId(String traineeId) {
+        return springDataRepository.findByTraineeId(traineeId).stream()
+                .map(TrainingEnrollmentEntity::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<TrainingEnrollment> findByTraineeId(String traineeId, Pageable pageable) {
+        return springDataRepository.findByTraineeId(traineeId, pageable).map(TrainingEnrollmentEntity::toDomain);
+    }
+
+    @Override
+    public boolean existsByBatchIdAndTraineeId(String batchId, String traineeId) {
+        return springDataRepository.existsByBatchIdAndTraineeId(batchId, traineeId);
+    }
+
+    @Override
+    public long countByStatus(com.sporekart.modules.training.domain.EnrollmentStatus status) {
+        return springDataRepository.countByStatus(status);
+    }
+
+    @Override
+    public List<TrainingEnrollment> findAll() {
+        return springDataRepository.findAll().stream()
+                .map(TrainingEnrollmentEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Page<TrainingEnrollment> searchEnrollments(String batchId, com.sporekart.modules.training.domain.EnrollmentStatus status, String search, Pageable pageable) {
+        String cleanSearch = (search == null || search.isBlank()) ? null : search.trim();
+        String cleanBatchId = (batchId == null || batchId.isBlank()) ? null : batchId.trim();
+        return springDataRepository.searchEnrollments(cleanBatchId, status, cleanSearch, pageable)
+                .map(TrainingEnrollmentEntity::toDomain);
+    }
+}
+

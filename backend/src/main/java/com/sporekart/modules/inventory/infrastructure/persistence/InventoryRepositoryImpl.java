@@ -55,4 +55,16 @@ public class InventoryRepositoryImpl implements InventoryRepository {
                 .map(InventoryItemEntity::toDomain)
                 .toList();
     }
+
+    @Override
+    public List<InventoryItem> findAllByGrowerId(String growerId) {
+        return jpaRepository.findAllByGrowerId(growerId).stream()
+                .map(InventoryItemEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<InventoryItem> findBySkuAndGrowerId(String sku, String growerId) {
+        return jpaRepository.findBySkuAndGrowerId(sku, growerId).map(InventoryItemEntity::toDomain);
+    }
 }

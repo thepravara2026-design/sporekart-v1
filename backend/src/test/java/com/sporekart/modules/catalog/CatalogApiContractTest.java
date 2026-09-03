@@ -51,7 +51,7 @@ class CatalogApiContractTest {
                 "Contract Test Mushroom",
                 "Organic mushroom for API contract verification",
                 new BigDecimal("39.99"),
-                "USD",
+                "INR",
                 category.id()
         );
         testProduct = productApplicationService.createProduct(command);
@@ -90,7 +90,7 @@ class CatalogApiContractTest {
                 .andExpect(jsonPath("$.data.content[0].sku").exists())
                 .andExpect(jsonPath("$.data.content[0].name").exists())
                 .andExpect(jsonPath("$.data.content[0].price").isNumber())
-                .andExpect(jsonPath("$.data.content[0].currency").value("USD"))
+                .andExpect(jsonPath("$.data.content[0].currency").value("INR"))
                 .andExpect(jsonPath("$.data.content[0].status").exists());
     }
 

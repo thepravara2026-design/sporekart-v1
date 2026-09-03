@@ -8,12 +8,11 @@ This document defines the mandatory pre-deployment, deployment, post-deployment,
 - [ ] Source tree clean on target release branch (`git status`).
 - [ ] Maven clean compile and packaging succeeds (`mvn clean package`).
 - [ ] Frontend TypeScript compile and production asset build succeeds (`npm run build`).
-- [ ] Full backend regression test suite passes (319/319 tests).
-- [ ] Frontend Vitest suite passes (20/20 tests).
-- [ ] Hardening suites pass (Security 35/35, Contract 25/25, Persistence 18/18, Catalog 15/15, Provider 20/20, Observability 20/20, Release 20/20).
+- [ ] Full backend regression test suite passes (835 tests).
+- [ ] Frontend Vitest suite passes (451 tests).
 - [ ] Zero secret credentials checked into repository or bundled in static frontend assets.
 - [ ] Production environment secrets configured in external secrets manager (PostgreSQL, JWT secret, Razorpay, Shiprocket).
-- [ ] Flyway database migrations (V1 through V23) validated against target PostgreSQL instance.
+- [ ] Flyway database migrations (V1 through V45) validated against target PostgreSQL instance.
 
 ---
 

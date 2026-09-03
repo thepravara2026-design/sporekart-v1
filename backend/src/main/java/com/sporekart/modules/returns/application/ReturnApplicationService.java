@@ -105,10 +105,6 @@ public class ReturnApplicationService {
             throw new ReturnEligibilityException(eligibility.ineligibilityReason(), "Order is not eligible for return: " + eligibility.ineligibilityReason());
         }
 
-        // Validate items & requested quantities
-        Map<UUID, ReturnEligibilityService.ItemEligibilityResult> itemEligibilityMap = eligibility.itemEligibilities().stream()
-                .collect(Collectors.toMap(ReturnEligibilityService.ItemEligibilityResult::orderItemId, e -> e));
-
         String returnRef = referenceGenerator.generateReturnReference();
         Return newReturn = Return.createNewRequest(
                 returnRef,
@@ -121,34 +117,7 @@ public class ReturnApplicationService {
                 "v1.0"
         );
 
-        for (CreateReturnRequestDto.CreateReturnItemInput itemInput : requestDto.items()) {
-            ReturnEligibilityService.ItemEligibilityResult itemEligibility = itemEligibilityMap.get(itemInput.orderItemId());
-            if (itemEligibility == null || !itemEligibility.isReturnable()) {
-                throw new ReturnEligibilityException("ITEM_NOT_RETURNABLE", "Item is not returnable: " + itemInput.orderItemId());
-            }
-
-            if (itemInput.quantity() <= 0 || itemInput.quantity() > itemEligibility.returnableQuantity()) {
-                throw new ReturnEligibilityException("INVALID_QUANTITY", "Requested quantity " + itemInput.quantity() + " exceeds returnable limit " + itemEligibility.returnableQuantity());
-            }
-
-            OrderItem orderItem = order.getItems().stream()
-                    .filter(oi -> oi.getId().equals(itemInput.orderItemId()))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid order item ID: " + itemInput.orderItemId()));
-
-            ReturnItem returnItem = ReturnItem.createNew(
-                    newReturn.getId(),
-                    orderItem.getId(),
-                    orderItem.getProductId(),
-                    orderItem.getSku(),
-                    orderItem.getProductNameSnapshot(),
-                    itemInput.quantity(),
-                    orderItem.getUnitPrice(),
-                    itemInput.itemReasonCode() != null ? itemInput.itemReasonCode() : requestDto.reasonCode()
-            );
-
-            newReturn.addItem(returnItem);
-        }
+        buildAndValidateReturnItems(requestDto, order, eligibility, newReturn);
 
         Return saved = returnRepository.save(newReturn);
         log.info("Successfully created return record {} for order {}", saved.getReturnReference(), saved.getOrderReference());
@@ -254,6 +223,18 @@ public class ReturnApplicationService {
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found for order: " + returnAgg.getOrderId()));
 
         String idempotencyKey = "RFD-" + returnAgg.getReturnReference();
+
+        // Enforce financial invariant: cumulative refunds cannot exceed payment amount
+        List<RefundRecordEntity> existingOrderRefunds = refundRecordRepository.findByOrderId(returnAgg.getOrderId());
+        BigDecimal cumulativeRefunded = existingOrderRefunds.stream()
+                .filter(r -> "PROCESSED".equals(r.getStatus()) && !r.getIdempotencyKey().equals(idempotencyKey))
+                .map(RefundRecordEntity::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (cumulativeRefunded.add(refundAmount).compareTo(payment.getAmount()) > 0) {
+            throw new IllegalArgumentException("Cumulative refund amount (" + cumulativeRefunded.add(refundAmount) + ") exceeds original payment amount (" + payment.getAmount() + ")");
+        }
+
         Optional<RefundRecordEntity> existingRefundOpt = refundRecordRepository.findByIdempotencyKey(idempotencyKey);
 
         RefundRecordEntity refundRecord;
@@ -418,5 +399,39 @@ public class ReturnApplicationService {
                 .map(instant -> OffsetDateTime.ofInstant(instant, java.time.ZoneOffset.UTC))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void buildAndValidateReturnItems(CreateReturnRequestDto requestDto, Order order, ReturnEligibilityService.OrderEligibilityResult eligibility, Return newReturn) {
+        Map<UUID, ReturnEligibilityService.ItemEligibilityResult> itemEligibilityMap = eligibility.itemEligibilities().stream()
+                .collect(Collectors.toMap(ReturnEligibilityService.ItemEligibilityResult::orderItemId, e -> e));
+
+        for (CreateReturnRequestDto.CreateReturnItemInput itemInput : requestDto.items()) {
+            ReturnEligibilityService.ItemEligibilityResult itemEligibility = itemEligibilityMap.get(itemInput.orderItemId());
+            if (itemEligibility == null || !itemEligibility.isReturnable()) {
+                throw new ReturnEligibilityException("ITEM_NOT_RETURNABLE", "Item is not returnable: " + itemInput.orderItemId());
+            }
+
+            if (itemInput.quantity() <= 0 || itemInput.quantity() > itemEligibility.returnableQuantity()) {
+                throw new ReturnEligibilityException("INVALID_QUANTITY", "Requested quantity " + itemInput.quantity() + " exceeds returnable limit " + itemEligibility.returnableQuantity());
+            }
+
+            OrderItem orderItem = order.getItems().stream()
+                    .filter(oi -> oi.getId().equals(itemInput.orderItemId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid order item ID: " + itemInput.orderItemId()));
+
+            ReturnItem returnItem = ReturnItem.createNew(
+                    newReturn.getId(),
+                    orderItem.getId(),
+                    orderItem.getProductId(),
+                    orderItem.getSku(),
+                    orderItem.getProductNameSnapshot(),
+                    itemInput.quantity(),
+                    orderItem.getUnitPrice(),
+                    itemInput.itemReasonCode() != null ? itemInput.itemReasonCode() : requestDto.reasonCode()
+            );
+
+            newReturn.addItem(returnItem);
+        }
     }
 }

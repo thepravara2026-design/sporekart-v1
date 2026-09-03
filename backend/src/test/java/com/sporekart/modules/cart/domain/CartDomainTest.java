@@ -24,7 +24,7 @@ class CartDomainTest {
 
     @BeforeEach
     void setUp() {
-        cart = Cart.createNewActiveCart(customerId, "USD");
+        cart = Cart.createNewActiveCart(customerId, "INR");
     }
 
     @Test
@@ -33,7 +33,7 @@ class CartDomainTest {
         assertNotNull(cart.getId());
         assertEquals(customerId, cart.getCustomerId());
         assertEquals(CartStatus.ACTIVE, cart.getStatus());
-        assertEquals("USD", cart.getCurrency());
+        assertEquals("INR", cart.getCurrency());
         assertEquals(BigDecimal.ZERO, cart.getSubtotal());
         assertEquals(0, cart.getItemCount());
         assertTrue(cart.getItems().isEmpty());

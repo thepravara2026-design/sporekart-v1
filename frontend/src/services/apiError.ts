@@ -6,23 +6,36 @@ export class ApiError extends Error {
   public status?: number;
   public path?: string;
   public timestamp?: string;
+  public requestId?: string;
 
-  constructor(message: string, code = 'UNKNOWN_ERROR', status?: number, path?: string, timestamp?: string) {
+  constructor(
+    message: string,
+    code = 'UNKNOWN_ERROR',
+    status?: number,
+    path?: string,
+    timestamp?: string,
+    requestId?: string
+  ) {
     super(message);
     this.name = 'ApiError';
     this.code = code;
     this.status = status;
     this.path = path;
     this.timestamp = timestamp;
+    this.requestId = requestId;
   }
 
   public static fromAxiosError(error: AxiosError<ApiErrorResponse>): ApiError {
     if (error.response?.data?.error) {
-      const { code, message, path, timestamp } = error.response.data.error;
-      return new ApiError(message, code, error.response.status, path, timestamp);
+      const { code, message, path, timestamp, requestId } = error.response.data.error;
+      return new ApiError(message, code, error.response.status, path, timestamp, requestId);
     }
     if (error.response) {
-      return new ApiError(`HTTP Error ${error.response.status}`, `HTTP_${error.response.status}`, error.response.status);
+      return new ApiError(
+        `HTTP Error ${error.response.status}`,
+        `HTTP_${error.response.status}`,
+        error.response.status
+      );
     }
     if (error.request) {
       return new ApiError('Backend server is unavailable or network is disconnected.', 'NETWORK_ERROR');

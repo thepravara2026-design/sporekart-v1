@@ -59,6 +59,21 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
+    public Page<Order> findByGrowerId(String growerId, Pageable pageable) {
+        return jpaRepository.findByGrowerIdOrderByCreatedAtDesc(growerId, pageable).map(OrderEntity::toDomain);
+    }
+
+    @Override
+    public Optional<Order> findByIdAndGrowerId(UUID id, String growerId) {
+        return jpaRepository.findByIdAndGrowerId(id, growerId).map(OrderEntity::toDomain);
+    }
+
+    @Override
+    public List<Order> findAllByGrowerId(String growerId) {
+        return jpaRepository.findAllByGrowerId(growerId).stream().map(OrderEntity::toDomain).toList();
+    }
+
+    @Override
     public Optional<Order> findByCustomerIdAndIdempotencyKey(String customerId, String idempotencyKey) {
         return jpaRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey).map(OrderEntity::toDomain);
     }

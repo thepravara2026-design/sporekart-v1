@@ -39,6 +39,9 @@ public class NotificationTemplateService {
     @Transactional
     public NotificationTemplateVersion createTemplateVersion(String templateCode, NotificationChannel channel,
                                                              int version, String locale, String subject, String body) {
+        validateTemplateSyntax(subject);
+        validateTemplateSyntax(body);
+
         NotificationTemplate template = templateRepository.findByTemplateCode(templateCode.toUpperCase().trim())
                 .orElseThrow(() -> new IllegalArgumentException("Template not found: " + templateCode));
 
@@ -47,10 +50,30 @@ public class NotificationTemplateService {
         return versionRepository.save(templateVersion);
     }
 
+    public void validateTemplateSyntax(String text) {
+        if (text == null || text.isBlank()) return;
+        int openBraces = 0;
+        for (char c : text.toCharArray()) {
+            if (c == '{') openBraces++;
+            else if (c == '}') {
+                openBraces--;
+                if (openBraces < 0) {
+                    throw new IllegalArgumentException("Malformed template syntax: unbalanced braces");
+                }
+            }
+        }
+        if (openBraces != 0) {
+            throw new IllegalArgumentException("Malformed template syntax: unbalanced braces");
+        }
+    }
+
     @Transactional
     public NotificationTemplateVersion activateTemplateVersion(String versionId) {
         NotificationTemplateVersion target = versionRepository.findById(versionId)
                 .orElseThrow(() -> new IllegalArgumentException("Template version not found: " + versionId));
+
+        validateTemplateSyntax(target.getSubject());
+        validateTemplateSyntax(target.getBody());
 
         // Deactivate active versions for same code, channel, locale
         List<NotificationTemplateVersion> versions = versionRepository.findByTemplateCode(target.getTemplateCode());
@@ -67,7 +90,7 @@ public class NotificationTemplateService {
     }
 
     public RenderedTemplate renderActiveTemplate(String templateCode, NotificationChannel channel,
-                                                String locale, Map<String, Object> variables) {
+                                                String locale, Map<String, ?> variables) {
         String reqLocale = (locale != null && !locale.isBlank()) ? locale : "en-US";
         Optional<NotificationTemplateVersion> activeOpt = versionRepository
                 .findFirstByTemplateCodeAndChannelAndStatusAndLocaleOrderByVersionDesc(

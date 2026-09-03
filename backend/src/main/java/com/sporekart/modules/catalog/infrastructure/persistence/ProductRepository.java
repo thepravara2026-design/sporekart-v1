@@ -17,6 +17,8 @@ public interface ProductRepository {
     boolean existsBySku(String sku);
     long countByCategoryId(UUID categoryId);
     List<Product> findAll();
+    List<Product> findAllByGrowerId(String growerId);
+    Optional<Product> findByIdAndGrowerId(UUID id, String growerId);
     Page<Product> findByFilters(String search, UUID categoryId, ProductStatus status, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
     default Page<Product> findByFilters(String search, UUID categoryId, ProductStatus status, Pageable pageable) {
         return findByFilters(search, categoryId, status, null, null, pageable);

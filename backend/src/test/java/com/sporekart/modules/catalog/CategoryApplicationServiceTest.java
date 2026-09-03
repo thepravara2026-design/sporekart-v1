@@ -47,7 +47,7 @@ class CategoryApplicationServiceTest {
     @Test
     void shouldPreventCategoryDeletionWhenProductsExist() {
         CategoryDto category = categoryApplicationService.createCategory(new CreateCategoryCommand("Substrates", "Grow media"));
-        productApplicationService.createProduct(new CreateProductCommand("SUB-COIR-001", "Coco Coir 5kg", "Sterilized coco coir", new BigDecimal("15.00"), "USD", category.id()));
+        productApplicationService.createProduct(new CreateProductCommand("SUB-COIR-001", "Coco Coir 5kg", "Sterilized coco coir", new BigDecimal("15.00"), "INR", category.id()));
 
         assertThrows(CategoryDeletionException.class, () -> categoryApplicationService.deleteCategory(category.id()));
     }

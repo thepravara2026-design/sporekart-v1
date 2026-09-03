@@ -11,11 +11,16 @@ spring:
     console:
       enabled: false
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+
+app:
+  security:
+    jwt:
+      secret: ${APP_SECURITY_JWT_SECRET:CHANGE_ME_MIN_64_CHAR_RANDOM_SECRET_KEY_FOR_HMAC_SHA512_SIGNING_SPEC}
 
 logging:
   level:

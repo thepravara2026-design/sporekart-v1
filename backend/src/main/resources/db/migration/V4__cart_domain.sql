@@ -4,7 +4,7 @@ CREATE TABLE carts (
     id UUID PRIMARY KEY,
     customer_id VARCHAR(100) NOT NULL,
     status VARCHAR(20) NOT NULL,
-    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    currency VARCHAR(3) NOT NULL DEFAULT 'INR',
     subtotal DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     item_count INT NOT NULL DEFAULT 0,
     version BIGINT NOT NULL DEFAULT 0,

@@ -22,6 +22,11 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Product save(Product product) {
+        // Clear existing images before saving so the unique (product_id,
+        // display_order) constraint is not violated when a replacement set is
+        // written in the same transaction (Hibernate flushes inserts before
+        // orphan removals).
+        springDataProductRepository.deleteImagesByProductId(product.getId());
         ProductEntity entity = ProductEntity.fromDomain(product);
         ProductEntity saved = springDataProductRepository.save(entity);
         return saved.toDomain();
@@ -52,6 +57,18 @@ public class ProductRepositoryImpl implements ProductRepository {
         return springDataProductRepository.findAll().stream()
                 .map(ProductEntity::toDomain)
                 .toList();
+    }
+
+    @Override
+    public List<Product> findAllByGrowerId(String growerId) {
+        return springDataProductRepository.findAllByGrowerId(growerId).stream()
+                .map(ProductEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Product> findByIdAndGrowerId(UUID id, String growerId) {
+        return springDataProductRepository.findByIdAndGrowerId(id, growerId).map(ProductEntity::toDomain);
     }
 
     @Override

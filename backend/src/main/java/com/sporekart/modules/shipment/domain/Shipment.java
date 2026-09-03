@@ -15,6 +15,7 @@ public class Shipment {
     private final UUID orderId;
     private final String orderReference;
     private final String customerId;
+    private String growerId;
     private ShipmentStatus status;
     private final ShipmentProviderType provider;
 
@@ -66,11 +67,42 @@ public class Shipment {
             Instant createdAt,
             Instant updatedAt
     ) {
+        this(id, shipmentReference, orderId, orderReference, customerId, null, status, provider, providerShipmentId, awb, trackingNumber, courierName, courierCode, packageDetails, shippingAddress, items, estimatedDeliveryAt, bookedAt, pickedUpAt, deliveredAt, statusHistories, trackingEvents, version, createdAt, updatedAt);
+    }
+
+    public Shipment(
+            UUID id,
+            String shipmentReference,
+            UUID orderId,
+            String orderReference,
+            String customerId,
+            String growerId,
+            ShipmentStatus status,
+            ShipmentProviderType provider,
+            String providerShipmentId,
+            String awb,
+            String trackingNumber,
+            String courierName,
+            String courierCode,
+            PackageDetails packageDetails,
+            ShippingAddressSnapshot shippingAddress,
+            List<ShipmentItem> items,
+            Instant estimatedDeliveryAt,
+            Instant bookedAt,
+            Instant pickedUpAt,
+            Instant deliveredAt,
+            List<ShipmentStatusHistory> statusHistories,
+            List<ShipmentTrackingEvent> trackingEvents,
+            Long version,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
         this.id = id != null ? id : UUID.randomUUID();
         this.shipmentReference = Objects.requireNonNull(shipmentReference, "shipmentReference required");
         this.orderId = Objects.requireNonNull(orderId, "orderId required");
         this.orderReference = Objects.requireNonNull(orderReference, "orderReference required");
         this.customerId = Objects.requireNonNull(customerId, "customerId required");
+        this.growerId = growerId;
         this.status = status != null ? status : ShipmentStatus.CREATED;
         this.provider = provider != null ? provider : ShipmentProviderType.MOCK;
         this.providerShipmentId = providerShipmentId;
@@ -274,6 +306,8 @@ public class Shipment {
     public UUID getOrderId() { return orderId; }
     public String getOrderReference() { return orderReference; }
     public String getCustomerId() { return customerId; }
+    public String getGrowerId() { return growerId; }
+    public void setGrowerId(String growerId) { this.growerId = growerId; }
     public ShipmentStatus getStatus() { return status; }
     public ShipmentProviderType getProvider() { return provider; }
     public String getProviderShipmentId() { return providerShipmentId; }

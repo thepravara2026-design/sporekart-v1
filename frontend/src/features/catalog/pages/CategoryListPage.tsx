@@ -1,13 +1,22 @@
 import { FC } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useCategories } from '../hooks/useCatalog';
-import { PaginationControls } from '../components/PaginationControls';
+import { useSearchParams } from 'react-router-dom';
+import { useCategories } from '../hooks/useCategories';
+import { CategoryGrid } from '../components/CategoryGrid';
+import { CatalogSearch } from '../components/CatalogSearch';
+import { CatalogPagination } from '../components/CatalogPagination';
+import { CatalogEmptyState } from '../components/CatalogEmptyState';
+import { CatalogErrorState } from '../components/CatalogErrorState';
+import { PageShell } from '../../../components/layout/PageShell';
+import { Grid } from '../../../components/layout/Grid';
+import { Skeleton } from '../../../components/ui/Skeleton';
+import { Card } from '../../../components/ui/Card';
 
 export const CategoryListPage: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const page = parseInt(searchParams.get('page') || '0', 10);
-  const size = parseInt(searchParams.get('size') || '12', 10);
+  // ─── URL-driven state ────────────────────────────────────────────────────
+  const page = Math.max(0, parseInt(searchParams.get('page') || '0', 10));
+  const size = Math.max(1, parseInt(searchParams.get('size') || '12', 10));
   const sort = searchParams.get('sort') || 'name,asc';
   const search = searchParams.get('search') || '';
 
@@ -30,6 +39,7 @@ export const CategoryListPage: FC = () => {
       next.set('page', newPage.toString());
       return next;
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSearchChange = (value: string) => {
@@ -49,83 +59,89 @@ export const CategoryListPage: FC = () => {
   const categories = pageData?.content || [];
 
   return (
-    <div className="catalog-page" data-testid="category-list-page">
-      <div className="page-header">
-        <h1>Catalog Categories</h1>
-        <p className="page-subtitle">Explore mushroom product categories and classifications.</p>
-      </div>
-
-      <div className="catalog-filter-bar">
-        <div className="filter-group filter-search">
-          <label htmlFor="category-search" className="filter-label">Search Categories</label>
-          <input
-            id="category-search"
-            type="text"
-            className="form-control"
-            placeholder="Search categories..."
+    <PageShell
+      title="Browse Categories"
+      subtitle="Explore mushroom spawn categories — oyster, medicinal, gourmet, substrate, and more."
+      className="catalog-page"
+    >
+      <div data-testid="category-list-page" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Search */}
+        <div style={{ maxWidth: '420px' }}>
+          <CatalogSearch
             value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onSearch={handleSearchChange}
+            placeholder="Search categories..."
+            isLoading={isLoading && Boolean(search)}
           />
         </div>
-      </div>
 
-      {isLoading && (
-        <div className="loading-container" data-testid="categories-loading">
-          <div className="skeleton-grid">
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <div key={idx} className="skeleton-card" />
-            ))}
+        {/* Result count */}
+        {!isLoading && !isError && (
+          <p
+            style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}
+            aria-live="polite"
+          >
+            {pageData?.totalElements ?? 0} {(pageData?.totalElements ?? 0) === 1 ? 'category' : 'categories'} found
+            {search && ` for "${search}"`}
+          </p>
+        )}
+
+        {/* Loading */}
+        {isLoading && (
+          <div className="loading-container" data-testid="categories-loading">
+            <Grid minWidth="260px" gap="1.5rem">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <Card key={idx} style={{ padding: '1.5rem' }}>
+                  <Skeleton height="24px" width="60%" />
+                  <Skeleton height="16px" width="40%" style={{ marginTop: '0.5rem' }} />
+                  <Skeleton height="40px" style={{ marginTop: '1rem' }} />
+                </Card>
+              ))}
+            </Grid>
           </div>
-        </div>
-      )}
+        )}
 
-      {isError && (
-        <div className="alert alert-danger" data-testid="categories-error">
-          <h3>Unable to load categories</h3>
-          <p>{error instanceof Error ? error.message : 'A network error occurred.'}</p>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => refetch()}>
-            Retry
-          </button>
-        </div>
-      )}
-
-      {!isLoading && !isError && categories.length === 0 && (
-        <div className="empty-state" data-testid="categories-empty">
-          <h3>No categories found</h3>
-          <p>Try searching with a different term.</p>
-        </div>
-      )}
-
-      {!isLoading && !isError && categories.length > 0 && (
-        <>
-          <div className="category-grid" data-testid="category-grid">
-            {categories.map((cat) => (
-              <div key={cat.id} className="category-card card">
-                <h3>{cat.name}</h3>
-                <div className="category-slug">Slug: {cat.slug}</div>
-                {cat.description && <p>{cat.description}</p>}
-                <div className="category-card-footer">
-                  <Link to={`/products?categoryId=${cat.id}`} className="btn btn-primary btn-sm">
-                    View Category Products
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {pageData && (
-            <PaginationControls
-              currentPage={pageData.page}
-              totalPages={pageData.totalPages}
-              totalElements={pageData.totalElements}
-              pageSize={pageData.size}
-              isFirst={pageData.first}
-              isLast={pageData.last}
-              onPageChange={handlePageChange}
+        {/* Error */}
+        {isError && (
+          <div data-testid="categories-error">
+            <CatalogErrorState
+              message={error instanceof Error ? error.message : 'A network error occurred.'}
+              onRetry={() => refetch()}
             />
-          )}
-        </>
-      )}
-    </div>
+          </div>
+        )}
+
+        {/* Empty */}
+        {!isLoading && !isError && categories.length === 0 && (
+          <div data-testid="categories-empty">
+            <CatalogEmptyState
+              title={search ? `No categories found for "${search}"` : 'No Categories Found'}
+              description={
+                search
+                  ? 'Try a different search term.'
+                  : 'Category data is not yet available. Check back soon.'
+              }
+            />
+          </div>
+        )}
+
+        {/* Grid */}
+        {!isLoading && !isError && categories.length > 0 && (
+          <>
+            <div data-testid="category-grid">
+              <CategoryGrid categories={categories} />
+            </div>
+
+            {pageData && pageData.totalPages > 1 && (
+              <CatalogPagination
+                currentPage={pageData.page}
+                totalPages={pageData.totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </PageShell>
   );
 };

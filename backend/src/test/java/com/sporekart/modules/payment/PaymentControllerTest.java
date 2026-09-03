@@ -122,4 +122,15 @@ class PaymentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("PROCESSED"));
     }
+
+    @Test
+    @DisplayName("POST /api/v1/payments/webhooks/razorpay missing X-Razorpay-Signature returns 400 Bad Request")
+    @WithMockUser
+    void testMissingRazorpaySignatureHeaderReturns400() throws Exception {
+        mockMvc.perform(post("/api/v1/payments/webhooks/razorpay")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"event_id\":\"evt_123\",\"event\":\"payment.captured\"}"))
+                .andExpect(status().isBadRequest());
+    }
 }

@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/inventory")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'ROLE_ADMIN')")
 public class AdminInventoryController {
 
     private final InventoryApplicationService inventoryApplicationService;

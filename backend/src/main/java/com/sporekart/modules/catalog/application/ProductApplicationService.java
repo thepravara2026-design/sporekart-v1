@@ -8,6 +8,8 @@ import com.sporekart.modules.catalog.domain.exception.DuplicateSkuException;
 import com.sporekart.modules.catalog.domain.exception.ProductNotFoundException;
 import com.sporekart.modules.catalog.domain.product.Product;
 import com.sporekart.modules.catalog.domain.product.ProductStatus;
+import com.sporekart.modules.catalog.domain.product.ProductVariant;
+import com.sporekart.modules.catalog.domain.product.QuantityUnit;
 import com.sporekart.modules.catalog.infrastructure.persistence.CategoryRepository;
 import com.sporekart.modules.catalog.infrastructure.persistence.ProductRepository;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -59,9 +62,40 @@ public class ProductApplicationService {
                 command.name(),
                 command.description(),
                 command.price(),
+                command.strikeOutPrice(),
                 command.currency(),
                 category
         );
+
+        if (command.variants() != null && !command.variants().isEmpty()) {
+            for (CreateProductVariantCommand vCmd : command.variants()) {
+                String variantSku = vCmd.sku() != null && !vCmd.sku().isBlank()
+                        ? Product.normalizeSku(vCmd.sku())
+                        : Product.normalizeSku(normalizedSku + "-" + vCmd.quantityValue().stripTrailingZeros().toPlainString() + vCmd.quantityUnit().getSymbol());
+                ProductVariant variant = ProductVariant.create(
+                        product.getId(),
+                        variantSku,
+                        vCmd.quantityValue(),
+                        vCmd.quantityUnit(),
+                        vCmd.sellingPrice(),
+                        vCmd.strikeOutPrice()
+                );
+                product.addVariant(variant);
+            }
+        } else {
+            // Default variant for single-size backward compatibility
+            QuantityUnit defaultUnit = (command.name().toLowerCase().contains("extract") || command.name().toLowerCase().contains("liquid"))
+                    ? QuantityUnit.L : QuantityUnit.KG;
+            ProductVariant defaultVariant = ProductVariant.create(
+                    product.getId(),
+                    Product.normalizeSku(normalizedSku + "-1" + defaultUnit.getSymbol()),
+                    new BigDecimal("1.00"),
+                    defaultUnit,
+                    command.price(),
+                    command.strikeOutPrice()
+            );
+            product.addVariant(defaultVariant);
+        }
 
         Product saved = productRepository.save(product);
         return ProductDto.fromDomain(saved);
@@ -84,9 +118,29 @@ public class ProductApplicationService {
                 command.name(),
                 command.description(),
                 command.price(),
+                command.strikeOutPrice(),
                 command.currency(),
                 category
         );
+
+        if (command.variants() != null && !command.variants().isEmpty()) {
+            List<ProductVariant> newVariants = new ArrayList<>();
+            for (CreateProductVariantCommand vCmd : command.variants()) {
+                String variantSku = vCmd.sku() != null && !vCmd.sku().isBlank()
+                        ? Product.normalizeSku(vCmd.sku())
+                        : Product.normalizeSku(product.getSku() + "-" + vCmd.quantityValue().stripTrailingZeros().toPlainString() + vCmd.quantityUnit().getSymbol());
+                ProductVariant variant = ProductVariant.create(
+                        product.getId(),
+                        variantSku,
+                        vCmd.quantityValue(),
+                        vCmd.quantityUnit(),
+                        vCmd.sellingPrice(),
+                        vCmd.strikeOutPrice()
+                );
+                newVariants.add(variant);
+            }
+            product.setVariants(newVariants);
+        }
 
         Product updated = productRepository.save(product);
         return ProductDto.fromDomain(updated);

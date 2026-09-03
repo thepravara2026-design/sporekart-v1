@@ -49,6 +49,7 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      show-components: always
       probes:
         enabled: true
   prometheus:
@@ -105,6 +106,11 @@ springdoc:
     doc-expansion: none
   show-actuator: false
   packages-to-scan: com.sporekart
+
+sporekart:
+  training:
+    cancellation-admin-days: ${TRAINING_CANCELLATION_ADMIN_DAYS:7}
+    cancellation-trainee-days: ${TRAINING_CANCELLATION_TRAINEE_DAYS:2}
 
 logging:
   level:

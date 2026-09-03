@@ -19,7 +19,7 @@ public record CartDto(
         @Schema(description = "Cart Status", example = "ACTIVE")
         String status,
 
-        @Schema(description = "Currency Code", example = "USD")
+        @Schema(description = "Currency Code", example = "INR")
         String currency,
 
         @Schema(description = "Cart Subtotal Amount", example = "59.98")

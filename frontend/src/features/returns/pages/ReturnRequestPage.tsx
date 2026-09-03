@@ -1,17 +1,41 @@
 import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { PageShell } from '../../../components/layout/PageShell';
+import { Breadcrumb } from '../../../components/ui/Breadcrumb';
+import { Card } from '../../../components/ui/Card';
+import { Alert } from '../../../components/ui/Alert';
+import { Button } from '../../../components/ui/Button';
+import { FormField } from '../../../components/ui/FormField';
+import { Select } from '../../../components/ui/Select';
+import { Input } from '../../../components/ui/Input';
+import { Textarea } from '../../../components/ui/Textarea';
 import { returnApi, ReturnEligibilityDto } from '../../../services/returnApi';
+import { getOrderErrorMessage } from '../../orders/utils/orderUtils';
 
-interface Props {
-  orderReference: string;
-  customerId?: string;
+const RETURN_REASON_OPTIONS = [
+  { value: 'DAMAGED', label: 'Damaged on arrival' },
+  { value: 'DEFECTIVE', label: 'Defective / Malfunctioning' },
+  { value: 'WRONG_ITEM', label: 'Wrong item received' },
+  { value: 'WRONG_SIZE', label: 'Wrong size received' },
+  { value: 'QUALITY_ISSUE', label: 'Quality issue' },
+  { value: 'MISSING_PART', label: 'Missing part' },
+  { value: 'NOT_AS_EXPECTED', label: 'Item not as expected' },
+  { value: 'CUSTOMER_CHANGED_MIND', label: 'Changed mind (unopened)' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+export interface ReturnRequestPageProps {
+  orderReference?: string;
   onReturnSubmitted?: (returnRef: string) => void;
 }
 
-export const ReturnRequestPage: React.FC<Props> = ({
-  orderReference,
-  customerId = 'cust-101',
+export const ReturnRequestPage: React.FC<ReturnRequestPageProps> = ({
+  orderReference: orderReferenceProp,
   onReturnSubmitted
 }) => {
+  const { orderReference: orderReferenceParam } = useParams<{ orderReference: string }>();
+  const orderReference = orderReferenceProp ?? orderReferenceParam ?? '';
+
   const [eligibility, setEligibility] = useState<ReturnEligibilityDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,26 +44,28 @@ export const ReturnRequestPage: React.FC<Props> = ({
   const [evidenceUrls, setEvidenceUrls] = useState<string>('');
   const [selectedQuantities, setSelectedQuantities] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [submittedReturnRef, setSubmittedReturnRef] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEligibility();
-  }, [orderReference, customerId]);
+  }, [orderReference]);
 
   const fetchEligibility = async () => {
+    if (!orderReference) return;
     setLoading(true);
     setError(null);
     try {
-      const data = await returnApi.checkEligibility(orderReference, customerId);
+      const data = await returnApi.checkEligibility(orderReference);
       setEligibility(data);
       const initialQty: Record<string, number> = {};
       data.items.forEach(item => {
-        if (item.returnable) {
+        if (item.isReturnable) {
           initialQty[item.orderItemId] = item.returnableQuantity;
         }
       });
       setSelectedQuantities(initialQty);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to evaluate return eligibility.');
+      setError(getOrderErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -60,7 +86,7 @@ export const ReturnRequestPage: React.FC<Props> = ({
       .filter(([, qty]) => qty > 0)
       .map(([orderItemId, qty]) => ({
         orderItemId,
-        quantity: qty
+        quantity: qty,
       }));
 
     if (returnItems.length === 0) {
@@ -73,122 +99,187 @@ export const ReturnRequestPage: React.FC<Props> = ({
     try {
       const result = await returnApi.createReturn(orderReference, {
         reasonCode,
-        reasonDescription,
+        reasonDescription: reasonDescription.trim() || undefined,
         evidenceUrls: evidenceUrls.trim() || undefined,
         items: returnItems
-      }, customerId);
+      });
 
+      setSubmittedReturnRef(result.returnReference);
       if (onReturnSubmitted) {
         onReturnSubmitted(result.returnReference);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to submit return request.');
+      setError(getOrderErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
   };
 
+  const breadcrumbs = (
+    <Breadcrumb items={[
+      { label: 'Home', path: '/' },
+      { label: 'My Orders', path: '/orders' },
+      { label: `Order ${orderReference}`, path: `/orders/${orderReference}` },
+      { label: 'Request Return' },
+    ]} />
+  );
+
+  if (!orderReference) {
+    return (
+      <PageShell title="Request Return" breadcrumbs={breadcrumbs}>
+        <Alert variant="warning" title="Order not specified">
+          No order was provided for this return request.
+        </Alert>
+      </PageShell>
+    );
+  }
+
   if (loading) {
-    return <div className="p-6 text-center text-gray-600">Evaluating return eligibility for Order #{orderReference}...</div>;
+    return (
+      <PageShell title="Request Return" breadcrumbs={breadcrumbs}>
+        <div className="p-6 text-center text-gray-600">Evaluating return eligibility for Order #{orderReference}...</div>
+      </PageShell>
+    );
   }
 
   if (error && !eligibility) {
-    return <div className="p-6 text-red-600 bg-red-50 rounded-md">Error: {error}</div>;
+    return (
+      <PageShell title="Request Return" breadcrumbs={breadcrumbs}>
+        <Alert variant="error" title="Unable to check eligibility">
+          {error}
+        </Alert>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+          <Link to={`/orders/${orderReference}`} className="btn btn-secondary btn-sm">
+            Back to Order
+          </Link>
+        </div>
+      </PageShell>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">Request Return for Order #{orderReference}</h1>
-
-      {eligibility && !eligibility.eligible ? (
-        <div className="p-4 mb-6 bg-amber-50 border border-amber-200 text-amber-800 rounded-md">
-          <p className="font-semibold">This order is not eligible for return.</p>
-          <p className="text-sm mt-1">Reason: {eligibility.ineligibilityReason}</p>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
-
-          <div>
-            <label className="block font-medium text-gray-700 mb-1">Return Reason</label>
-            <select
-              value={reasonCode}
-              onChange={e => setReasonCode(e.target.value)}
-              className="w-full border-gray-300 rounded-md p-2 border shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="DAMAGED">Damaged on arrival</option>
-              <option value="DEFECTIVE">Defective / Malfunctioning</option>
-              <option value="WRONG_ITEM">Wrong item received</option>
-              <option value="EXPIRED">Expired product</option>
-              <option value="NOT_AS_DESCRIBED">Item not as described</option>
-              <option value="CHANGED_MIND">Changed mind (unopened)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-medium text-gray-700 mb-1">Description / Notes</label>
-            <textarea
-              rows={3}
-              value={reasonDescription}
-              onChange={e => setReasonDescription(e.target.value)}
-              placeholder="Provide specific details regarding why you are returning these items..."
-              className="w-full border-gray-300 rounded-md p-2 border shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium text-gray-700 mb-1">Photo / Video Evidence URLs (optional)</label>
-            <input
-              type="text"
-              value={evidenceUrls}
-              onChange={e => setEvidenceUrls(e.target.value)}
-              placeholder="https://example.com/photo1.jpg"
-              className="w-full border-gray-300 rounded-md p-2 border shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold mb-2 text-gray-800">Select Items to Return</h2>
-            <div className="divide-y border rounded-md">
-              {eligibility?.items.map(item => (
-                <div key={item.orderItemId} className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">{item.productNameSnapshot}</p>
-                    <p className="text-xs text-gray-500">SKU: {item.sku} | Price: ₹{item.unitPrice.toFixed(2)}</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Max returnable: {item.returnableQuantity} of {item.originalQuantity}
-                    </p>
-                  </div>
-                  {item.returnable ? (
-                    <div className="flex items-center space-x-2">
-                      <label className="text-sm text-gray-600">Qty:</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max={item.returnableQuantity}
-                        value={selectedQuantities[item.orderItemId] || 0}
-                        onChange={e => handleQuantityChange(item.orderItemId, parseInt(e.target.value) || 0)}
-                        className="w-20 border border-gray-300 rounded p-1 text-center"
-                      />
-                    </div>
-                  ) : (
-                    <span className="text-xs text-red-500 bg-red-50 p-1.5 rounded">{item.ineligibilityReason}</span>
-                  )}
-                </div>
-              ))}
+    <PageShell
+      title={`Request Return — Order #${orderReference}`}
+      subtitle="Review eligibility and submit your return request."
+      breadcrumbs={breadcrumbs}
+    >
+      <div data-testid="return-request-page" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {submittedReturnRef ? (
+          <Card>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+              Return request submitted
+            </h2>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              Your return reference is <strong>{submittedReturnRef}</strong>. Our team will review your request.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <Link to={`/orders/${orderReference}`}>
+                <Button variant="secondary" size="sm">Back to Order</Button>
+              </Link>
+              <Link to="/orders">
+                <Button variant="primary" size="sm">My Orders</Button>
+              </Link>
             </div>
-          </div>
+          </Card>
+        ) : eligibility && !eligibility.eligible ? (
+          <Alert variant="warning" title="This order is not eligible for return">
+            {eligibility.ineligibilityReason || 'The return window or eligibility criteria are not met for this order.'}
+          </Alert>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <Alert variant="error" title="Unable to submit return">
+                {error}
+              </Alert>
+            )}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-md shadow-sm transition disabled:opacity-50"
-          >
-            {submitting ? 'Submitting Return Request...' : 'Submit Return Request'}
-          </button>
-        </form>
-      )}
-    </div>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <FormField label="Return Reason" htmlFor="return-reason" required>
+                  <Select
+                    id="return-reason"
+                    value={reasonCode}
+                    options={RETURN_REASON_OPTIONS}
+                    onChange={e => setReasonCode(e.target.value)}
+                  />
+                </FormField>
+
+                <FormField label="Description / Notes" htmlFor="return-notes" required>
+                  <Textarea
+                    id="return-notes"
+                    rows={3}
+                    value={reasonDescription}
+                    onChange={e => setReasonDescription(e.target.value)}
+                    placeholder="Provide specific details regarding why you are returning these items..."
+                  />
+                </FormField>
+
+                <FormField label="Photo / Video Evidence URLs (optional)" htmlFor="return-evidence">
+                  <Input
+                    id="return-evidence"
+                    type="text"
+                    value={evidenceUrls}
+                    onChange={e => setEvidenceUrls(e.target.value)}
+                    placeholder="https://example.com/photo1.jpg"
+                  />
+                </FormField>
+              </div>
+            </Card>
+
+            <Card>
+              <h2 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                Select Items to Return
+              </h2>
+              <div data-testid="return-eligibility-items" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {eligibility?.items.map(item => (
+                  <div key={item.orderItemId} data-testid="return-eligibility-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{item.productName}</p>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        SKU: {item.sku}
+                      </p>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        Max returnable: {item.returnableQuantity} of {item.orderedQuantity}
+                      </p>
+                    </div>
+                    {item.isReturnable ? (
+                      <label className="flex items-center gap-2" style={{ fontSize: '0.875rem' }}>
+                        Qty:
+                        <Input
+                          type="number"
+                          min={0}
+                          max={item.returnableQuantity}
+                          value={selectedQuantities[item.orderItemId] || 0}
+                          onChange={e => handleQuantityChange(item.orderItemId, parseInt(e.target.value) || 0)}
+                          style={{ width: '80px' }}
+                        />
+                      </label>
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--danger-color)', fontWeight: 600 }}>
+                        {item.reasonCode || 'Not returnable'}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <Link to={`/orders/${orderReference}`}>
+                <Button variant="secondary" size="md">Cancel</Button>
+              </Link>
+              <Button
+                type="submit"
+                size="md"
+                isLoading={submitting}
+                data-testid="submit-return-button"
+              >
+                Submit Return Request
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </PageShell>
   );
 };

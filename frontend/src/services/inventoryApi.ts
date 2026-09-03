@@ -1,5 +1,6 @@
 import { axiosInstance } from './apiClient';
 import { ENDPOINTS } from './endpoints';
+import { ApiResponse } from '../types/api';
 
 export interface StockAvailabilityDto {
   sku: string;
@@ -38,10 +39,47 @@ export interface StockMovementDto {
   createdAt: string;
 }
 
+export interface ReservationItemDto {
+  id: string;
+  reservationId: string;
+  inventoryItemId: string;
+  productId: string;
+  variantId?: string | null;
+  sku: string;
+  quantity: number;
+  createdAt: string;
+}
+
+export interface ReservationDto {
+  id: string;
+  reservationReference: string;
+  orderId: string;
+  status: string;
+  expiresAt: string;
+  releaseReason?: string | null;
+  items: ReservationItemDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const inventoryApi = {
   getAvailability: async (sku: string): Promise<StockAvailabilityDto> => {
     const response = await axiosInstance.get<{ data: StockAvailabilityDto }>(ENDPOINTS.INVENTORY_AVAILABILITY(sku));
     return response.data.data;
+  },
+
+  /** Reserve stock for an order. The backend requires an active reservation before payment initiation. */
+  reserveInventory: async (orderId: string): Promise<ApiResponse<ReservationDto>> => {
+    const response = await axiosInstance.post<ApiResponse<ReservationDto>>(ENDPOINTS.INVENTORY_RESERVE(orderId));
+    return response.data;
+  },
+
+  /** Release an inventory reservation (e.g. after a failed payment). */
+  releaseReservation: async (reservationId: string, reason?: string): Promise<ApiResponse<ReservationDto>> => {
+    const response = await axiosInstance.post<ApiResponse<ReservationDto>>(
+      `${ENDPOINTS.INVENTORY_RESERVATION_RELEASE(reservationId)}?reason=${encodeURIComponent(reason ?? 'MANUAL_RELEASE')}`
+    );
+    return response.data;
   },
 
   listAdminInventory: async (): Promise<InventoryItemDto[]> => {

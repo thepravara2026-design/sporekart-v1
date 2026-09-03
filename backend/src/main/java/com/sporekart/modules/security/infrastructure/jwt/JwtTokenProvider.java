@@ -23,7 +23,7 @@ public class JwtTokenProvider {
     private final String issuer;
 
     public JwtTokenProvider(
-            @Value("${app.security.jwt.secret:sporekart-v3-super-secure-production-jwt-secret-key-min-512-bits-for-hmac-sha512-signing-spec}") String secret,
+            @Value("${app.security.jwt.secret:}") String secret,
             @Value("${app.security.jwt.expiration-ms:900000}") long expirationMs,
             @Value("${app.security.jwt.issuer:sporekart-platform}") String issuer
     ) {

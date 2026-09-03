@@ -56,6 +56,15 @@ public class Notification {
     @Column(name = "provider_message_id")
     private String providerMessageId;
 
+    @Column(name = "provider_event_id")
+    private String providerEventId;
+
+    @Column(name = "provider_status")
+    private String providerStatus;
+
+    @Column(name = "last_provider_update_at")
+    private Instant lastProviderUpdateAt;
+
     @Column(name = "idempotency_key", unique = true)
     private String idempotencyKey;
 
@@ -70,6 +79,15 @@ public class Notification {
 
     @Column(name = "read_at")
     private Instant readAt;
+
+    @Column(name = "scheduled_at")
+    private Instant scheduledAt;
+
+    @Column(name = "cancelled_at")
+    private Instant cancelledAt;
+
+    @Column(name = "suppressed_at")
+    private Instant suppressedAt;
 
     @Version
     private Long version;
@@ -88,6 +106,24 @@ public class Notification {
 
     @Column(name = "failure_reason", columnDefinition = "TEXT")
     private String failureReason;
+
+    @Column(name = "last_attempt_at")
+    private Instant lastAttemptAt;
+
+    @Column(name = "next_retry_at")
+    private Instant nextRetryAt;
+
+    @Column(name = "reconciliation_attempt_count")
+    private Integer reconciliationAttemptCount = 0;
+
+    @Column(name = "last_reconciliation_at")
+    private Instant lastReconciliationAt;
+
+    @Column(name = "content_hash")
+    private String contentHash;
+
+    @Column(name = "payload_minimized_at")
+    private Instant payloadMinimizedAt;
 
     protected Notification() {}
 
@@ -128,6 +164,7 @@ public class Notification {
         transitionTo(NotificationStatus.PROCESSING);
         this.providerName = providerName;
         this.attemptCount++;
+        this.lastAttemptAt = Instant.now();
     }
 
     public void markSent(String providerMessageId) {
@@ -152,11 +189,65 @@ public class Notification {
         this.failureReason = reason;
     }
 
+    public void markCancelled(String reason) {
+        transitionTo(NotificationStatus.CANCELLED);
+        this.cancelledAt = Instant.now();
+        this.failureReason = reason;
+    }
+
+    public void markSuppressed(String reason) {
+        transitionTo(NotificationStatus.SUPPRESSED);
+        this.suppressedAt = Instant.now();
+        this.failureReason = reason;
+    }
+
+    public void scheduleRetry(String reason, Instant nextScheduledAt) {
+        transitionTo(NotificationStatus.RETRY_SCHEDULED);
+        this.failedAt = Instant.now();
+        this.failureReason = reason;
+        this.scheduledAt = nextScheduledAt;
+        this.nextRetryAt = nextScheduledAt;
+    }
+
+    public void recoverStaleProcessing(String reason, Instant nextScheduledAt) {
+        if (this.status == NotificationStatus.PROCESSING) {
+            transitionTo(NotificationStatus.RETRY_SCHEDULED);
+            this.failureReason = reason;
+            this.scheduledAt = nextScheduledAt;
+            this.nextRetryAt = nextScheduledAt;
+        }
+    }
+
+    public void recordReconciliationAttempt() {
+        if (this.reconciliationAttemptCount == null) {
+            this.reconciliationAttemptCount = 0;
+        }
+        this.reconciliationAttemptCount++;
+        this.lastReconciliationAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
     public void markRead() {
         if (this.readAt == null) {
             this.readAt = Instant.now();
             this.updatedAt = Instant.now();
         }
+    }
+
+    public void updateProviderReconciliation(String providerEventId, String providerStatus, NotificationStatus targetStatus) {
+        this.providerEventId = providerEventId;
+        this.providerStatus = providerStatus;
+        this.lastProviderUpdateAt = Instant.now();
+        if (targetStatus != null && this.status != targetStatus) {
+            if (targetStatus == NotificationStatus.DELIVERED) {
+                markDelivered(this.providerMessageId);
+            } else if (targetStatus == NotificationStatus.FAILED_PERMANENTLY) {
+                markFailed("Failed per provider reconciliation: " + providerStatus, true);
+            } else if (this.status.canTransitionTo(targetStatus)) {
+                transitionTo(targetStatus);
+            }
+        }
+        this.updatedAt = Instant.now();
     }
 
     // Getters
@@ -175,17 +266,37 @@ public class Notification {
     public NotificationPriority getPriority() { return priority; }
     public String getProviderName() { return providerName; }
     public String getProviderMessageId() { return providerMessageId; }
+    public String getProviderEventId() { return providerEventId; }
+    public String getProviderStatus() { return providerStatus; }
+    public Instant getLastProviderUpdateAt() { return lastProviderUpdateAt; }
     public String getIdempotencyKey() { return idempotencyKey; }
     public String getCorrelationId() { return correlationId; }
     public String getTraceId() { return traceId; }
     public int getAttemptCount() { return attemptCount; }
     public Instant getReadAt() { return readAt; }
+    public Instant getScheduledAt() { return scheduledAt; }
+    public Instant getCancelledAt() { return cancelledAt; }
+    public Instant getSuppressedAt() { return suppressedAt; }
     public Long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public Instant getDeliveredAt() { return deliveredAt; }
     public Instant getFailedAt() { return failedAt; }
     public String getFailureReason() { return failureReason; }
+
+    public Instant getLastAttemptAt() { return lastAttemptAt; }
+    public Instant getNextRetryAt() { return nextRetryAt; }
+    public Integer getReconciliationAttemptCount() { return reconciliationAttemptCount != null ? reconciliationAttemptCount : 0; }
+    public Instant getLastReconciliationAt() { return lastReconciliationAt; }
+    public String getContentHash() { return contentHash; }
+    public Instant getPayloadMinimizedAt() { return payloadMinimizedAt; }
+
+    public void minimizePayload(String hash) {
+        this.body = "[REDACTED_PAYLOAD]";
+        this.contentHash = hash;
+        this.payloadMinimizedAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -58,8 +58,7 @@ Sporekart v3.0 is an enterprise e-commerce platform built as a **Modular Monolit
 ```
 sporekart/
 ├── frontend/             # Vite + React + TS Application
-├── backend/              # Spring Boot Java Application
-├── database/             # Schema & Migration SQL documentation
+├── backend/              # Spring Boot Java Application (Flyway migrations under backend/src/main/resources/db/migration)
 ├── infrastructure/       # Docker & Deployment Infrastructure
 ├── scripts/              # Helper & Validation Scripts
 ├── docs/                 # Architecture, API & Development Documentation
@@ -107,8 +106,8 @@ sporekart/
    ```
 
 4. **Run Test Suites**
-   - Backend Tests: `cd backend && mvn clean test` (186 tests passing across Catalog, Cart, Checkout, Order, Inventory, Payment, State Machine, Shipping)
-   - Frontend Tests: `cd frontend && npm run test` (20 tests passing)
+   - Backend Tests: `cd backend && mvn test` (835 tests passing across Catalog, Cart, Checkout, Order, Inventory, Payment, State Machine, Shipping, Security, Training, Support, Returns)
+   - Frontend Tests: `cd frontend && npm run test` (451 tests passing)
 
 5. **Verify API Endpoints & Docs**
    - Backend Health: `http://localhost:8080/api/v1/health`

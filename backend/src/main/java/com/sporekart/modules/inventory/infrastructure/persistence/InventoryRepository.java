@@ -19,4 +19,8 @@ public interface InventoryRepository {
     List<InventoryItem> findAllBySkuInOrderBySkuAscForUpdate(List<String> skus);
 
     List<InventoryItem> findAll();
+
+    List<InventoryItem> findAllByGrowerId(String growerId);
+
+    Optional<InventoryItem> findBySkuAndGrowerId(String sku, String growerId);
 }

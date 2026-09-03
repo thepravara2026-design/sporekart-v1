@@ -32,7 +32,7 @@ class CartPersistenceTest {
     @DisplayName("Should persist and retrieve active cart with items")
     void shouldPersistAndRetrieveCart() {
         String customerId = "cust-pers-1";
-        Cart cart = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart = Cart.createNewActiveCart(customerId, "INR");
         UUID productId = UUID.randomUUID();
         cart.addItem(productId, null, "SKU-PERS-1", "Persistent Product", null, new BigDecimal("15.50"), 3, 50, 100);
 
@@ -63,10 +63,10 @@ class CartPersistenceTest {
     @DisplayName("Should enforce unique active cart constraint per customer in database")
     void shouldEnforceUniqueActiveCartConstraint() {
         String customerId = "cust-unique-1";
-        Cart cart1 = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart1 = Cart.createNewActiveCart(customerId, "INR");
         cartRepository.save(cart1);
 
-        Cart cart2 = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart2 = Cart.createNewActiveCart(customerId, "INR");
         assertThrows(DataIntegrityViolationException.class, () -> {
             cartRepository.save(cart2);
             jpaCartRepository.flush();
@@ -78,7 +78,7 @@ class CartPersistenceTest {
     @DisplayName("Should cascade delete line items when cart is deleted")
     void shouldCascadeDeleteLineItems() {
         String customerId = "cust-cascade-1";
-        Cart cart = Cart.createNewActiveCart(customerId, "USD");
+        Cart cart = Cart.createNewActiveCart(customerId, "INR");
         cart.addItem(UUID.randomUUID(), null, "SKU-C1", "Product 1", null, new BigDecimal("10.00"), 1, 50, 100);
         Cart saved = cartRepository.save(cart);
 

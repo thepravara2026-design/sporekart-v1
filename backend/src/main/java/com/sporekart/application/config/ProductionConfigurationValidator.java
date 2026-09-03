@@ -20,8 +20,7 @@ public class ProductionConfigurationValidator {
 
     private static final Logger log = LoggerFactory.getLogger(ProductionConfigurationValidator.class);
 
-    private static final String DEFAULT_DEV_JWT_SECRET = "sporekart-v3-super-secure-production-jwt-secret-key-min-512-bits-for-hmac-sha512-signing-spec";
-    private static final String PLACEHOLDER_JWT_SECRET = "CHANGE_ME_MIN_32_CHAR_RANDOM_SECRET_KEY";
+    private static final String PLACEHOLDER_JWT_SECRET = "CHANGE_ME_MIN_64_CHAR_RANDOM_SECRET_KEY_FOR_HMAC_SHA512_SIGNING_SPEC";
     private static final String PLACEHOLDER_DB_PASSWORD = "CHANGE_ME_PRODUCTION_STRONG_PASSWORD";
 
     @Value("${app.security.jwt.secret:}")
@@ -50,7 +49,7 @@ public class ProductionConfigurationValidator {
         log.info("Executing ProductionConfigurationValidator check for active profile: {}", activeProfile);
 
         // 1. JWT Secret Validation
-        if (jwtSecret == null || jwtSecret.isBlank() || DEFAULT_DEV_JWT_SECRET.equals(jwtSecret) || PLACEHOLDER_JWT_SECRET.equals(jwtSecret)) {
+        if (jwtSecret == null || jwtSecret.isBlank() || PLACEHOLDER_JWT_SECRET.equals(jwtSecret)) {
             throw new IllegalStateException(
                 "CRITICAL PRODUCTION CONFIGURATION ERROR: Active profile is '" + activeProfile +
                 "' but app.security.jwt.secret is missing, empty, or using default development fallback. " +
@@ -80,13 +79,19 @@ public class ProductionConfigurationValidator {
             );
         }
 
-        // 3. Strict Production Provider Isolation
+        // 3. Strict Production Provider Isolation: Fail startup if provider is unconfigured or MOCK in prod
         if ("prod".equalsIgnoreCase(activeProfile)) {
-            if ("MOCK".equalsIgnoreCase(paymentProvider)) {
-                log.warn("PRODUCTION WARNING: sporekart.payment.provider is configured to MOCK. In live production environments, set PAYMENT_PROVIDER=RAZORPAY.");
+            if (paymentProvider == null || paymentProvider.isBlank() || "MOCK".equalsIgnoreCase(paymentProvider)) {
+                throw new IllegalStateException(
+                    "CRITICAL PRODUCTION CONFIGURATION ERROR: Active profile is 'prod' but sporekart.payment.provider is unconfigured or set to MOCK. " +
+                    "Set PAYMENT_PROVIDER environment variable (e.g. RAZORPAY)."
+                );
             }
-            if ("MOCK".equalsIgnoreCase(shippingProvider)) {
-                log.warn("PRODUCTION WARNING: sporekart.shipping.provider is configured to MOCK. In live production environments, set SHIPPING_PROVIDER=SHIPROCKET.");
+            if (shippingProvider == null || shippingProvider.isBlank() || "MOCK".equalsIgnoreCase(shippingProvider)) {
+                throw new IllegalStateException(
+                    "CRITICAL PRODUCTION CONFIGURATION ERROR: Active profile is 'prod' but sporekart.shipping.provider is unconfigured or set to MOCK. " +
+                    "Set SHIPPING_PROVIDER environment variable (e.g. SHIPROCKET)."
+                );
             }
         }
 

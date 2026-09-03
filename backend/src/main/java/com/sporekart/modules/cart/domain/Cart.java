@@ -41,7 +41,7 @@ public class Cart {
         this.id = Objects.requireNonNull(id, "Cart ID cannot be null");
         this.customerId = Objects.requireNonNull(customerId, "Customer ID cannot be null");
         this.status = Objects.requireNonNull(status, "Cart status cannot be null");
-        this.currency = currency != null ? currency : "USD";
+        this.currency = currency != null ? currency : "INR";
         this.version = version != null ? version : 0L;
         this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
         this.createdAt = createdAt != null ? createdAt : OffsetDateTime.now();
@@ -55,7 +55,7 @@ public class Cart {
         }
         UUID id = UUID.randomUUID();
         OffsetDateTime now = OffsetDateTime.now();
-        return new Cart(id, customerId, CartStatus.ACTIVE, currency != null ? currency : "USD", BigDecimal.ZERO, 0, null, new ArrayList<>(), now, now);
+        return new Cart(id, customerId, CartStatus.ACTIVE, currency != null ? currency : "INR", BigDecimal.ZERO, 0, null, new ArrayList<>(), now, now);
     }
 
     public CartItem addItem(

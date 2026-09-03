@@ -1,6 +1,7 @@
 package com.sporekart.modules.shipment.controller;
 
 import com.sporekart.modules.order.domain.OrderActorType;
+import com.sporekart.modules.security.infrastructure.jwt.UserPrincipal;
 import com.sporekart.modules.shipment.application.ShipmentApplicationService;
 import com.sporekart.modules.shipment.application.dto.ShipmentDto;
 import com.sporekart.modules.shipment.domain.ShipmentStatus;
@@ -8,6 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin/shipments")
+@PreAuthorize("hasAnyRole('ADMIN', 'ROLE_ADMIN')")
 public class AdminShipmentController {
 
     private final ShipmentApplicationService shipmentService;
@@ -29,15 +34,25 @@ public class AdminShipmentController {
         this.shipmentService = shipmentService;
     }
 
+    private String resolveAdminId(String headerAdminId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+            return principal.getId();
+        }
+        return headerAdminId != null ? headerAdminId : "admin-1001";
+    }
+
     @GetMapping
     public ResponseEntity<Page<ShipmentDto>> getShipmentList(
             @RequestParam(required = false) ShipmentStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
+        int boundedSize = Math.min(Math.max(1, size), 100);
+        int boundedPage = Math.max(0, page);
         Page<ShipmentDto> shipments = shipmentService.getAdminShipments(
                 status,
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+                PageRequest.of(boundedPage, boundedSize, Sort.by(Sort.Direction.DESC, "createdAt"))
         );
         return ResponseEntity.ok(shipments);
     }
@@ -59,10 +74,11 @@ public class AdminShipmentController {
     public ResponseEntity<ShipmentDto> cancelShipment(
             @PathVariable String shipmentReference,
             @RequestBody(required = false) Map<String, String> body,
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "admin-1001") String adminId
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
         String reason = body != null ? body.get("reason") : "Admin cancelled shipment";
-        ShipmentDto cancelled = shipmentService.cancelShipment(shipmentReference, reason, OrderActorType.ADMIN, adminId);
+        String resolvedId = resolveAdminId(adminId);
+        ShipmentDto cancelled = shipmentService.cancelShipment(shipmentReference, reason, OrderActorType.ADMIN, resolvedId);
         return ResponseEntity.ok(cancelled);
     }
 

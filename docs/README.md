@@ -41,7 +41,7 @@
 - [Final Access Control Matrix](file:///f:/sporekart-v3.0/docs/security/final-access-control-matrix.md)
 - [Secret Rotation Plan](file:///f:/sporekart-v3.0/docs/security/secret-rotation-plan.md)
 - [Final Security Debt Register](file:///f:/sporekart-v3.0/docs/release/final-security-debt.md)
-- [Sprint 4J Threat Model](file:///f:/sporekart-v3.0/docs/sprint-4j-threat-model.md)
+- [Sprint 4J Threat Model](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
 
 ## 5. Performance, Database & Reliability
 - [Final Performance Certification](file:///f:/sporekart-v3.0/docs/release/final-performance-certification.md)
@@ -56,9 +56,9 @@
 - [Final Failure Matrix](file:///f:/sporekart-v3.0/docs/release/final-failure-matrix.md)
 
 ## 6. Post-Go-Live Stabilization & Operational Maturity (Sprint 4L)
-- [Sprint 4L Completion Report](file:///f:/sporekart-v3.0/docs/sprint-4l-completion-report.md)
-- [Post-Go-Live Production Baseline](file:///f:/sporekart-v3.0/docs/sprint-4l-production-baseline.md)
-- [Post-Go-Live Production Quality Scorecard](file:///f:/sporekart-v3.0/docs/sprint-4l-production-quality-scorecard.md)
+- [Sprint 4L Completion Report](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
+- [Post-Go-Live Production Baseline](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
+- [Post-Go-Live Production Quality Scorecard](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
 - [Post-Go-Live Reconciliation Report](file:///f:/sporekart-v3.0/docs/data/sprint-4l-reconciliation-report.md)
 - [Production Data Quality Scorecard](file:///f:/sporekart-v3.0/docs/data/production-data-quality.md)
 - [Production Incident Register](file:///f:/sporekart-v3.0/docs/operations/production-incident-register.md)
@@ -74,11 +74,11 @@
 - [Production Test Gap Register](file:///f:/sporekart-v3.0/docs/testing/production-test-gap-register.md)
 - [Post-Go-Live Change Log](file:///f:/sporekart-v3.0/docs/release/post-go-live-change-log.md)
 - [Sprint 4L Release Retrospective](file:///f:/sporekart-v3.0/docs/release/sprint-4l-release-retrospective.md)
-- [Top Production Risks Register](file:///f:/sporekart-v3.0/docs/sprint-4l-top-production-risks.md)
+- [Top Production Risks Register](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
 
 ## 7. Production Scale, Platform Maturity & Continuous Delivery (Sprint 4M)
-- [Sprint 4M Completion Report](file:///f:/sporekart-v3.0/docs/sprint-4m-completion-report.md)
-- [Production Maturity Assessment](file:///f:/sporekart-v3.0/docs/sprint-4m-production-maturity-assessment.md)
+- [Sprint 4M Completion Report](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
+- [Production Maturity Assessment](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
 - [Production Growth & Capacity Model](file:///f:/sporekart-v3.0/docs/operations/production-growth-model.md)
 - [Platform Maturity Roadmap](file:///f:/sporekart-v3.0/docs/operations/platform-maturity-roadmap.md)
 - [Scalability Risk Register](file:///f:/sporekart-v3.0/docs/operations/scaling-risk-register.md)
@@ -93,6 +93,7 @@
 
 ## 8. Sprint 4 Final Consolidation & Approval Gate
 - [Sprint 4 Final Consolidation, Audit & Approval Report](file:///f:/sporekart-v3.0/docs/SPRINT-4-FINAL-CONSOLIDATION-AND-APPROVAL.md)
+- [Sprint 4 Working-Document Archive (4A–4M)](file:///f:/sporekart-v3.0/docs/sprints/sprint-4/README.md)
 
 ## 9. Sprint 5A Security & Identity Hardening
 - [Sprint 5A Security & Identity Hardening Completion Report](file:///f:/sporekart-v3.0/docs/sprint-5a-security-identity-hardening.md)
@@ -145,7 +146,6 @@
 
 ## 21. Sprint 6F Database & Persistence Hardening
 - [Sprint 6F Database & Persistence Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6f-database-persistence-hardening.md)
-- [Sprint 6F Persistence Hardening Summary](file:///f:/sporekart-v3.0/docs/sprint-6f-persistence-hardening.md)
 
 ## 22. Sprint 6G Search & Catalog Hardening
 - [Sprint 6G Search & Catalog Hardening Report](file:///f:/sporekart-v3.0/docs/sprint-6g-search-catalog-hardening.md)

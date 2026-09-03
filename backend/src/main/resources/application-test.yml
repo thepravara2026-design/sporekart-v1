@@ -12,7 +12,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         generate_statistics: true
@@ -44,6 +43,9 @@ management:
 
 app:
   version: 0.1.0-TEST
+  security:
+    jwt:
+      secret: ${APP_SECURITY_JWT_SECRET:CHANGE_ME_MIN_64_CHAR_RANDOM_SECRET_KEY_FOR_HMAC_SHA512_SIGNING_SPEC}
   cors:
     allowed-origins: http://localhost:5173
   rate-limit:

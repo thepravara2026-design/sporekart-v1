@@ -42,6 +42,9 @@ public class InventoryItemEntity {
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
+    @Column(name = "grower_id", length = 100)
+    private String growerId;
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
@@ -64,6 +67,7 @@ public class InventoryItemEntity {
             int damagedQuantity,
             int lowStockThreshold,
             String status,
+            String growerId,
             Long version,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
@@ -77,6 +81,7 @@ public class InventoryItemEntity {
         this.damagedQuantity = damagedQuantity;
         this.lowStockThreshold = lowStockThreshold;
         this.status = status;
+        this.growerId = growerId;
         this.version = version;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -93,6 +98,7 @@ public class InventoryItemEntity {
                 item.getDamagedQuantity(),
                 item.getLowStockThreshold(),
                 item.getStatus(),
+                item.getGrowerId(),
                 item.getVersion(),
                 item.getCreatedAt(),
                 item.getUpdatedAt()
@@ -110,6 +116,7 @@ public class InventoryItemEntity {
                 this.damagedQuantity,
                 this.lowStockThreshold,
                 this.status,
+                this.growerId,
                 this.version,
                 this.createdAt,
                 this.updatedAt
@@ -143,6 +150,9 @@ public class InventoryItemEntity {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getGrowerId() { return growerId; }
+    public void setGrowerId(String growerId) { this.growerId = growerId; }
 
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }

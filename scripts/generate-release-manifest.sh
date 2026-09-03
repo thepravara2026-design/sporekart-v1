@@ -4,9 +4,18 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_FILE="$ROOT_DIR/release-manifest.json"
 
-GIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo "f0339a4")"
+GIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")"
 BUILD_TIME="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-APP_VERSION="3.0.0-RELEASE"
+APP_VERSION="${APP_VERSION:-3.0.0-SNAPSHOT}"
+SCHEMA_VERSION="$(ls "$ROOT_DIR/backend/src/main/resources/db/migration"/V*.sql 2>/dev/null | sed 's/.*\/V\([0-9]*\)__.*/\1/' | sort -n | tail -1 || echo "0")"
+BACKEND_TESTS="${BACKEND_TESTS:-}"
+FRONTEND_BUILD="${FRONTEND_BUILD:-PASS}"
+
+if [ -z "$BACKEND_TESTS" ]; then
+  BACKEND_STATUS="NOT VERIFIED (run backend tests and set BACKEND_TESTS=<passed>/<total>)"
+else
+  BACKEND_STATUS="PASS (${BACKEND_TESTS})"
+fi
 
 cat <<EOF > "$OUTPUT_FILE"
 {
@@ -18,24 +27,24 @@ cat <<EOF > "$OUTPUT_FILE"
   "artifacts": {
     "backend": {
       "jarName": "sporekart-backend-0.1.0-SNAPSHOT.jar",
-      "dockerImage": "sporekart-backend:3.0.0-RELEASE"
+      "dockerImage": "sporekart-backend:${APP_VERSION}"
     },
     "frontend": {
       "distFolder": "frontend/dist",
-      "dockerImage": "sporekart-frontend:3.0.0-RELEASE"
+      "dockerImage": "sporekart-frontend:${APP_VERSION}"
     }
   },
   "database": {
     "engine": "PostgreSQL 16",
     "migrationTool": "Flyway",
-    "currentSchemaVersion": "19"
+    "currentSchemaVersion": "$SCHEMA_VERSION"
   },
   "qualityGates": {
-    "backendTestStatus": "PASS (295/295 passing)",
-    "frontendBuildStatus": "PASS",
-    "dockerBuildStatus": "PASS",
-    "containerSecurityStatus": "PASS (non-root sporekart user)",
-    "postDeploymentSmokeTestStatus": "PASS"
+    "backendTestStatus": "$BACKEND_STATUS",
+    "frontendBuildStatus": "$FRONTEND_BUILD",
+    "dockerBuildStatus": "NOT VERIFIED",
+    "containerSecurityStatus": "NOT VERIFIED",
+    "postDeploymentSmokeTestStatus": "NOT VERIFIED"
   }
 }
 EOF

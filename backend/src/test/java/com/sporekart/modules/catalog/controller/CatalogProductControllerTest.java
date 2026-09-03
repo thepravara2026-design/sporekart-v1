@@ -51,7 +51,7 @@ class CatalogProductControllerTest {
                 "Controller Test Product",
                 "Description for controller test product",
                 new BigDecimal("49.99"),
-                "USD",
+                "INR",
                 category.id()
         );
         seededProduct = productApplicationService.createProduct(command);

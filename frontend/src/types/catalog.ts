@@ -1,5 +1,27 @@
 export type ProductStatus = 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'DISCONTINUED' | 'ARCHIVED';
 export type CategoryStatus = 'ACTIVE' | 'INACTIVE';
+export type QuantityUnit = 'G' | 'KG' | 'ML' | 'L';
+
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  sku: string;
+  quantityValue: number;
+  quantityUnit: QuantityUnit;
+  formattedQuantity: string;
+  sellingPrice: number;
+  strikeOutPrice?: number | null;
+  status: ProductStatus;
+  availableQuantity?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ProductImage {
+  id: string;
+  imageUrl: string;
+  displayOrder: number;
+}
 
 export interface Category {
   id: string;
@@ -17,9 +39,13 @@ export interface Product {
   name: string;
   description: string | null;
   price: number;
+  strikeOutPrice?: number | null;
   currency: string;
   status: ProductStatus;
   category: Category | null;
+  variants?: ProductVariant[];
+  imageUrl?: string | null;
+  images?: ProductImage[];
   createdAt: string;
   updatedAt: string;
 }

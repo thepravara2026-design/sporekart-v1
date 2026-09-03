@@ -49,12 +49,12 @@ class CatalogApiIntegrationTest {
         );
 
         product1 = productApplicationService.createProduct(
-                new CreateProductCommand("SKU-INT-001", "Integration Product Alpha", "Desc 1", new BigDecimal("10.00"), "USD", category.id())
+                new CreateProductCommand("SKU-INT-001", "Integration Product Alpha", "Desc 1", new BigDecimal("10.00"), "INR", category.id())
         );
         productApplicationService.changeProductStatus(product1.id(), ProductStatus.ACTIVE);
 
         product2 = productApplicationService.createProduct(
-                new CreateProductCommand("SKU-INT-002", "Integration Product Beta", "Desc 2", new BigDecimal("20.00"), "USD", category.id())
+                new CreateProductCommand("SKU-INT-002", "Integration Product Beta", "Desc 2", new BigDecimal("20.00"), "INR", category.id())
         );
         productApplicationService.changeProductStatus(product2.id(), ProductStatus.ACTIVE);
     }

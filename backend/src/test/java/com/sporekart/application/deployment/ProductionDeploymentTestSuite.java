@@ -117,7 +117,7 @@ class ProductionDeploymentTestSuite {
                 for (Path file : files) {
                     String content = Files.readString(file);
                     assertFalse(content.contains("CHANGE_ME_PRODUCTION"), "Frontend src must not contain production placeholder secrets in file: " + file);
-                    assertFalse(content.contains("sporekart-v3-super-secure"), "Frontend src must not contain JWT secret in file: " + file);
+                    assertFalse(content.contains("CHANGE_ME_MIN_64_CHAR_RANDOM_SECRET_KEY_FOR_HMAC_SHA512_SIGNING_SPEC"), "Frontend src must not contain JWT placeholder secret in file: " + file);
                 }
             }
         }

@@ -120,7 +120,7 @@ public class CartApplicationService {
         return cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE)
                 .orElseGet(() -> {
                     try {
-                        Cart newCart = Cart.createNewActiveCart(customerId, "USD");
+                        Cart newCart = Cart.createNewActiveCart(customerId, "INR");
                         return cartRepository.save(newCart);
                     } catch (DataIntegrityViolationException e) {
                         log.warn("Concurrent active cart creation detected for customer {}, retrying query...", customerId);

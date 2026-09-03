@@ -57,7 +57,7 @@ class CartControllerTest {
                 new BigDecimal("20.00"), 2, new BigDecimal("40.00"), OffsetDateTime.now(), OffsetDateTime.now()
         );
         mockCartDto = new CartDto(
-                cartId, customerId, "ACTIVE", "USD", new BigDecimal("40.00"), 2,
+                cartId, customerId, "ACTIVE", "INR", new BigDecimal("40.00"), 2,
                 List.of(itemDto), OffsetDateTime.now(), OffsetDateTime.now()
         );
     }
@@ -170,7 +170,7 @@ class CartControllerTest {
     @DisplayName("DELETE /api/v1/cart/items should clear cart and return 200 OK")
     void shouldClearCart() throws Exception {
         CartDto emptyCartDto = new CartDto(
-                cartId, customerId, "ACTIVE", "USD", BigDecimal.ZERO, 0,
+                cartId, customerId, "ACTIVE", "INR", BigDecimal.ZERO, 0,
                 List.of(), OffsetDateTime.now(), OffsetDateTime.now()
         );
         when(cartApplicationService.clearCart(customerId)).thenReturn(emptyCartDto);

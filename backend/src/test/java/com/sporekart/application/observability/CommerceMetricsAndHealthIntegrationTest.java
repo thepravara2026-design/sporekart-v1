@@ -2,6 +2,8 @@ package com.sporekart.application.observability;
 
 import com.sporekart.application.observability.health.ExternalProviderHealthIndicator;
 import com.sporekart.application.observability.metrics.CommerceMetricsService;
+import com.sporekart.modules.security.domain.UserRole;
+import com.sporekart.modules.security.infrastructure.jwt.JwtTokenProvider;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,9 @@ class CommerceMetricsAndHealthIntegrationTest {
     @Autowired
     private MeterRegistry meterRegistry;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     @Test
     @DisplayName("Should expose health, liveness, and readiness probes")
     void shouldExposeHealthProbes() throws Exception {
@@ -62,8 +67,11 @@ class CommerceMetricsAndHealthIntegrationTest {
         assertThat(meterRegistry.find("sporekart.orders.created").counter()).isNotNull();
         assertThat(meterRegistry.find("sporekart.payments.succeeded").counter()).isNotNull();
 
-        // Verify Actuator metrics endpoint
+        String adminToken = jwtTokenProvider.generateAccessToken("admin-999", "admin@sporekart.com", UserRole.ROLE_ADMIN, "session-999");
+
+        // Verify Actuator metrics endpoint with admin authorization
         mockMvc.perform(get("/actuator/metrics")
+                        .header("Authorization", "Bearer " + adminToken)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.names").exists());

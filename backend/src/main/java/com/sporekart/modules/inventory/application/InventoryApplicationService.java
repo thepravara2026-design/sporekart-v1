@@ -265,31 +265,37 @@ public class InventoryApplicationService {
                 .sorted(Comparator.naturalOrder())
                 .toList();
 
-        List<InventoryItem> lockedItems = inventoryRepository.findAllBySkuInOrderBySkuAscForUpdate(sortedSkus);
-        Map<String, InventoryItem> inventoryMap = lockedItems.stream()
-                .collect(Collectors.toMap(i -> i.getSku().trim().toUpperCase(), Function.identity()));
+        if (!sortedSkus.isEmpty()) {
+            List<InventoryItem> lockedItems = inventoryRepository.findAllBySkuInOrderBySkuAscForUpdate(sortedSkus);
+            Map<String, InventoryItem> inventoryMap = lockedItems.stream()
+                    .collect(Collectors.toMap(i -> i.getSku().trim().toUpperCase(), Function.identity()));
 
-        for (StockReservationItem resItem : reservation.getItems()) {
-            String itemSku = resItem.getSku().trim().toUpperCase();
-            InventoryItem invItem = inventoryMap.get(itemSku);
-            if (invItem != null) {
-                int prevOnHand = invItem.getOnHandQuantity();
-                int prevReserved = invItem.getReservedQuantity();
+            for (StockReservationItem resItem : reservation.getItems()) {
+                if (resItem.getSku() == null) continue;
+                String itemSku = resItem.getSku().trim().toUpperCase();
+                InventoryItem invItem = inventoryMap.get(itemSku);
+                if (invItem != null && invItem.getReservedQuantity() > 0) {
+                    int prevOnHand = invItem.getOnHandQuantity();
+                    int prevReserved = invItem.getReservedQuantity();
 
-                invItem.release(resItem.getQuantity());
-                inventoryRepository.save(invItem);
+                    int releaseQty = Math.min(resItem.getQuantity(), invItem.getReservedQuantity());
+                    if (releaseQty > 0) {
+                        invItem.release(releaseQty);
+                        inventoryRepository.save(invItem);
 
-                stockMovementRepository.save(StockMovement.recordMovement(
-                        invItem.getId(),
-                        movementType,
-                        resItem.getQuantity(),
-                        "SYSTEM_EXPIRY",
-                        reservation.getId().toString(),
-                        prevOnHand,
-                        invItem.getOnHandQuantity(),
-                        prevReserved,
-                        invItem.getReservedQuantity()
-                ));
+                        stockMovementRepository.save(StockMovement.recordMovement(
+                                invItem.getId(),
+                                movementType,
+                                releaseQty,
+                                "SYSTEM_EXPIRY",
+                                reservation.getId().toString(),
+                                prevOnHand,
+                                invItem.getOnHandQuantity(),
+                                prevReserved,
+                                invItem.getReservedQuantity()
+                        ));
+                    }
+                }
             }
         }
 
@@ -454,7 +460,15 @@ public class InventoryApplicationService {
 
     @Transactional(readOnly = true)
     public List<InventoryItemDto> listAllInventory() {
+        return listAllInventory(org.springframework.data.domain.PageRequest.of(0, 50));
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryItemDto> listAllInventory(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Pageable p = pageable != null ? pageable : org.springframework.data.domain.PageRequest.of(0, 50);
         return inventoryRepository.findAll().stream()
+                .skip((long) p.getPageNumber() * p.getPageSize())
+                .limit(p.getPageSize())
                 .map(InventoryItemDto::fromDomain)
                 .toList();
     }

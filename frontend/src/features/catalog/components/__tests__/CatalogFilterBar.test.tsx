@@ -47,11 +47,11 @@ describe('CatalogFilterBar Component', () => {
     fireEvent.change(searchInput, { target: { value: 'oyster' } });
     expect(onSearchChange).toHaveBeenCalledWith('oyster');
 
-    const minPriceInput = screen.getByPlaceholderText('Min $');
+    const minPriceInput = screen.getByPlaceholderText(/Min/i);
     fireEvent.change(minPriceInput, { target: { value: '10' } });
     expect(onMinPriceChange).toHaveBeenCalledWith('10');
 
-    const maxPriceInput = screen.getByPlaceholderText('Max $');
+    const maxPriceInput = screen.getByPlaceholderText(/Max/i);
     fireEvent.change(maxPriceInput, { target: { value: '50' } });
     expect(onMaxPriceChange).toHaveBeenCalledWith('50');
   });
