@@ -6,6 +6,7 @@ import com.sporekart.modules.returns.application.dto.ReturnDto;
 import com.sporekart.modules.returns.application.dto.ReturnInspectionDto;
 import com.sporekart.modules.returns.domain.ReturnStatus;
 import com.sporekart.modules.security.infrastructure.jwt.UserPrincipal;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -80,7 +81,7 @@ public class AdminReturnController {
     @PostMapping("/{returnReference}/inspect")
     public ResponseEntity<ReturnDto> inspectReturn(
             @PathVariable String returnReference,
-            @RequestBody ReturnInspectionDto inspectionDto,
+            @Valid @RequestBody ReturnInspectionDto inspectionDto,
             @RequestHeader(value = "X-Admin-Id", required = false) String adminId
     ) {
         String resolvedId = resolveAdminId(adminId);
